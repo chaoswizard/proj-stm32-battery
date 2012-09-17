@@ -143,9 +143,9 @@ int main(void)
 	flashIO();
 	
   NVIC_Configuration();				// NVIC configuration 
-	//Timer_Config();							// TIMER configuration 
-	//RTC_Configuration();
-	//DMA1_ADC1_Configuration();	
+	Timer_Config();							// TIMER configuration 
+	RTC_Configuration();
+	DMA1_ADC1_Configuration();	
 	while(1)
 	{
 		RST_DB041();
@@ -153,13 +153,9 @@ int main(void)
     if((i&0x3C)==0x1C) break;			//Õý³£0x9C
 		for(j=0;j<200;j++);
   } 	
-    INIT_XLCD();
-    drawLogo();
-    Screen_PrintClear(NULL);
-    sprintf(mystr,"ABC%d",123);  printSmall(1,10);
-    Screen_PrintClear(NULL);
-    ui_mmi_open();//Screen_PrintEllipse(NULL, 0);
 #if 1
+    ui_mmi_open();
+    //sprintf(mystr,"ABC%d",123);  printSmall(1,10);
     ui_mmi_start();
     while (1)
     {
@@ -170,7 +166,6 @@ int main(void)
 
 
     
-	INIT_XLCD();	drawLogo();	
 	curIndex=0;	drawMainFace(1);
 	led_Buf=0x08;	Flag_LEDChange=1;
 	ADBufIndex=0;	scanCh=0;	changeChannel();	
