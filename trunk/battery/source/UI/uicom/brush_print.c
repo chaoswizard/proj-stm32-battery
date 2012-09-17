@@ -236,6 +236,11 @@ void Screen_PrintString(struct SCREEN_ZONE *rect, u_int8 *str, T_SCREEN_PIXEL_AT
     struct UICOM_1PP_BMP_INFO  bmpInfo;
     //MY_DEBUG("\t[TXT] %s\n", str);
 
+    if (NULL == str)
+    {
+        return;
+    }
+    
     len = strlen(str);
     if (len)
     {
