@@ -19,10 +19,25 @@
 #define XLCD_CMD	0
 #define XLCD_DAT	1
 
-#define DEV_LCD_CS_A() {GPIOA->BRR |= 0x00000800; GPIOB->BSRR|= 0x00000100;}
-#define DEV_LCD_CS_B() {GPIOA->BSRR |= 0x00000800; GPIOB->BRR |= 0x00000100;}
-#define DEV_LCD_START_FILL() {GPIOA->BRR |= 0x00000800; GPIOB->BRR |= 0x00000100;}
-#define DEV_LCD_END_FILL() {GPIOA->BSRR |= 0x00000800; GPIOB->BSRR	|= 0x00000100;}
+#define DEV_LCD_CS_A() {\
+    GPIOA->BRR |= 0x00000800;\
+    GPIOB->BSRR|= 0x00000100;\
+}
+
+#define DEV_LCD_CS_B() {\
+    GPIOA->BSRR |= 0x00000800;\
+    GPIOB->BRR |= 0x00000100;\
+}
+
+#define DEV_LCD_START_FILL() {\
+    GPIOA->BRR |= 0x00000800; \
+    GPIOB->BRR |= 0x00000100;\
+}
+
+#define DEV_LCD_END_FILL() {\
+    GPIOA->BSRR |= 0x00000800; \
+    GPIOB->BSRR |= 0x00000100;\
+}
 
 #define DEV_LCD_MOVE_POS(pos_x, pos_y)  {\
     WR_XLCD(XLCD_CMD, 0xB8 + (pos_y));\
@@ -33,54 +48,25 @@
 
 
 #define DEV_LCD_CS(pos_x) {\
-    if((pos_x)<(SCREEN_WIDTH_PIXEL_NUM/2)) {DEV_LCD_CS_A();} else {DEV_LCD_CS_B();}\
+    if((pos_x)<(SCREEN_WIDTH_PIXEL_NUM/2))\
+    {\
+        DEV_LCD_CS_A();\
+    } else { \
+       DEV_LCD_CS_B();\
+    }\
 }
 
 
 #define DEV_LCD_SET_DATA(pos_x, pos_y, data)  {\
-    DEV_LCD_MOVE_POS(pos_x, pos_y); DEV_LCD_WRITE(data);\
+    DEV_LCD_MOVE_POS(pos_x, pos_y); \
+    DEV_LCD_WRITE(data);\
 }
 #define DEV_LCD_GET_DATA(pos_x, pos_y, data)  {\
-    DEV_LCD_MOVE_POS(pos_x, pos_y); DEV_LCD_READ(data); DEV_LCD_READ(data);\
+    DEV_LCD_MOVE_POS(pos_x, pos_y);\
+    DEV_LCD_READ(data); \
+    DEV_LCD_READ(data);\
 }
 
-void WR_XLCD (u_int8 dat_comm, u_int8 content)
-{
-    if(dat_comm) GPIOB->BSRR	|= 0x00000020;	
-    else GPIOB->BRR	|= 0x00000020;
-        GPIOD->CRL  = 0x11111111;
-        GPIOB->BRR |= 0x00000080;
-        GPIOB->BRR	|= 0x00000040;
-        GPIOD->BRR	|= 0x000000FF;
-        GPIOD->BSRR	|= (unsigned int)content;	
-        __NOP();	__NOP();	__NOP();	__NOP();	__NOP();
-        __NOP();	__NOP();	__NOP();	__NOP();	__NOP();
-        GPIOB->BSRR	|= 0x00000080;			//PB7,XLCD_E=1;
-        __NOP();	__NOP();	__NOP();	__NOP();	__NOP();
-        __NOP();	__NOP();	__NOP();	__NOP();	__NOP();
-        GPIOB->BRR	|= 0x00000080;			//PB7,XLCD_E=0;
-}
-
-u_int8 RD_XLCD(void)
-{
-    u_int8 temp;
-    
-    GPIOB->BSRR	|= 0x00000020;
-    GPIOB->BSRR	|= 0x00000040;
-    GPIOD->CRL   = 0x88888888;
-    GPIOD->ODR	|= 0x000000FF;
-    __NOP();	__NOP();	__NOP();	__NOP();	__NOP();
-    __NOP();	__NOP();	__NOP();	__NOP();	__NOP();
-    GPIOB->BSRR	|= 0x00000080;	//PB7,XLCD_E=1;
-    __NOP();	__NOP();	__NOP();	__NOP();	__NOP();
-    __NOP();	__NOP();	__NOP();	__NOP();	__NOP();
-    temp=(unsigned char)(GPIOD->IDR);			//temp=PORTB;
-    GPIOB->BRR	|= 0x00000080;
-    __NOP();	__NOP();	__NOP();	__NOP();	__NOP();
-    GPIOD->CRL  = 0x11111111;
-    
-    return(temp);
-}
 
 void Screen_PrintInit(void)
 {
@@ -135,7 +121,7 @@ void Screen_PrintPixel(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, enum PIXEL_MODE pixel
     }
 
     DEV_LCD_CS(x);
-    DEV_LCD_GET_DATA(x, y, tmp);
+    DEV_LCD_GET_DATA(X_PIXLE_TO_COL(x), Y_PIXLE_TO_ROW(y), tmp);
     if (pixel_mode == PIXEL_MODE_SET)
     {
         tmp |= (1<<((y & 0x07)));

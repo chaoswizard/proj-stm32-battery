@@ -155,7 +155,7 @@ int main(void)
   } 	
 #if 1
     ui_mmi_open();
-    //sprintf(mystr,"ABC%d",123);  printSmall(1,10);
+    sprintf(mystr,"ABC%d",123);  printSmall(1,10);while(1);
     ui_mmi_start();
     while (1)
     {
