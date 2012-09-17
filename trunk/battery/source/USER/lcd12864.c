@@ -77,7 +77,7 @@ void XFILLRAM(unsigned char dat)
 }
 
 
-void printf_debug(unsigned char *tips, int val)
+void printf_debug(unsigned char *tips, int val,unsigned char *tips2)
 {
     struct SCREEN_ZONE zone;
     unsigned char  str[32];
@@ -85,7 +85,7 @@ void printf_debug(unsigned char *tips, int val)
     zone.y = 20;
 
     Screen_PrintClear(NULL);
-    sprintf(str, "%s:%d", tips, val);
+    sprintf(str, "%s:%X %s", tips, val, tips2);
     Screen_PrintString(&zone, str, FONT_SIZE_NORMAL);
 }
 

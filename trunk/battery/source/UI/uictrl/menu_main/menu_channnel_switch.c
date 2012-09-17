@@ -1,7 +1,8 @@
 #include "uimmi_ctrl.h"
 
 
-#define THIS_MENU_NAME  "通道切换选择"
+#define THIS_MENU_NAME  "SwitchChSel"
+//"通道切换选择"
 
 
 static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);

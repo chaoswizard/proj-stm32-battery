@@ -1,8 +1,8 @@
 #include "uimmi_ctrl.h"
 #include "gui_menu_item.h"
 
-#define THIS_MENU_NAME   "ֹͣ"
-
+#define THIS_MENU_NAME   "Stop"
+//"ֹͣ"
 
 static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
 static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);

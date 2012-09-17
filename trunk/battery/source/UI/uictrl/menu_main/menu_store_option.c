@@ -1,7 +1,7 @@
 #include "uimmi_ctrl.h"
 
-#define THIS_MENU_NAME   "存储选项"
-
+#define THIS_MENU_NAME   "StoreOption"
+//"存储选项"
 
 static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
 static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);

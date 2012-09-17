@@ -1,7 +1,7 @@
 #include "uimmi_ctrl.h"
 
-#define THIS_MENU_NAME    "开机"
-
+#define THIS_MENU_NAME   "PowerOn"
+// "开机"
 
 static void menu_poweron_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
 static void menu_poweron_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);

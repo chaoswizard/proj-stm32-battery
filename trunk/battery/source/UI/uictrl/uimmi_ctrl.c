@@ -361,28 +361,28 @@ void ui_mmi_stop_timer(SWTMR_NODE_HANDLE tmrHdl)
 //==========================================================
 void ui_mmi_debug_enter(char *nameStr, SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
 {
-    MY_DEBUG("进入 (%s) parent[%d] -> me[%d]\n", nameStr, parent, me);
+    printf_debug("Open", me,nameStr);
 }
 void ui_mmi_debug_exit(char *nameStr, SM_NODE_HANDLE me, SM_NODE_HANDLE next)
 {
-    MY_DEBUG("退出 (%s) reurn[%d] <- me[%d]\n", nameStr, next, me);
+    printf_debug("Close", me,nameStr);
 }
 
 void ui_mmi_debug_suspend(char *nameStr, SM_NODE_HANDLE me, SM_NODE_HANDLE child)
 {
-    MY_DEBUG("暂停 (%s): me[%d] -> to[%d]\n", nameStr, me, child);
+    printf_debug("Suspend", me,nameStr);
 }
 
 void ui_mmi_debug_resume(char *nameStr, SM_NODE_HANDLE me, SM_NODE_HANDLE child)
 {
-    MY_DEBUG("继续 (%s): from[%d] -> me[%d]\n", nameStr, child, me);
+    printf_debug("Resume", me,nameStr);
 }
 
 
 
 void ui_mmi_debug_handle(char *nameStr, SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 {
-    MY_DEBUG("处理中 (%s): me[%d]  evt[%d]\n", nameStr, me, e->sig);
+    printf_debug("Proc", me,nameStr);
 
     switch (e->sig)
     {

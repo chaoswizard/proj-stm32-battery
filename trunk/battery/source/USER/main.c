@@ -76,7 +76,7 @@ void TIM2_IRQHandler(void)
 						Flag_exInput=1;
 				}	
 		}
-		else {	inputDelay=0; Flag_exInput=0;	}
+		else {inputDelay=0; Flag_exInput=0;	}
 		//---------------Start ADC1-------------------------
 		//if(++jj>10)
 		{
@@ -142,10 +142,10 @@ int main(void)
 	for(i=0;i<13;i++) OutputBuf[i]=0;
 	flashIO();
 	
-  NVIC_Configuration();				// NVIC configuration 
+    NVIC_Configuration();				// NVIC configuration 
 	Timer_Config();							// TIMER configuration 
-	RTC_Configuration();
-	DMA1_ADC1_Configuration();	
+	//RTC_Configuration();
+	//DMA1_ADC1_Configuration();	
 	while(1)
 	{
 		RST_DB041();
@@ -155,7 +155,7 @@ int main(void)
   } 	
 #if 1
     ui_mmi_open();
-    sprintf(mystr,"ABC%d",123);  printSmall(1,10);while(1);
+    //sprintf(mystr,"ABC%d",123);  printSmall(1,10);while(1);
     ui_mmi_start();
     while (1)
     {
@@ -397,7 +397,7 @@ void Timer_Config(void)
 	
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);	//使能TIM2外设
 	TIM_DeInit(TIM2);	//复位时钟TIM2，恢复到初始状态
-	TIM_TimeBaseStructure.TIM_Period = 39999;
+	TIM_TimeBaseStructure.TIM_Period = 59999;
 	TIM_TimeBaseStructure.TIM_Prescaler = 5;
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;	//TIM2时钟分频
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;	//计数方式

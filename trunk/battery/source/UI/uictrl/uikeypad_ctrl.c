@@ -1,11 +1,12 @@
+#include "stm32f10x.h"
+#include "global.h"
 #include "uimmi_ctrl.h"
 #include "uikeypad_ctrl.h"
-
 
 #define UI_KEYPAD_TRACE(f, v, s)   MY_DEBUG(f, v, s)
 
 
-typedef char UI_KEY_NODE_HANDLE;
+typedef u_int16 UI_KEY_NODE_HANDLE;
 
 enum UI_KEY_TYPE {
     UI_KEY_TYPE_NULL,
@@ -34,17 +35,25 @@ static const char *gKeyEventName[] = {
 };
 
 static const struct UI_KEY_NODE_MAP gUiKeyNodeMapTabl[] = {
-    {'=', EVENT_KEY_ADD},
-    {'-', EVENT_KEY_SUB},
-    {'k', EVENT_KEY_UP},
-    {'j', EVENT_KEY_DOWN},
-    {'h', EVENT_KEY_LEFT},
-    {'l', EVENT_KEY_RIGHT},
-    {'y', EVENT_KEY_OK},
-    {'q', EVENT_KEY_ESC},
-    {'g', EVENT_KEY_RUN},
-    {'p', EVENT_KEY_STOP},
-    {'r', EVENT_KEY_RESET},
+    {0x10000,  EVENT_KEY_ADD},
+    {0x4,      EVENT_KEY_SUB},
+    {0x20000,  EVENT_KEY_UP},
+    {0x80,     EVENT_KEY_DOWN},
+    {0x100,    EVENT_KEY_LEFT},
+    {0x400,    EVENT_KEY_RIGHT},
+    {0x2,      EVENT_KEY_OK},
+    {0x1,      EVENT_KEY_ESC},
+    {0x400000, EVENT_KEY_RUN},
+    {0x40000,  EVENT_KEY_NUM_0},
+    {0x80000,  EVENT_KEY_NUM_1},
+    {0x100000, EVENT_KEY_NUM_2},
+    {0x200000, EVENT_KEY_NUM_3},
+    {0x800,    EVENT_KEY_NUM_4},
+    {0x1000,   EVENT_KEY_NUM_5},
+    {0x2000,   EVENT_KEY_NUM_6},
+    {0x8,      EVENT_KEY_NUM_7},
+    {0x10,     EVENT_KEY_NUM_8},
+    {0x20,     EVENT_KEY_NUM_9},
 };
 
 void ui_keypad_init(void)
@@ -61,16 +70,6 @@ static enum UI_KEY_TYPE ui_keypad_map(UI_KEY_NODE_HANDLE keyHdl, struct EVENT_NO
 {
     enum UI_KEY_TYPE type = UI_KEY_TYPE_NULL;
     
-    
-    if ((keyHdl >= '0') && (keyHdl <= '9'))
-    {
-        e->param.key.digit.val = keyHdl - '0';
-        e->sig = e->param.key.digit.val + EVENT_KEY_NUM_0;
-        type = UI_KEY_TYPE_DIGIT;
-        UI_KEYPAD_TRACE("[KEY_NUM_%d]:%d\n", e->param.key.digit.val, e->sig);
-    }
-
-    // if not digit key
     if (UI_KEY_TYPE_NULL == type)
     {
         s_int32 i;
@@ -94,24 +93,24 @@ static enum UI_KEY_TYPE ui_keypad_map(UI_KEY_NODE_HANDLE keyHdl, struct EVENT_NO
     return type;
 }
 
-u_int8 kbhit(void)
-{
-    return 0;
-}
 
 void ui_keypad_scan(void)
 {
     struct EVENT_NODE_ITEM e;
 
     //check whether any key press
-    if (!kbhit())
+    if(Flag_keyPressed)
     {
-        return;
-    }
-
-    if (UI_KEY_TYPE_NULL != ui_keypad_map(getchar(), &e))
-    {
-        ui_mmi_send_msg(&e);
-    }
+        if(curKey!=0) 
+        {
+            if (UI_KEY_TYPE_NULL != ui_keypad_map(curKey, &e))
+            {
+                ui_mmi_send_msg(&e);
+            }
+            curKey=0;  
+        }
+        Flag_keyPressed=0; 
+        preKey=0;
+    }    
 }
 

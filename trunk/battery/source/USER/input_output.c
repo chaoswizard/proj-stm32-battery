@@ -70,8 +70,15 @@ unsigned long input_165(void)
 	GPIOC->BSRR  |= 0x00001000;					//PC12,P_SL=1;
 	for(i=0;i<24;i++)
 	{
-		if(GPIOA->IDR & 0x0200)	tmp=(tmp<<1);
-		else tmp=(tmp<<1)+1;							//A9,DAT
+		if(GPIOA->IDR & 0x0200)	
+		{
+            tmp = (tmp<<1);
+        }
+		else 
+		{
+            tmp = (tmp<<1)+1; 
+        }
+        //A9,DAT
 		GPIOA->BRR  |= 0x00000100;				//A8,P_CP=0;
 		__NOP();	__NOP();
 		GPIOA->BSRR |= 0x00000100;				//A8,P_CP=1;
