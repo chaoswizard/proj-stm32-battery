@@ -28,7 +28,7 @@ u_int8 ui_menu_shotcut_proc(struct EVENT_NODE_ITEM *e)
     }
     else if (MSG_IS_CANCLE(e->sig))
     {
-        ui_mmi_close();
+        //ui_mmi_close();
     }
     
     return 0;

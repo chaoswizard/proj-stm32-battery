@@ -6,7 +6,7 @@
 #define UI_KEYPAD_TRACE(f, v, s)   MY_DEBUG(f, v, s)
 
 
-typedef u_int16 UI_KEY_NODE_HANDLE;
+typedef u_int32 UI_KEY_NODE_HANDLE;
 
 enum UI_KEY_TYPE {
     UI_KEY_TYPE_NULL,
@@ -103,6 +103,7 @@ void ui_keypad_scan(void)
     {
         if(curKey!=0) 
         {
+            printf_debug("K", curKey, NULL);
             if (UI_KEY_TYPE_NULL != ui_keypad_map(curKey, &e))
             {
                 ui_mmi_send_msg(&e);

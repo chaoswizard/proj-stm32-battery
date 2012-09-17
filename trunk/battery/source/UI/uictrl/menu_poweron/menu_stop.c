@@ -34,8 +34,6 @@ static void  menu_stop_paint(void);
 static void  menu_stop_paint(void)
 {
     gmenu_win_clear(NULL);
-
-    
 }
 
 
