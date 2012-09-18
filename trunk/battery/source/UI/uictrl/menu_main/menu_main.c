@@ -4,6 +4,12 @@
 #define THIS_MENU_NAME  "MainFace"
 //"主工作界面"
 
+#define  MAIN_TABL_ROW_NUM   5
+#define  MAIN_TABL_COL_NUM   5
+
+
+
+
 static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
 static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
 static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next);
@@ -16,11 +22,13 @@ DEFINE_SM_NODE_MAP(gMenuMain,
 static void mainmenu_tab_init(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, struct OSD_ZONE *zone, PUICOM_DATA item, u_int8 *strbuf);
 
 
-LDEF_MENU_CONTENT_TAB(gMainMenuTable, 0, 0, 64, 32, mainmenu_tab_init, 5, 5);
-
+LDEF_MENU_CONTENT_TAB(gMainMenuTable, 0, 0, 
+                                      (MAIN_LCD_WIDTH/MAIN_TABL_COL_NUM),   (MAIN_LCD_HEIGHT/MAIN_TABL_ROW_NUM),
+                                      mainmenu_tab_init, MAIN_TABL_ROW_NUM, MAIN_TABL_COL_NUM);
+  
 static void menu_main_paint(void)
 {
-    gmenu_content_tab_draw(&gMainMenuTable, 5, 5, 0, 0);
+    gmenu_content_tab_draw(&gMainMenuTable, MAIN_TABL_ROW_NUM, MAIN_TABL_COL_NUM, 0, 0);
 }
 
 static void mainmenu_tab_init(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, struct OSD_ZONE *zone, PUICOM_DATA item, u_int8 *strbuf)
@@ -28,7 +36,7 @@ static void mainmenu_tab_init(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, stru
    // if (0 == col)
     {
         UICOM_DATA_TEXT_INIT(item, NULL);
-        sprintf(strbuf, "<%d, %d>", row, col);
+        sprintf(strbuf, "%d,%d", row, col);
     }
     //else
     {

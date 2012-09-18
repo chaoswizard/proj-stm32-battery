@@ -17,6 +17,9 @@
 extern "C" {
 #endif
 
+#define MAIN_LCD_WIDTH   (128)
+#define MAIN_LCD_HEIGHT  (64)
+
 struct GUI_MENU_ITEM {
     POSD_OBJ_HEAD *objs;
     void (*initobj)(T_UICOM_OBJ_COUNT idx, POSD_OBJ_HEAD obj);

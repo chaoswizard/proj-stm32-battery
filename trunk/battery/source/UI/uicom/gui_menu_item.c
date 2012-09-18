@@ -108,6 +108,8 @@ void gmenu_content_tab_cell_draw(struct GMENU_CONTENT_TAB *table, u_int8 row, u_
                     content.data = str;
                 }
             }
+            zone.zone.x += 2;
+            zone.zone.y += 2;
             gui_osd_data_draw(&content, &zone.zone, 0);
         }
     }
