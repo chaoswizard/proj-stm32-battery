@@ -53,11 +53,11 @@ void gui_osd_data_draw(struct UICOM_DATA *data, struct SCREEN_ZONE *zone, T_SCRE
 {
     if (UICOM_DATA_TYPE_TEXT == data->type)
     {
-        Screen_PrintString(zone, (data->data), 0xf);
+        Screen_PrintString(zone, (data->data), attr);
     }
     else if (UICOM_DATA_TYPE_PICTURE == data->type)
     {
-        Screen_PrintBmp(zone, (u_int8 *)data->data, 0xf);
+        Screen_PrintBmp(zone, (u_int8 *)data->data, attr);
     }
 }
 

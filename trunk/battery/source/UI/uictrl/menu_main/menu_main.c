@@ -25,14 +25,14 @@ static void menu_main_paint(void)
 
 static void mainmenu_tab_init(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, struct OSD_ZONE *zone, PUICOM_DATA item, u_int8 *strbuf)
 {
-    if (0 == col)
+   // if (0 == col)
     {
         UICOM_DATA_TEXT_INIT(item, NULL);
         sprintf(strbuf, "<%d, %d>", row, col);
     }
     else
     {
-        UICOM_DATA_TEXT_INIT(item, UICOM_STR_BAOCUNCHENGGONG);
+        //UICOM_DATA_TEXT_INIT(item, UICOM_STR_BAOCUNCHENGGONG);
     }
 }
 
