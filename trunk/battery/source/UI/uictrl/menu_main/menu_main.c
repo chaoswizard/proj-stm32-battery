@@ -21,6 +21,7 @@ DEFINE_SM_NODE_MAP(gMenuMain,
 
 static void mainmenu_tab_init(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, struct OSD_ZONE *zone, PUICOM_DATA item, u_int8 *strbuf);
 
+static u_int8 gMainMenuTestNum = 0;
 
 LDEF_MENU_CONTENT_TAB(gMainMenuTable, 0, 0, 
                                       (MAIN_LCD_WIDTH/MAIN_TABL_COL_NUM),   (MAIN_LCD_HEIGHT/MAIN_TABL_ROW_NUM),
@@ -36,7 +37,7 @@ static void mainmenu_tab_init(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, stru
    // if (0 == col)
     {
         UICOM_DATA_TEXT_INIT(item, NULL);
-        sprintf(strbuf, "%d,%d", row, col);
+        sprintf(strbuf, "%d,%d", gMainMenuTestNum+row, col);
     }
     //else
     {
@@ -65,10 +66,21 @@ static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
 
 static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 {
-    ui_mmi_debug_handle(THIS_MENU_NAME, me, e);
+    //ui_mmi_debug_handle(THIS_MENU_NAME, me, e);
     if (MSG_IS_ENTRY(e->sig))
     {
         menu_main_paint();
+    }
+    
+    switch (e->sig)
+    {
+        case EVENT_KEY_NUM_1:
+            gMainMenuTestNum++;
+            menu_main_paint();
+            break;
+        default:
+            break;
+        
     }
 }
 
