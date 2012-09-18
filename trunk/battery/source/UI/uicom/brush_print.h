@@ -89,7 +89,7 @@ extern "C" {
 void Screen_PrintInit(void);
 void Screen_PrintPixel(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, enum PIXEL_MODE pixel_mode);
 void Screen_PrintLine(T_SCREEN_PIXEL x1, T_SCREEN_PIXEL y1, T_SCREEN_PIXEL x2, T_SCREEN_PIXEL y2, enum PIXEL_MODE pixel_mode);
-void Screen_PrintRect(struct OSD_ZONE *zone);
+void Screen_PrintRect(struct OSD_ZONE *zone, enum PIXEL_MODE pixel_mode);
 void Screen_PrintFillRect(struct SCREEN_ZONE *rect,  enum PIXEL_MODE pixel_mode);
 void Screen_PrintEllipse(struct SCREEN_ZONE *rect, T_SCREEN_PIXEL_ATTR attr);
 void Screen_PrintCursor(struct OSD_ZONE *zone, T_SCREEN_PIXEL_ATTR attr);

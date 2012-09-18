@@ -45,7 +45,7 @@ void gui_osd_rect_draw(struct OSD_OBJ_RECT_INFO *rect, enum OSD_OBJ_DRAW_TYPE dr
     {
         return;
     }
-    Screen_PrintRect(&rect->rect);
+    Screen_PrintRect(&rect->rect, PIXEL_MODE_SET);
 }
 
 
@@ -69,7 +69,7 @@ void gui_osd_content_draw(struct OSD_OBJ_CONTENT_INFO *content, enum OSD_OBJ_DRA
         return;
     }
     
-    Screen_PrintRect(&content->rect);
+    Screen_PrintRect(&content->rect, PIXEL_MODE_SET);
     gui_osd_data_draw(&content->content, &content->rect.zone, content->attr);
 }
 

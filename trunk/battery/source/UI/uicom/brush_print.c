@@ -16,7 +16,6 @@
 
 #define SCREEN_POS_IS_INVALID(x, y) (((x) > (SCREEN_WIDTH_PIXEL_NUM - 1)) || ((y) > (SCREEN_HEIGHT_PIXEL_NUM - 1)))
 
-#define XLCD_CMD	0
 #define XLCD_DAT	1
 
 #define DEV_LCD_CS_A() {\
@@ -39,12 +38,9 @@
     GPIOB->BSRR |= 0x00000100;\
 }
 
-#define DEV_LCD_MOVE_POS(pos_x, pos_y)  {\
-    WR_XLCD(XLCD_CMD, 0xB8 + (pos_y));\
-    WR_XLCD(XLCD_CMD, 0x40 + (pos_x));\
-}
-#define DEV_LCD_WRITE(data)  WR_XLCD(XLCD_DAT, (data))
-#define DEV_LCD_READ(data)   (data) = RD_XLCD()
+#define DEV_LCD_MOVE_POS(pos_x, pos_y)  XLCD_MOV_POS(pos_x, pos_y)
+#define DEV_LCD_WRITE(data)  XLCD_SEND_DATA((data))
+#define DEV_LCD_READ(data)   (data) = XLCD_RECV_DATA()
 
 
 #define DEV_LCD_CS(pos_x) {\
@@ -64,7 +60,6 @@
 #define DEV_LCD_GET_DATA(pos_x, pos_y, data)  {\
     DEV_LCD_MOVE_POS(pos_x, pos_y);\
     DEV_LCD_READ(data); \
-    DEV_LCD_READ(data);\
 }
 
 
@@ -151,18 +146,28 @@ void Screen_PrintLine(T_SCREEN_PIXEL x1, T_SCREEN_PIXEL y1, T_SCREEN_PIXEL x2, T
 
     xdelta=x2-x1;
     ydelta=y2-y1;
+    
     if(xdelta<0)
     {
         xdelta=-xdelta;
         xstep=-1;
     }
-    else xstep=1;
+    else
+    {
+        xstep=1;
+    }
+
     if(ydelta<0)
     {
         ydelta=-ydelta;
         ystep=-1;
     }
-    else ystep=1;
+    else 
+    {
+        ystep=1;
+    }
+
+    
     if (xdelta>ydelta)
     {
         change=xdelta>>1;
@@ -196,27 +201,29 @@ void Screen_PrintLine(T_SCREEN_PIXEL x1, T_SCREEN_PIXEL y1, T_SCREEN_PIXEL x2, T
     Screen_PrintPixel(x2, y2, pixel_mode);
 }
 
-void Screen_PrintRect(struct OSD_ZONE *zone)
+
+
+void Screen_PrintRect(struct OSD_ZONE *zone, enum PIXEL_MODE pixel_mode)
 {
-    MY_DEBUG("\n|RECT|(%d,%d)[%d x %d]<%d,%d,%d,%d>\n", 
-           zone->zone.x, zone->zone.y, zone->zone.w, zone->zone.h,
-           zone->border.l, zone->border.t, zone->border.r, zone->border.b);
+    //MY_DEBUG("\n|RECT|(%d,%d)[%d x %d]<%d,%d,%d,%d>\n", 
+     //      zone->zone.x, zone->zone.y, zone->zone.w, zone->zone.h,
+     //      zone->border.l, zone->border.t, zone->border.r, zone->border.b);
 
     if (zone->border.t > 0)
         Screen_PrintLine(zone->zone.x,                zone->zone.y, 
-                         zone->zone.x + zone->zone.w, zone->zone.y,                PIXEL_MODE_SET);
+                         zone->zone.x + zone->zone.w, zone->zone.y,                pixel_mode);
 
     if (zone->border.l > 0)
         Screen_PrintLine(zone->zone.x,                zone->zone.y, 
-                     zone->zone.x,                    zone->zone.y + zone->zone.h, PIXEL_MODE_SET);
+                     zone->zone.x,                    zone->zone.y + zone->zone.h, pixel_mode);
 
     if (zone->border.r > 0)
         Screen_PrintLine(zone->zone.x + zone->zone.w, zone->zone.y, 
-                         zone->zone.x + zone->zone.w, zone->zone.y + zone->zone.h, PIXEL_MODE_SET);
+                         zone->zone.x + zone->zone.w, zone->zone.y + zone->zone.h, pixel_mode);
 
     if (zone->border.b > 0)
         Screen_PrintLine(zone->zone.x,                zone->zone.y + zone->zone.h, 
-                         zone->zone.x + zone->zone.w, zone->zone.y + zone->zone.h, PIXEL_MODE_SET);
+                         zone->zone.x + zone->zone.w, zone->zone.y + zone->zone.h, pixel_mode);
 
 }
 void Screen_PrintEllipse(struct SCREEN_ZONE *rect, T_SCREEN_PIXEL_ATTR attr)
@@ -337,4 +344,25 @@ T_SCREEN_PIXEL Screen_PrintFont_By_Bit(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struc
     return info->width;
 }
 
+
+void  XLCD_TEST(u_int8 w, u_int8 h)
+{
+    struct OSD_ZONE rect = {{0,0,128,64}, {1,1,1,1}};
+
+  //  rect.zone.w = w;
+ //   rect.zone.h = h;
+    if (h!=40){
+        rect.zone.y = 10;
+        rect.zone.h = 44;
+    }
+    Screen_PrintFillRect(&rect.zone, (h==40)?PIXEL_MODE_CLEAR:PIXEL_MODE_SET);
+
+    if (h!=40){
+        rect.zone.x = 20;
+        rect.zone.y = 20;
+        rect.zone.w = 20;
+        rect.zone.h = 20;
+        Screen_PrintRect(&rect, PIXEL_MODE_TURN);
+    }
+}
 

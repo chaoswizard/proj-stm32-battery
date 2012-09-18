@@ -100,7 +100,7 @@ void gmenu_content_tab_cell_draw(struct GMENU_CONTENT_TAB *table, u_int8 row, u_
             zone.zone.y = table->tabZone.y + row*zone.zone.h;
             (table->inititem)(row, col, &zone, (PUICOM_DATA)&content, str);
             Screen_PrintClear(&zone.zone);
-            Screen_PrintRect(&zone);
+            Screen_PrintRect(&zone, PIXEL_MODE_SET);
             if (UICOM_DATA_TYPE_TEXT == content.type)
             {
                 if (content.data == NULL)

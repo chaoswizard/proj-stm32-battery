@@ -5,57 +5,100 @@
 #include "global.h"
 #include "gui_menu_item.h"
 
-#define XLCD_CMD	0
-#define XLCD_DAT	1
 
 void WR_XLCD (unsigned char dat_comm,unsigned char content)
 {
-  if(dat_comm) GPIOB->BSRR	|= 0x00000020;	
-  else GPIOB->BRR	|= 0x00000020;
-	GPIOD->CRL  = 0x11111111;
-	GPIOB->BRR |= 0x00000080;
+    // W/R = 0.   
+    
+    if(dat_comm) //  D/I = 0
+    {
+        GPIOB->BSRR |= 0x00000020;//LCD_RST  ÖÃ1
+    }
+    else  // D/I = 1
+    {
+        GPIOB->BRR  |= 0x00000020;//
+    }
+    
+	GPIOD->CRL   = 0x11111111;
+	GPIOB->BRR  |= 0x00000080;
 	GPIOB->BRR	|= 0x00000040;
 	GPIOD->BRR	|= 0x000000FF;
 	GPIOD->BSRR	|= (unsigned int)content;	
-	__NOP();	__NOP();	__NOP();	__NOP();	__NOP();
-	__NOP();	__NOP();	__NOP();	__NOP();	__NOP();
+    delay_us(10);
 	GPIOB->BSRR	|= 0x00000080;			//PB7,XLCD_E=1;
-	__NOP();	__NOP();	__NOP();	__NOP();	__NOP();
-	__NOP();	__NOP();	__NOP();	__NOP();	__NOP();
+    delay_us(10);
 	GPIOB->BRR	|= 0x00000080;			//PB7,XLCD_E=0;
 }
 
-unsigned char RD_XLCD(void)
+void XLCD_WAIT(void)
 {
-	unsigned char temp;
-  GPIOB->BSRR	|= 0x00000020;
-  GPIOB->BSRR	|= 0x00000040;
-	GPIOD->CRL   = 0x88888888;
-	GPIOD->ODR	|= 0x000000FF;
-	__NOP();	__NOP();	__NOP();	__NOP();	__NOP();
-	__NOP();	__NOP();	__NOP();	__NOP();	__NOP();
-	GPIOB->BSRR	|= 0x00000080;	//PB7,XLCD_E=1;
-	__NOP();	__NOP();	__NOP();	__NOP();	__NOP();
-	__NOP();	__NOP();	__NOP();	__NOP();	__NOP();
-	temp=(unsigned char)(GPIOD->IDR);			//temp=PORTB;
-	GPIOB->BRR	|= 0x00000080;
-	__NOP();	__NOP();	__NOP();	__NOP();	__NOP();
-	GPIOD->CRL  = 0x11111111;
-	return(temp);
+    #if 0
+    GPIOB->BSRR |= 0x00000020;
+	GPIOD->CRL   = 0x11111111;
+	GPIOB->BRR  |= 0x00000080;
+	GPIOB->BRR	|= 0x00000040;
+	GPIOD->BRR	|= 0x000000FF;
+	GPIOB->BSRR	|= 0x00000080;			//PB7,XLCD_E=1;
+	while(GPIOD->IDR & (0x80)){
+        delay_us(5);
+    }
+	GPIOB->BRR	|= 0x00000080;	
+    #endif//PB7,XLCD_E=0;
+}
+
+
+unsigned char XLCD_RECV_DATA(void)
+{
+	unsigned char temp, i;
+    
+    i = 2;
+    while (i--)
+    {
+        GPIOB->BSRR |= 0x00000020;
+        GPIOB->BSRR |= 0x00000040;
+        GPIOD->CRL   = 0x88888888;
+        GPIOD->ODR  |= 0x000000FF;
+        GPIOB->BSRR |= 0x00000080;  //PB7,XLCD_E=1;
+        delay_us(10);
+        temp=(unsigned char)(GPIOD->IDR);           //temp=PORTB;
+        GPIOB->BRR  |= 0x00000080;
+        delay_us(6);
+        GPIOD->CRL  = 0x11111111;
+    } 
+	return (temp);
 }
 
 void INIT_XLCD(void)
 {
-	int i;
 	GPIOB->BRR	|= 0x00000200;	
-  for(i=0;i<1000;i++)	;
+    
+    delay_us(1000);
+
  	GPIOB->BSRR	|= 0x00000200;	
 	GPIOA->BRR |= 0x00000800;;	
 	GPIOB->BRR |= 0x00000100;				
-  WR_XLCD(XLCD_CMD,0x3F);
-  WR_XLCD(XLCD_CMD,0xC0);
+    XLCD_SEND_CMD(0x3F);
+    XLCD_SEND_CMD(0xC0);
 	GPIOA->BSRR |= 0x00000800;;			
 	GPIOB->BSRR	|= 0x00000100;			
+}
+
+
+void XLCD_SEND_CMD(unsigned char cmd)
+{
+    WR_XLCD(0, cmd);
+}
+
+void XLCD_SEND_DATA(unsigned char data)
+{
+    WR_XLCD(1, data);
+}
+
+
+void XLCD_MOV_POS(unsigned char x,unsigned char y)
+{
+    XLCD_SEND_CMD(0xB8 | y);
+    XLCD_SEND_CMD(0x40 | x);
 }
 
 void XFILLRAM(unsigned char dat)
@@ -63,20 +106,27 @@ void XFILLRAM(unsigned char dat)
 	unsigned char i,j;
 	GPIOA->BRR |= 0x00000800;				
 	GPIOB->BRR |= 0x00000100;				
- 	for(j=0;j<8;j++)
-  {
-		WR_XLCD(XLCD_CMD,0xB8+j);
-		WR_XLCD(XLCD_CMD,0x40);
-		for(i=0;i<64;i++)
-		{
-		  	WR_XLCD(XLCD_DAT,dat);
-		}
-	}
+    for(j=0;j<8;j++)
+    {
+        XLCD_MOV_POS(0, j);
+        for(i=0;i<64;i++)
+        {
+          	XLCD_SEND_DATA(dat);
+        }
+    }
 	GPIOA->BSRR |= 0x00000800;				
 	GPIOB->BSRR	|= 0x00000100;				
 }
 
 
+void delay_us(unsigned int us)
+{
+    u_int32 i;
+    for (i=0; i<us; i++)
+    {
+        __NOP();
+    }
+}
 void printf_debug(unsigned char *tips, int val,unsigned char *tips2)
 {
     struct SCREEN_ZONE zone;
@@ -119,13 +169,10 @@ void displaycursor(unsigned char x,unsigned char y,unsigned char w,unsigned char
 				GPIOA->BSRR|= 0x00000800;			//PA11,XLCD_CS1=LCD_SELECT;
 				GPIOB->BRR |= 0x00000100;			//PB8,XLCD_CS2=LCD_SELECT;
 			}
-			WR_XLCD(XLCD_CMD,0xB8+j+y);
-			WR_XLCD(XLCD_CMD,0x40+((i+x)&0x3F));
-			tmp=RD_XLCD();
-			tmp=RD_XLCD();
-			WR_XLCD(XLCD_CMD,0xB8+j+y);
-			WR_XLCD(XLCD_CMD,0x40+((i+x)&0x3F));
-			WR_XLCD(XLCD_DAT,tmp^0xFF);
+			XLCD_MOV_POS((i+x)& 0x3F, j+y);
+			tmp=XLCD_RECV_DATA();
+			XLCD_MOV_POS(((i+x)&0x3F), j+y);
+			XLCD_SEND_DATA(tmp^0xFF);
 		}
 	}
 }
@@ -149,15 +196,12 @@ void putpixel(unsigned char x,unsigned char y,unsigned char pixel_mode)
 		GPIOA->BSRR|= 0x00000800;			//PA11,XLCD_CS1=LCD_SELECT;
 		GPIOB->BRR |= 0x00000100;			//PB8,XLCD_CS2=LCD_SELECT;
 	}
-	WR_XLCD(XLCD_CMD,0xB8+(y>>3));
-	WR_XLCD(XLCD_CMD,0x40+(x&0x3F));
-	tmp=RD_XLCD();
-	tmp=RD_XLCD();
-	WR_XLCD(XLCD_CMD,0xB8+(y>>3));
-	WR_XLCD(XLCD_CMD,0x40+(x&0x3F));
-	if(pixel_mode==1)					WR_XLCD(XLCD_DAT,tmp|(1<<((y&0x07))));
-	else if(pixel_mode==0)		WR_XLCD(XLCD_DAT,tmp&(~(1<<((y&0x7)))));
-	else if(pixel_mode==2)		WR_XLCD(XLCD_DAT,tmp^(1<<((y&0x7))));
+	XLCD_MOV_POS((x&0x3F), (y>>3));
+	tmp=XLCD_RECV_DATA();
+    XLCD_MOV_POS((x&0x3F), (y>>3));
+	if(pixel_mode==1)					XLCD_SEND_DATA(tmp|(1<<((y&0x07))));
+	else if(pixel_mode==0)		XLCD_SEND_DATA(tmp&(~(1<<((y&0x7)))));
+	else if(pixel_mode==2)		XLCD_SEND_DATA(tmp^(1<<((y&0x7))));
 }
 
 #endif
