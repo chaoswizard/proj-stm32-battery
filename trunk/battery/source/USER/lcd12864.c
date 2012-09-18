@@ -177,76 +177,22 @@ void displaycursor(unsigned char x,unsigned char y,unsigned char w,unsigned char
 	}
 }
 
-void putpixel(unsigned char x,unsigned char y,unsigned char pixel_mode)
-#if 0
+void putpixel(unsigned char x, unsigned char y, unsigned char pixel_mode)
 {
     Screen_PrintPixel(x, y, pixel_mode);
 }
-#else
-{
-	unsigned char tmp;
-	if((x>127)||(y>63))return;
-	if(x<64)
-	{
-		GPIOA->BRR |= 0x00000800;			//PA11,XLCD_CS1=LCD_SELECT;
-		GPIOB->BSRR|= 0x00000100;			//PB8,XLCD_CS2=LCD_SELECT;
-	}
-	else 
-	{
-		GPIOA->BSRR|= 0x00000800;			//PA11,XLCD_CS1=LCD_SELECT;
-		GPIOB->BRR |= 0x00000100;			//PB8,XLCD_CS2=LCD_SELECT;
-	}
-	XLCD_MOV_POS((x&0x3F), (y>>3));
-	tmp=XLCD_RECV_DATA();
-    XLCD_MOV_POS((x&0x3F), (y>>3));
-	if(pixel_mode==1)					XLCD_SEND_DATA(tmp|(1<<((y&0x07))));
-	else if(pixel_mode==0)		XLCD_SEND_DATA(tmp&(~(1<<((y&0x7)))));
-	else if(pixel_mode==2)		XLCD_SEND_DATA(tmp^(1<<((y&0x7))));
-}
 
-#endif
 void line(unsigned char x1,unsigned char y1,unsigned char x2,unsigned char y2,unsigned char pixel_mode)
 {
     Screen_PrintLine(x1, y1, x2, y2, pixel_mode);
 }
 
 void printSmall(unsigned char x,unsigned char y)
-#if 0
 {
     struct SCREEN_ZONE zone;
 
     zone.x = x;
     zone.y = y;
     
-    Screen_PrintString(&zone, mystr, FONT_SIZE_NORMAL);
+    Screen_PrintString(&zone, mystr, FONT_SIZE_SMALL);
 }
-#else
-{	//x=[0,15],y=[0,64]£¬Í¼ÐÎ·½Ê½
-	unsigned char temp,i,j,k,qq,len;
-    struct UICOM_1PP_BMP_INFO  fontInfo;
-
-    
-	if((x>122)||(y>57)) return;
-
-	len=strlen(mystr);
- 	for(j=0;j<len;j++)
-	{	
-        temp = uicom_font_getdata((u_int8 *)mystr + j, &fontInfo, FONT_SIZE_SMALL);
-        if (0 == temp)
-        {
-            break;
-        }
-        
-		for(i=0;i<6;i++)
-		{			
-			qq = fontInfo.data[i];
-			for(k=0;k<8;k++)
-			{
-				if((qq>>k)&0x01) putpixel(j*6+x+i,y+k,1);
-				else putpixel(j*6+x+i,y+k,0);
-			}
-		}
-	}
-}
-
-#endif

@@ -155,19 +155,7 @@ int main(void)
   } 	
 #if 1
     ui_mmi_open();
-    //sprintf(mystr,"ABC%d",123);  printSmall(1,10);while(1);
-    i = 0;
-    while(1){
-        //Screen_PrintClear(NULL);
-        delay_us(0x456780);
-        if (0 == (i%2))
-        XLCD_TEST(30, 40);
-        else
-        XLCD_TEST(30, 60);
-        
-        delay_us(0x456780);
-        i++;
-    };
+    //sprintf(mystr,"ABCDEF%d",123);  printSmall(1,10);while(1);
     ui_mmi_start();
     while (1)
     {

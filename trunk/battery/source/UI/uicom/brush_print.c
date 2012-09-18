@@ -318,7 +318,7 @@ T_SCREEN_PIXEL Screen_PrintFont_By_Bit(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struc
 {
     T_SCREEN_PIXEL i, j;
     u_int32 prePixelNum, curPixelPos;
-    
+
     for (i=0; i<info->height; i++)// scan height
     {
         prePixelNum = info->width * i;
@@ -329,40 +329,17 @@ T_SCREEN_PIXEL Screen_PrintFont_By_Bit(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struc
                 break;
             }
             curPixelPos = prePixelNum + j;
-            //if ((info->data[curPixelPos/8] << (curPixelPos % 8)) & 0x80)
             if ((info->data[curPixelPos/8]) & (1<<(curPixelPos % 8)))
             {
-                Screen_PrintPixel((x + j), (y + i), PIXEL_MODE_SET);
+                Screen_PrintPixel((x + i), (y + j), PIXEL_MODE_SET);
             }
             else
             {
-                Screen_PrintPixel((x + j), (y + i), PIXEL_MODE_CLEAR);
+                Screen_PrintPixel((x + i), (y + j), PIXEL_MODE_CLEAR);
             }
         }
     }
 
-    return info->width;
-}
-
-
-void  XLCD_TEST(u_int8 w, u_int8 h)
-{
-    struct OSD_ZONE rect = {{0,0,128,64}, {1,1,1,1}};
-
-  //  rect.zone.w = w;
- //   rect.zone.h = h;
-    if (h!=40){
-        rect.zone.y = 10;
-        rect.zone.h = 44;
-    }
-    Screen_PrintFillRect(&rect.zone, (h==40)?PIXEL_MODE_CLEAR:PIXEL_MODE_SET);
-
-    if (h!=40){
-        rect.zone.x = 20;
-        rect.zone.y = 20;
-        rect.zone.w = 20;
-        rect.zone.h = 20;
-        Screen_PrintRect(&rect, PIXEL_MODE_TURN);
-    }
+    return info->height;
 }
 
