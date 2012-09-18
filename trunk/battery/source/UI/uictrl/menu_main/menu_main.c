@@ -30,7 +30,7 @@ static void mainmenu_tab_init(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, stru
         UICOM_DATA_TEXT_INIT(item, NULL);
         sprintf(strbuf, "<%d, %d>", row, col);
     }
-    else
+    //else
     {
         //UICOM_DATA_TEXT_INIT(item, UICOM_STR_BAOCUNCHENGGONG);
     }
