@@ -36,6 +36,13 @@ struct GUI_MENU_ITEM item = \
 #define LDEF_MENU_ITEM(item, objsTab, initobj)   \
     static DEF_MENU_ITEM(item, objsTab, initobj)
 
+
+enum ITEM_INIT_STATUS{
+    ITEM_STATUS_NORMAL,
+    PAINT_STATUS_SKIP_ALL,
+    PAINT_STATUS_SKIP_BORDER,
+    PAINT_STATUS_SKIP_DATA,
+};
 void gmenu_item_draw(PGUI_MENU_ITEM item,  enum OSD_OBJ_DRAW_TYPE type);
 void gmenu_win_clear(struct SCREEN_ZONE *win);
 void gmenu_item_clear(PGUI_MENU_ITEM item);
@@ -62,25 +69,24 @@ void gmenu_list_item_draw(struct GMENU_ITEM_LIST *list, u_int8 pos, enum OSD_OBJ
 
 //==========================================================
 struct GMENU_CONTENT_TAB {
-    struct SCREEN_ZONE         tabZone;
-    void (*inititem)(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, struct OSD_ZONE *zone, PUICOM_DATA item, u_int8 *strbuf);
+    void   (*initzone)(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, struct OSD_ZONE *zone);
+    u_int8 (*inititem)(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, PUICOM_DATA item, u_int8 *strbuf);
     T_UICOM_OBJ_COUNT          rowCount;
     T_UICOM_OBJ_COUNT          colCount;
     T_UICOM_OBJ_COUNT          rowFocus;//[1, rowCount], if row==0, means focus row
     T_UICOM_OBJ_COUNT          colFocus;//[1, colCount], if col==0, means focus col
 };
 
-#define DEF_MENU_CONTENT_TAB(tab, x, y, cellW, cellH,inititem, row, col)   \
+#define DEF_MENU_CONTENT_TAB(tab, initzone, inititem)   \
 struct GMENU_CONTENT_TAB tab = \
 {  \
-    {x, y, cellW, cellH}, \
-    inititem, row, col, 0, 0\
+    initzone, inititem, 0, 0, 0, 0\
 }
-#define LDEF_MENU_CONTENT_TAB(tab, x, y, cellW, cellH,inititem, row, col)  \
-    static DEF_MENU_CONTENT_TAB(tab, x, y, cellW, cellH,inititem, row, col)
+#define LDEF_MENU_CONTENT_TAB(tab, initzone, inititem)  \
+    static DEF_MENU_CONTENT_TAB(tab, initzone, inititem)
 
 void gmenu_content_tab_draw(struct GMENU_CONTENT_TAB *table, u_int8 row, u_int8 col, u_int8 rowfocus, u_int8 colfocus);
-void gmenu_content_tab_cell_draw(struct GMENU_CONTENT_TAB *table, u_int8 row, u_int8 col, enum OSD_OBJ_DRAW_TYPE type);
+void gmenu_content_tab_clear_row(struct GMENU_CONTENT_TAB *table, u_int8 row1, u_int8 row2);
 
 #ifdef __cplusplus
 }

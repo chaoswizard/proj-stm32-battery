@@ -34,6 +34,45 @@ UICOM_TEXT_DECLAER(BaoCunChengGong);
 #define   UICOM_STR_BAOCUNCHENGGONG              UICOM_TEXT_STR_REF(BaoCunChengGong)
 
 
+//序号
+UICOM_TEXT_DECLAER(XuHao);
+#define   UICOM_STR_XUHAO                        UICOM_TEXT_STR_REF(XuHao)
+
+
+//当前值
+UICOM_TEXT_DECLAER(ZhiDangQian);
+#define   UICOM_STR_DANGQIANZHI                   UICOM_TEXT_STR_REF(ZhiDangQian)
+
+
+//工作状态
+UICOM_TEXT_DECLAER(GongZuoZhuangTai);
+#define   UICOM_STR_GONGZUOZHUANGTAI              UICOM_TEXT_STR_REF(GongZuoZhuangTai)
+
+
+//通道切换
+UICOM_TEXT_DECLAER(TongDaoQieHuan);
+#define   UICOM_STR_TONGDAOQIEHUAN                UICOM_TEXT_STR_REF(TongDaoQieHuan)
+
+
+//放电中
+UICOM_TEXT_DECLAER(FangDianZhong);
+#define   UICOM_STR_FANGDIANZHONG                 UICOM_TEXT_STR_REF(FangDianZhong)
+
+
+//放电结束
+UICOM_TEXT_DECLAER(FangDianJieShu);
+#define   UICOM_STR_FANGDIANJIESHU                UICOM_TEXT_STR_REF(FangDianJieShu)
+
+//启用
+UICOM_TEXT_DECLAER(QiYong);
+#define   UICOM_STR_QIYONG                         UICOM_TEXT_STR_REF(QiYong)
+
+//停用
+UICOM_TEXT_DECLAER(TingYong);
+#define   UICOM_STR_TINGYONG                       UICOM_TEXT_STR_REF(TingYong)
+
+
+
 //=========================================================
 //测试图片
 UICOM_PIC_DECLAER(smile);

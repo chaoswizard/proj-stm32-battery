@@ -30,20 +30,23 @@ enum  UICOM_DATA_TYPE {
 };
 
 
-#define UICOM_DATA_TEXT_INIT(c, text)     {\
+#define UICOM_DATA_TEXT_INIT(c, text, attrib)     {\
     ((struct UICOM_DATA *)(c))->type  = UICOM_DATA_TYPE_TEXT;\
+    ((struct UICOM_DATA *)(c))->attr  = attrib;\
     ((struct UICOM_DATA *)(c))->data  = text;\
 }
 
 
-#define UICOM_DATA_PIC_INIT(c, pic)     {\
+#define UICOM_DATA_PIC_INIT(c, pic, attrib)     {\
     ((struct UICOM_DATA *)(c))->type  = UICOM_DATA_TYPE_PICTURE;\
+    ((struct UICOM_DATA *)(c))->attr  = attrib;\
     ((struct UICOM_DATA *)(c))->data  = pic;\
 }
 
 struct UICOM_DATA {
     enum UICOM_DATA_TYPE    type;
-    void *data;
+    u_int8                  attr;
+    void                    *data;
 };
 
 typedef struct UICOM_DATA *PUICOM_DATA;

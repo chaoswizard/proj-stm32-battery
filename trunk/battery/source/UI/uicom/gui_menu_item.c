@@ -83,37 +83,56 @@ void gmenu_list_draw(struct GMENU_ITEM_LIST *list, u_int8 focus, u_int8 drawAttr
 void gmenu_content_tab_cell_draw(struct GMENU_CONTENT_TAB *table, u_int8 row, u_int8 col, enum OSD_OBJ_DRAW_TYPE type)
 {
     struct UICOM_DATA content = {0};
-    struct OSD_ZONE zone;
     u_int8 str[128];
-
+    u_int8 status;
+    
     if (table)
     {
         if (table->inititem)
         {
-            zone.border.b = 1;
-            zone.border.t = 1;
-            zone.border.l = 1;
-            zone.border.r = 1;
-            zone.zone.w = table->tabZone.w;
-            zone.zone.h = table->tabZone.h;
-            zone.zone.x = table->tabZone.x + col*zone.zone.w;
-            zone.zone.y = table->tabZone.y + row*zone.zone.h;
-            (table->inititem)(row, col, &zone, (PUICOM_DATA)&content, str);
-            Screen_PrintClear(&zone.zone);
-            Screen_PrintRect(&zone, PIXEL_MODE_SET);
-            if (UICOM_DATA_TYPE_TEXT == content.type)
+            status = (table->inititem)(row, col,(PUICOM_DATA)&content, str);
+                
+            if(PAINT_STATUS_SKIP_ALL != status)
             {
-                if (content.data == NULL)
+                struct OSD_ZONE zone;
+                
+                (table->initzone)(row, col, &zone);
+                if(PAINT_STATUS_SKIP_BORDER != status)
                 {
-                    content.data = str;
+                    Screen_PrintRect(&zone, PIXEL_MODE_SET);
+                }
+
+                if (UICOM_DATA_TYPE_TEXT == content.type)
+                {
+                    if (content.data == NULL)
+                    {
+                        content.data = str;
+                    }
+                }
+
+                if(PAINT_STATUS_SKIP_DATA != status)
+                {
+                    zone.zone.x += 2;
+                    zone.zone.y += 2;
+                    gui_osd_data_draw(&content, &zone.zone);
                 }
             }
-            zone.zone.x += 2;
-            zone.zone.y += 2;
-            gui_osd_data_draw(&content, &zone.zone, 0);
         }
     }
 }
+
+
+void gmenu_content_tab_cell_clear(struct GMENU_CONTENT_TAB *table, u_int8 row, u_int8 col)
+{
+    if (table->initzone)
+    {
+        struct OSD_ZONE zone;
+        
+        (table->initzone)(row, col, &zone);
+        Screen_PrintClear(&zone.zone);
+    }
+}
+
 
 static void table_cell_content_proc(T_UICOM_OBJ_COUNT x, T_UICOM_OBJ_COUNT y, struct GMENU_CONTENT_TAB *table)
 {
@@ -141,8 +160,25 @@ void gmenu_content_tab_draw(struct GMENU_CONTENT_TAB *table, u_int8 row, u_int8 
         table->rowFocus = rowfocus;
         table->rowCount = row;
         table->colCount = col;
-        //Screen_PrintRect(&table->tabZone, OSD_OBJ_DRAW_NORMAL);
         uicom_obj_tab(table->rowCount, table->colCount, table, table_cell_content_proc, 0);
     }
 }
+
+void gmenu_content_tab_clear_row(struct GMENU_CONTENT_TAB *table, u_int8 row1, u_int8 row2)
+{
+    if (table)
+    {
+        u_int8 i;
+        while(row1<=row2)
+        {
+            for (i=0;i<table->colCount;i++)
+            {
+                gmenu_content_tab_cell_clear(table, row1, i);
+            }
+            row1++;
+        }
+    }
+}
+
+
 

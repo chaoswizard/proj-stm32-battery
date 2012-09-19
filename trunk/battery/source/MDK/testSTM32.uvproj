@@ -416,9 +416,9 @@
               <FilePath>..\USER\keyboard.c</FilePath>
             </File>
             <File>
-              <FileName>ad677.c</FileName>
+              <FileName>ad7705.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\USER\ad677.c</FilePath>
+              <FilePath>..\USER\ad7705.c</FilePath>
             </File>
           </Files>
         </Group>

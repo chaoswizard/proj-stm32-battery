@@ -146,7 +146,7 @@ void gui_osd_rect_draw(struct OSD_OBJ_RECT_INFO *rect, enum OSD_OBJ_DRAW_TYPE dr
 void gui_osd_content_draw(struct OSD_OBJ_CONTENT_INFO *content, enum OSD_OBJ_DRAW_TYPE drawType);
 void gui_osd_button_draw(struct OSD_OBJ_BUTTON_INFO *button, enum OSD_OBJ_DRAW_TYPE drawType);
 void gui_osd_msel_draw(struct OSD_OBJ_BUTTON_INFO *button, enum OSD_OBJ_DRAW_TYPE drawType);
-void gui_osd_data_draw(struct UICOM_DATA *data, struct SCREEN_ZONE *zone, T_SCREEN_PIXEL_ATTR attr);
+void gui_osd_data_draw(struct UICOM_DATA *data, struct SCREEN_ZONE *zone);
 
 //==========================================================
 #ifdef __cplusplus

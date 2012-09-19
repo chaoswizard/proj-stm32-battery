@@ -49,15 +49,15 @@ void gui_osd_rect_draw(struct OSD_OBJ_RECT_INFO *rect, enum OSD_OBJ_DRAW_TYPE dr
 }
 
 
-void gui_osd_data_draw(struct UICOM_DATA *data, struct SCREEN_ZONE *zone, T_SCREEN_PIXEL_ATTR attr)
+void gui_osd_data_draw(struct UICOM_DATA *data, struct SCREEN_ZONE *zone)
 {
     if (UICOM_DATA_TYPE_TEXT == data->type)
     {
-        Screen_PrintString(zone, (data->data), attr);
+        Screen_PrintString(zone, (data->data), data->attr);
     }
     else if (UICOM_DATA_TYPE_PICTURE == data->type)
     {
-        Screen_PrintBmp(zone, (u_int8 *)data->data, attr);
+        Screen_PrintBmp(zone, (u_int8 *)data->data, data->attr);
     }
 }
 
@@ -70,7 +70,7 @@ void gui_osd_content_draw(struct OSD_OBJ_CONTENT_INFO *content, enum OSD_OBJ_DRA
     }
     
     Screen_PrintRect(&content->rect, PIXEL_MODE_SET);
-    gui_osd_data_draw(&content->content, &content->rect.zone, content->attr);
+    gui_osd_data_draw(&content->content, &content->rect.zone);
 }
 
 void gui_osd_button_draw(struct OSD_OBJ_BUTTON_INFO *button, enum OSD_OBJ_DRAW_TYPE drawType)
@@ -80,7 +80,7 @@ void gui_osd_button_draw(struct OSD_OBJ_BUTTON_INFO *button, enum OSD_OBJ_DRAW_T
         return;
     }
     Screen_PrintFillRect(&button->rect.zone, PIXEL_MODE_SET);
-    gui_osd_data_draw(&button->content, &button->rect.zone, button->attr);
+    gui_osd_data_draw(&button->content, &button->rect.zone);
 }
 
 
