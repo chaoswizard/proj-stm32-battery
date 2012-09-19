@@ -10,7 +10,7 @@
 #include "input_output.h"
 #include "at45db041.h"
 #include "keyboard.h"
-#include "ad677.h"
+#include "ad7705.h"
 
 #define GLOBAL
 #include "global.h"
@@ -57,16 +57,30 @@ void TIM2_IRQHandler(void)
 		if(keyDelay==0)
 		{
 			tmp=input_165();
-			if(tmp!=0){
-				if(preKey==tmp)	{
-					preKey=0;	curKey=tmp;	Flag_keyPressed=1;
-					keyDelay=20;	GPIOA->BSRR |= 0x0400;	/*PA10=SPK*/							
-				}else preKey=tmp;
+			if(tmp!=0)
+			{
+				if(preKey==tmp)	
+				{
+					preKey=0;	
+					curKey=tmp;	
+					Flag_keyPressed=1;
+					keyDelay=20;
+					GPIOA->BSRR |= 0x0400;	/*PA10=SPK*/							
+				}
+				else 
+				{
+					preKey=tmp;
+				}
 			}
-		}else 
+		}
+		else 
 		{
-			if(keyDelay--==14)	GPIOA->BRR |= 0x0400;	/*PA10=SPK*/
+			if(keyDelay--==14)	
+			{
+				GPIOA->BRR |= 0x0400;	/*PA10=SPK*/
 		}	
+		}	
+
 		//---------------Check Input------------------------
 		if((GPIOB->IDR & 0x0002)!=0)		//PB1
 		{
@@ -76,7 +90,11 @@ void TIM2_IRQHandler(void)
 						Flag_exInput=1;
 				}	
 		}
-		else {inputDelay=0; Flag_exInput=0;	}
+		else
+		{
+			inputDelay=0; 
+			Flag_exInput=0;	
+		}
 		//---------------Start ADC1-------------------------
 		//if(++jj>10)
 		{
@@ -132,11 +150,14 @@ void DMA1_Channel1_IRQHandler(void)
     DMA1->IFCR  = (1 << 1);              // clear TCIF interrupt              
   }
 }
+#define DEBUG_SDA  0
 
+uint16_t array[100] = {0};
 int main(void)
 {
 	int i,j,k;  	
 	long tadd;
+	uint16_t temp;
   RCC_Configuration();				// System clocks configuration
   GPIO_Configuration();				// GPIO configuration 		
 	for(i=0;i<13;i++) OutputBuf[i]=0;
@@ -146,6 +167,7 @@ int main(void)
 	Timer_Config();							// TIMER configuration 
 	//RTC_Configuration();
 	//DMA1_ADC1_Configuration();	
+
 	while(1)
 	{
 		RST_DB041();
@@ -153,10 +175,50 @@ int main(void)
     if((i&0x3C)==0x1C) break;			//正常0x9C
 		for(j=0;j<200;j++);
   } 	
+
+
+
+
 #if 1
+	
     ui_mmi_open();
     //sprintf(mystr,"ABCDEF%d",123);  printSmall(1,10);while(1);
     ui_mmi_start();
+
+	#if DEBUG_SDA == 1   /////////////////////
+	AD7705_configuration();
+	AD7705_inti ();
+	j = 0;
+	while(1)
+	{
+		temp = 0;
+
+		//改变通道
+		changeChannel(i++);
+		if(3==i)
+		{
+			i = 0;
+		}
+		delay_us(200);
+		
+		while ( DRDY_read );
+		 temp =  Read_ad7705_data();
+
+		 array[j++] = temp;
+		 if(100 <= j)
+		 {
+		 	while(1);  //结束测试
+		 }
+
+		//temp1 =(double) temp*2500/65535;
+	 
+		//显示
+		printf_debug("AD",temp,NULL);
+		while(1);
+		
+	}
+#endif
+
     while (1)
     {
         ui_mmi_proc();
@@ -168,7 +230,7 @@ int main(void)
     
 	curIndex=0;	drawMainFace(1);
 	led_Buf=0x08;	Flag_LEDChange=1;
-	ADBufIndex=0;	scanCh=0;	changeChannel();	
+	ADBufIndex=0;	scanCh=0;
 	if (BKP_ReadBackupRegister(BKP_DR1) != 0xA5A5)	//1..42
   {    
     RTC_Configuration();	// RTC Configuration

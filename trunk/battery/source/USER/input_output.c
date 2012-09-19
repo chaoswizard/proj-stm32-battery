@@ -85,10 +85,21 @@ unsigned long input_165(void)
 	}
 	return(tmp);
 }
-void changeChannel(void)
+void changeChannel(uint32_t ch)
 {
 	GPIOC->BRR 	|= 0x0000000F;							//A,B,C,D=0 选中第一通道
-	GPIOC->BSRR |= (uint32_t)(scanCh&0x0F);	//A,B,C,D=0 选中第一通道
+	GPIOC->BSRR |= (uint32_t)(ch&0x0F);	//A,B,C,D=0 选中第一通道
+
+	////////for test
+	if(0 == ch)
+	{
+		GPIOE->BRR |= 0x00000007;
+		GPIOE->BSRR |= (uint32_t)(ch&0x07);	//PE0,PE1,PE2
+	}
+	
+	GPIOE->BRR |= 0x00000008;  //PE3 实际上，这条路一起打开
+
+	////for test
 }
 /* 冒泡排序法 */
 void Bublesort(uint16_t a[],int n)
