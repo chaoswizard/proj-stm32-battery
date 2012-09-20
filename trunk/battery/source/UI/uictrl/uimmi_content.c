@@ -28,7 +28,7 @@ DEF_UICOM_CONTENT_TEXT(QiYong,          "Opened");//启用
 DEF_UICOM_CONTENT_TEXT(TiaoQiFangDian,  "Discharge Curve");//条起放电曲线
 DEF_UICOM_CONTENT_TEXT(TingYong,        "Closed");//停用
 DEF_UICOM_CONTENT_TEXT(TongDao,         "Channel");//通道
-DEF_UICOM_CONTENT_TEXT(TongDaoQieHuan,  "Switch");//通道切换
+DEF_UICOM_CONTENT_TEXT(TongDaoQieHuan,  "SWCH");//通道切换
 DEF_UICOM_CONTENT_TEXT(TongDaoXuanZe,   "Switch Select");//通道切换选择
 DEF_UICOM_CONTENT_TEXT(TongDaoXuanZeTip,"Select:+ Cancle:-");//请选择可用通道，按下+，为选中，按-，为去选中
 DEF_UICOM_CONTENT_TEXT(XianShiDi,       "Show");//显示第
@@ -37,8 +37,8 @@ DEF_UICOM_CONTENT_TEXT(YiCiXianQuXian,  "CurveCount");//一次显示曲线数
 DEF_UICOM_CONTENT_TEXT(YiJianCeShuLiang,"CheckedQuantity");//已检测产品数量
 DEF_UICOM_CONTENT_TEXT(ZaiYong,         "Useing");//在用
 DEF_UICOM_CONTENT_TEXT(ZhuJieMian,      "MainFace");//主界面
-DEF_UICOM_CONTENT_TEXT(ZhiDangQian,     "CurVal");//当前值
-DEF_UICOM_CONTENT_TEXT(ZhiSheDing,      "SetVal");//设定值
+DEF_UICOM_CONTENT_TEXT(ZhiDangQian,     "CURV");//当前值
+DEF_UICOM_CONTENT_TEXT(ZhiSheDing,      "SETV");//设定值
 DEF_UICOM_CONTENT_TEXT(ZuiDaCunChuLiang,"MaxStorage");//最大存储量为
 
 

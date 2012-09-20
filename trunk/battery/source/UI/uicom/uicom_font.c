@@ -241,6 +241,7 @@ static const unsigned char gFont6_AsciiMap[][6]={//Lucida Console
 u_int8 uicom_font_getdata(u_int8 *ch, struct UICOM_1PP_BMP_INFO *info, u_int8 fontsize)
 {
     u_int32 idx;
+    u_int8  val;
 
     //printf(":[%2X,%2X]\n",ch[0],ch[1]);  
     //CKJ
@@ -261,7 +262,12 @@ u_int8 uicom_font_getdata(u_int8 *ch, struct UICOM_1PP_BMP_INFO *info, u_int8 fo
     }
     else
     {
-        idx = ch[0] - 32;
+        val = ch[0];
+        if ((val <= 'z') && (val >= 'a'))//小写转为大写，当前无小写字库
+        {
+            val = 'A' + (val - 'a');
+        }
+        idx = val - 32;
         if (fontsize > FONT_SIZE_SMALL)
         {
             if (idx < FONT16_ASCII_COUNT)
