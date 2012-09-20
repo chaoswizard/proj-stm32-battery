@@ -21,7 +21,7 @@ enum UI_NODE_NAME {
    UI_NODE_LEAF_01,/*<0><X><1> 主工作界面: 列表list[1+4][5] */
    UI_NODE_LEAF_02,/*<0><X><1><1> 检测模式设置edittext[2] +  button[1+2]*/
    UI_NODE_LEAF_03,/*<0><X><1><2> 查询选项edittext[2] + button[2]*/
-   UI_NODE_LEAF_04,/*<0><X><1><3> 存储选项edittext[2] + button[2]*/
+   UI_NODE_LEAF_04,/*<0><X><1><3> 设置选项edittext[2] + button[2]*/
    UI_NODE_LEAF_05,/*<0><X><1><3> 通道切换选择list[4][4] + button[2] + tips[1]*/
    UI_NODE_END,
 } ;

@@ -72,6 +72,76 @@ UICOM_TEXT_DECLAER(TingYong);
 #define   UICOM_STR_TINGYONG                       UICOM_TEXT_STR_REF(TingYong)
 
 
+//以检测产品数量
+UICOM_TEXT_DECLAER(YiJianCeShuLiang);
+#define   UICOM_STR_YIJIANCESHULIANF                UICOM_TEXT_STR_REF(YiJianCeShuLiang)
+
+//合格率
+UICOM_TEXT_DECLAER(HeGeLv);
+#define   UICOM_STR_HEGELV                          UICOM_TEXT_STR_REF(HeGeLv)
+
+//选项设置
+UICOM_TEXT_DECLAER(XuanXiangSheZhi);
+#define   UICOM_STR_XUANXIANGSHEZHI                 UICOM_TEXT_STR_REF(XuanXiangSheZhi)
+
+//确认
+UICOM_TEXT_DECLAER(QueRen);
+#define   UICOM_STR_QUEREN                       UICOM_TEXT_STR_REF(QueRen)
+
+
+//取消
+UICOM_TEXT_DECLAER(QuXiao);
+#define   UICOM_STR_QUXIAO                       UICOM_TEXT_STR_REF(QuXiao)
+
+
+//合格数
+UICOM_TEXT_DECLAER(HeGeShu);
+#define   UICOM_STR_HEGESHU                       UICOM_TEXT_STR_REF(HeGeShu)
+
+
+//计数值清零
+UICOM_TEXT_DECLAER(JiShuZhiQingLing);
+#define   UICOM_STR_JISHUZHIQINGLING              UICOM_TEXT_STR_REF(JiShuZhiQingLing)
+
+
+//串口输出结果
+UICOM_TEXT_DECLAER(ChuanKouShuChu);
+#define   UICOM_STR_CHUANKOUSHUCHU                UICOM_TEXT_STR_REF(ChuanKouShuChu)
+
+
+//条
+UICOM_TEXT_DECLAER(DanWeiTiao);
+#define   UICOM_STR_DANWEITIAO                     UICOM_TEXT_STR_REF(DanWeiTiao)
+
+//个
+UICOM_TEXT_DECLAER(DanWeiGe);
+#define   UICOM_STR_DANWEIGE                       UICOM_TEXT_STR_REF(DanWeiGe)
+
+//模式选项
+UICOM_TEXT_DECLAER(MoShiXuanXiang);
+#define   UICOM_STR_MOSHIXUANXAIN                  UICOM_TEXT_STR_REF(MoShiXuanXiang)
+
+
+//存储选项
+UICOM_TEXT_DECLAER(CunChuXUanXiang);
+#define   UICOM_STR_CUNCHUXUANXIANG                 UICOM_TEXT_STR_REF(CunChuXUanXiang)
+
+
+//还原出厂设置
+UICOM_TEXT_DECLAER(HuanYuanChuChang);
+#define   UICOM_STR_RESETFACTORY                     UICOM_TEXT_STR_REF(HuanYuanChuChang)
+
+
+//查询选项
+UICOM_TEXT_DECLAER(ChaXunXuanXiang);
+#define   UICOM_STR_CHAXUNOPTION                     UICOM_TEXT_STR_REF(ChaXunXuanXiang)
+
+
+//其他选项
+UICOM_TEXT_DECLAER(QiTaXuanXiang);
+#define   UICOM_STR_QITAXUANXIANG                     UICOM_TEXT_STR_REF(QiTaXuanXiang)
+
+
 
 //=========================================================
 //测试图片

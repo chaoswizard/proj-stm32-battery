@@ -180,7 +180,6 @@ static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
 
 static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 {
-    //ui_mmi_debug_handle(THIS_MENU_NAME, me, e);
     if (MSG_IS_ENTRY(e->sig))
     {
         menu_main_paint(0);
@@ -192,6 +191,13 @@ static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
             gCurStartChNum += 4;
             menu_main_paint(1);
             break;
+        case EVENT_KEY_NUM_2:
+            ui_mmi_enter(UI_NODE_BRANCH_01, 0);
+            break;
+        case EVENT_KEY_NUM_3:
+            ui_mmi_enter(UI_NODE_LEAF_04, 0);
+            break;
+            
         default:
             break;
         

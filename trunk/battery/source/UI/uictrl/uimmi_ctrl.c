@@ -29,7 +29,7 @@ DECLARE_SM_NODE_MAP(gMenuStopCheck);
 DECLARE_SM_NODE_MAP(gMenuMain);
 DECLARE_SM_NODE_MAP(gMenuCheckModeCfg);
 DECLARE_SM_NODE_MAP(gMenuSearchOption);
-DECLARE_SM_NODE_MAP(gMenuStoreOption);
+DECLARE_SM_NODE_MAP(gMenuSetupOption);
 DECLARE_SM_NODE_MAP(gMenuChSwitch);
 
 static const struct SM_NODE_MAP  gFuncMapTab[] = {
@@ -39,7 +39,7 @@ static const struct SM_NODE_MAP  gFuncMapTab[] = {
     UI_NODE_LEAF_01, &gMenuMain, 
     UI_NODE_LEAF_02, &gMenuCheckModeCfg, 
     UI_NODE_LEAF_03, &gMenuSearchOption, 
-    UI_NODE_LEAF_04, &gMenuStoreOption, 
+    UI_NODE_LEAF_04, &gMenuSetupOption, 
     UI_NODE_LEAF_05, &gMenuChSwitch, 
 };
 
