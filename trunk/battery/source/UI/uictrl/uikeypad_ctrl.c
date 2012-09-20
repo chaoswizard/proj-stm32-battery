@@ -103,7 +103,7 @@ void ui_keypad_scan(void)
     {
         if(curKey!=0) 
         {
-            printf_debug("K", curKey, NULL);
+            //printf_debug("K", curKey, NULL);
             if (UI_KEY_TYPE_NULL != ui_keypad_map(curKey, &e))
             {
                 ui_mmi_send_msg(&e);

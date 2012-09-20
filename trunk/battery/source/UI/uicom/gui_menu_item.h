@@ -69,8 +69,8 @@ void gmenu_list_item_draw(struct GMENU_ITEM_LIST *list, u_int8 pos, enum OSD_OBJ
 
 //==========================================================
 struct GMENU_CONTENT_TAB {
-    void   (*initzone)(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, struct OSD_ZONE *zone);
-    u_int8 (*inititem)(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, PUICOM_DATA item, u_int8 *strbuf);
+    void   (*initzone)(struct SCREEN_ZONE *zone, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col);
+    u_int8 (*inititem)(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col);
     T_UICOM_OBJ_COUNT          rowCount;
     T_UICOM_OBJ_COUNT          colCount;
     T_UICOM_OBJ_COUNT          rowFocus;//[1, rowCount], if row==0, means focus row
@@ -80,13 +80,13 @@ struct GMENU_CONTENT_TAB {
 #define DEF_MENU_CONTENT_TAB(tab, initzone, inititem)   \
 struct GMENU_CONTENT_TAB tab = \
 {  \
-    initzone, inititem, 0, 0, 0, 0\
+    initzone, inititem, 1, 1, 0, 0\
 }
 #define LDEF_MENU_CONTENT_TAB(tab, initzone, inititem)  \
     static DEF_MENU_CONTENT_TAB(tab, initzone, inititem)
 
 void gmenu_content_tab_draw(struct GMENU_CONTENT_TAB *table, u_int8 row, u_int8 col, u_int8 rowfocus, u_int8 colfocus);
-void gmenu_content_tab_clear_row(struct GMENU_CONTENT_TAB *table, u_int8 row1, u_int8 row2);
+void gmenu_content_tab_clear_row(struct GMENU_CONTENT_TAB *table, u_int8 row1, u_int8 row2, u_int8 isClearBorder);
 
 #ifdef __cplusplus
 }

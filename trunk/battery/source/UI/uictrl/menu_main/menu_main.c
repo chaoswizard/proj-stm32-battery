@@ -13,7 +13,7 @@
 #define MAINMENU_TAB_H         MAIN_LCD_HEIGHT
 
 
-#define MAINMENU_TAB_COL_H          12
+#define MAINMENU_TAB_COL_H          10
 #define MAINMENU_TAB_COL_W          (MAINMENU_TAB_W/MAINMENU_TAB_COL_NUM)
 #define MAINMENU_TAB_COL0_W         28
 #define MAINMENU_TAB_COL1_W         32
@@ -29,69 +29,57 @@ DEFINE_SM_NODE_MAP(gMenuMain,
                                   menu_pub_handle,
                                   menu_pub_exit);
 
-static u_int8 mainmenu_cell_data_init(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, PUICOM_DATA item, u_int8 *strbuf);
-static void mainmenu_cell_zone_init(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col,struct OSD_ZONE *zone);
+static u_int8 mainmenu_cell_data_init(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col);
+static void mainmenu_cell_zone_init(struct SCREEN_ZONE *zone, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col);
 
 static u_int8 gCurStartChNum = 0;
 
 LDEF_MENU_CONTENT_TAB(gMainMenuTable, mainmenu_cell_zone_init, mainmenu_cell_data_init);
   
-static void menu_main_paint(u_int8 isFirst)
+static void menu_main_paint(u_int8 isClear)
 {
-    if (!isFirst)
+    if (isClear)
     {
-        gmenu_content_tab_clear_row(&gMainMenuTable, 1, MAINMENU_TAB_COL_NUM-1);
+       gmenu_content_tab_clear_row(&gMainMenuTable, 1, MAINMENU_TAB_ROW_NUM-1, 0);
     }
     gmenu_content_tab_draw(&gMainMenuTable, MAINMENU_TAB_ROW_NUM, MAINMENU_TAB_COL_NUM, 0, 0);
 }
 
 
-static void mainmenu_cell_zone_init(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col,struct OSD_ZONE *zone)
+static void mainmenu_cell_zone_init(struct SCREEN_ZONE *zone, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col)
 {
     T_SCREEN_PIXEL cellWidth;
 
-    if (0 == col)
-    {
-        zone->border.l = 1;
-    }
-
-    if (0 == row)
-    {
-        zone->border.t = 1;
-    }
-    
-    zone->border.b = 1;
-    zone->border.r = 1;
     switch (col)
     {
         case 0:// 序号
             cellWidth    = MAINMENU_TAB_COL0_W;
-            zone->zone.x = (MAINMENU_TAB_ORIGN_X);
+            zone->x = (MAINMENU_TAB_ORIGN_X);
             break;
         case 1://当前值
             cellWidth = MAINMENU_TAB_COL1_W;
-            zone->zone.x = (MAINMENU_TAB_ORIGN_X + MAINMENU_TAB_COL0_W);
+            zone->x = (MAINMENU_TAB_ORIGN_X + MAINMENU_TAB_COL0_W);
             break;
         case 2://工作状态 
             cellWidth = MAINMENU_TAB_COL2_W;
-            zone->zone.x = (MAINMENU_TAB_ORIGN_X + MAINMENU_TAB_COL0_W + MAINMENU_TAB_COL1_W);
+            zone->x = (MAINMENU_TAB_ORIGN_X + MAINMENU_TAB_COL0_W + MAINMENU_TAB_COL1_W);
             break;
         case 3://通道切换
             cellWidth = MAINMENU_TAB_COL3_W;
-            zone->zone.x = (MAINMENU_TAB_ORIGN_X + MAINMENU_TAB_COL0_W + MAINMENU_TAB_COL1_W + MAINMENU_TAB_COL2_W);
+            zone->x = (MAINMENU_TAB_ORIGN_X + MAINMENU_TAB_COL0_W + MAINMENU_TAB_COL1_W + MAINMENU_TAB_COL2_W);
             break;
         default:
             cellWidth = MAINMENU_TAB_COL_W;
             break;
     }
 
-    zone->zone.w = cellWidth;
-    zone->zone.h = MAINMENU_TAB_COL_H;
-    zone->zone.y = (MAINMENU_TAB_ORIGN_Y + row*MAINMENU_TAB_COL_H);
+    zone->w = cellWidth;
+    zone->h = MAINMENU_TAB_COL_H;
+    zone->y = (MAINMENU_TAB_ORIGN_Y + row*MAINMENU_TAB_COL_H);
     
 }
 
-static u_int8 mainmenu_cell_data_init(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, PUICOM_DATA item, u_int8 *strbuf)
+static u_int8 mainmenu_cell_data_init(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col)
 {
     if (0 == row)
     {
@@ -182,14 +170,14 @@ static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
     //ui_mmi_debug_handle(THIS_MENU_NAME, me, e);
     if (MSG_IS_ENTRY(e->sig))
     {
-        menu_main_paint(1);
+        menu_main_paint(0);
     }
     
     switch (e->sig)
     {
         case EVENT_KEY_NUM_1:
             gCurStartChNum += 4;
-            menu_main_paint(0);
+            menu_main_paint(1);
             break;
         default:
             break;

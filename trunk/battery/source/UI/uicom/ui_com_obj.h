@@ -46,7 +46,7 @@ enum  UICOM_DATA_TYPE {
 struct UICOM_DATA {
     enum UICOM_DATA_TYPE    type;
     u_int8                  attr;
-    void                    *data;
+    void *data;
 };
 
 typedef struct UICOM_DATA *PUICOM_DATA;
@@ -81,7 +81,7 @@ void uicom_obj_list(T_UICOM_OBJ_COUNT len, void *param,
                           u_int8 paintOrder);
 // 2D array, table /picture
 void uicom_obj_tab(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, void *param, 
-                          void (*paint)(T_UICOM_OBJ_COUNT x, T_UICOM_OBJ_COUNT y, void *param), 
+                          void (*paint)(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, void *param), 
                           u_int8 paintOrder);
 
 u_int8 uicom_font_getdata(u_int8 *ch, struct UICOM_1PP_BMP_INFO *info, u_int8 fontsize);
