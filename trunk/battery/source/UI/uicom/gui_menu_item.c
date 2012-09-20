@@ -96,21 +96,9 @@ void gmenu_content_tab_cell_draw(struct GMENU_CONTENT_TAB *table, u_int8 row, u_
             {
                 struct OSD_ZONE zone = {0};
                 
-                (table->initzone)(&zone.zone, row, col);
+                (table->initzone)(&zone, row, col);
                 if(PAINT_STATUS_SKIP_BORDER != status)
                 {
-                    if (0 == col)
-                    {
-                        zone.border.l = 1;
-                    }
-                    
-                    if (0 == row)
-                    {
-                        zone.border.t = 1;
-                    }
-                    
-                    zone.border.b = 1;
-                    zone.border.r = 1;
                     Screen_PrintRect(&zone, PIXEL_MODE_SET);
                 }
 
@@ -140,7 +128,7 @@ void gmenu_content_tab_cell_clear(struct GMENU_CONTENT_TAB *table, u_int8 row, u
     {
         struct OSD_ZONE zone;
         
-        (table->initzone)(&zone.zone, row, col);
+        (table->initzone)(&zone, row, col);
         if (!isClearBorder)//±£Áô±ß¿ò
         {
             zone.zone.x += 1;

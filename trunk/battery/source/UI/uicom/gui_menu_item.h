@@ -69,7 +69,7 @@ void gmenu_list_item_draw(struct GMENU_ITEM_LIST *list, u_int8 pos, enum OSD_OBJ
 
 //==========================================================
 struct GMENU_CONTENT_TAB {
-    void   (*initzone)(struct SCREEN_ZONE *zone, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col);
+    void   (*initzone)(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col);
     u_int8 (*inititem)(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col);
     T_UICOM_OBJ_COUNT          rowCount;
     T_UICOM_OBJ_COUNT          colCount;

@@ -30,7 +30,7 @@ DEFINE_SM_NODE_MAP(gMenuMain,
                                   menu_pub_exit);
 
 static u_int8 mainmenu_cell_data_init(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col);
-static void mainmenu_cell_zone_init(struct SCREEN_ZONE *zone, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col);
+static void mainmenu_cell_zone_init(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col);
 
 static u_int8 gCurStartChNum = 0;
 
@@ -46,36 +46,49 @@ static void menu_main_paint(u_int8 isClear)
 }
 
 
-static void mainmenu_cell_zone_init(struct SCREEN_ZONE *zone, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col)
+static void mainmenu_cell_zone_init(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col)
 {
     T_SCREEN_PIXEL cellWidth;
+
+    if (0 == col)
+    {
+        zone->border.l = 1;
+    }
+    
+    if (0 == row)
+    {
+        zone->border.t = 1;
+    }
+    
+    zone->border.b = 1;
+    zone->border.r = 1;
 
     switch (col)
     {
         case 0:// 序号
             cellWidth    = MAINMENU_TAB_COL0_W;
-            zone->x = (MAINMENU_TAB_ORIGN_X);
+            zone->zone.x = (MAINMENU_TAB_ORIGN_X);
             break;
         case 1://当前值
             cellWidth = MAINMENU_TAB_COL1_W;
-            zone->x = (MAINMENU_TAB_ORIGN_X + MAINMENU_TAB_COL0_W);
+            zone->zone.x = (MAINMENU_TAB_ORIGN_X + MAINMENU_TAB_COL0_W);
             break;
         case 2://工作状态 
             cellWidth = MAINMENU_TAB_COL2_W;
-            zone->x = (MAINMENU_TAB_ORIGN_X + MAINMENU_TAB_COL0_W + MAINMENU_TAB_COL1_W);
+            zone->zone.x = (MAINMENU_TAB_ORIGN_X + MAINMENU_TAB_COL0_W + MAINMENU_TAB_COL1_W);
             break;
         case 3://通道切换
             cellWidth = MAINMENU_TAB_COL3_W;
-            zone->x = (MAINMENU_TAB_ORIGN_X + MAINMENU_TAB_COL0_W + MAINMENU_TAB_COL1_W + MAINMENU_TAB_COL2_W);
+            zone->zone.x = (MAINMENU_TAB_ORIGN_X + MAINMENU_TAB_COL0_W + MAINMENU_TAB_COL1_W + MAINMENU_TAB_COL2_W);
             break;
         default:
             cellWidth = MAINMENU_TAB_COL_W;
             break;
     }
 
-    zone->w = cellWidth;
-    zone->h = MAINMENU_TAB_COL_H;
-    zone->y = (MAINMENU_TAB_ORIGN_Y + row*MAINMENU_TAB_COL_H);
+    zone->zone.w = cellWidth;
+    zone->zone.h = MAINMENU_TAB_COL_H;
+    zone->zone.y = (MAINMENU_TAB_ORIGN_Y + row*MAINMENU_TAB_COL_H);
     
 }
 
