@@ -165,6 +165,7 @@ static u_int8 ui_mmi_bypass_proc(struct EVENT_NODE_ITEM *e)
         switch (e->sig)
         {
             case EVENT_SYS_INIT:
+               // ui_mmi_enter(UI_NODE_BRANCH_00, 1);
                 ui_mmi_enter(UI_NODE_LEAF_00, 1);
                 ret = 1;
                 break;

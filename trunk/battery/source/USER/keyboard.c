@@ -108,7 +108,7 @@ void KeyServer(uint32_t qkey)
 			if(curPages>0)	
 			{
 				curPages--;	drawPicture();
-				line(curline_x+10,3,curline_x+10,53,2);
+				Screen_PrintLine(curline_x+10,3,curline_x+10,53,2);
 			}
 		}	
 		break;
@@ -153,7 +153,7 @@ void KeyServer(uint32_t qkey)
 			if(curPages<4)	
 			{
 				curPages++;	drawPicture();	
-				line(curline_x+10,3,curline_x+10,53,2);
+				Screen_PrintLine(curline_x+10,3,curline_x+10,53,2);
 			}
 		}		
 		break;
@@ -166,10 +166,10 @@ void KeyServer(uint32_t qkey)
 		{
 			if(curline_x>0)
 			{
-				line(curline_x+10,3,curline_x+10,53,2);
+				Screen_PrintLine(curline_x+10,3,curline_x+10,53,2);
 				curline_x--;
 				if(curline_x>0xF0)curline_x=0;
-				line(curline_x+10,3,curline_x+10,53,2);
+				Screen_PrintLine(curline_x+10,3,curline_x+10,53,2);
 			}
 		}	
 		break;
@@ -182,9 +182,9 @@ void KeyServer(uint32_t qkey)
 		{
 			if(curline_x<110)
 			{
-				line(curline_x+10,3,curline_x+10,53,2);
+				Screen_PrintLine(curline_x+10,3,curline_x+10,53,2);
 				curline_x++;
-				line(curline_x+10,3,curline_x+10,53,2);
+				Screen_PrintLine(curline_x+10,3,curline_x+10,53,2);
 			}
 		}	
 		break;
@@ -251,7 +251,7 @@ void KeyServer(uint32_t qkey)
 		{
 			for(i=0;i<100;i++) tmpSet[i]=EnableCh[i];			
 			curPages=0;	curFace=FACE_PICTURE;	drawPicture();
-			line(curline_x+10,3,curline_x+10,53,2);
+			Screen_PrintLine(curline_x+10,3,curline_x+10,53,2);
 		}
 		break;
 	case KEY_ESC:
@@ -278,7 +278,7 @@ void KeyServer(uint32_t qkey)
 		}else if(curFace==FACE_SELECTCURVE)
 		{
 			curPages=0;	curFace=FACE_PICTURE;	drawPicture();
-			line(curline_x+10,3,curline_x+10,53,2);			
+			Screen_PrintLine(curline_x+10,3,curline_x+10,53,2);			
 		}
 		break;
 	case KEY_RUN:

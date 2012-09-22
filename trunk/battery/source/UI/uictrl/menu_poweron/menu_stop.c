@@ -87,18 +87,18 @@ static u_int8 stopmenu_cell_data_init(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_
         switch (row)
         {
             case 0:// 已检测产品数量
-                UICOM_DATA_TEXT_INIT(item, NULL, FONT_SIZE_SMALL);
+                UICOM_DATA_TEXT_INIT(item, NULL, TEXT_SMALL_BLACK);
                 sprintf(strbuf, "%s %x %s", UICOM_STR_YIJIANCESHULIANF, strbuf, UICOM_STR_DANWEIGE);
                 break;
             case 1://合格率
-                UICOM_DATA_TEXT_INIT(item, NULL, FONT_SIZE_SMALL);
+                UICOM_DATA_TEXT_INIT(item, NULL, TEXT_SMALL_BLACK);
                 sprintf(strbuf, "%s %d.%d", UICOM_STR_HEGELV, row, col);
                 break;
             case 2://选项设置 
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_XUANXIANGSHEZHI, FONT_SIZE_SMALL);
+                UICOM_DATA_TEXT_INIT(item, UICOM_STR_XUANXIANGSHEZHI, TEXT_SMALL_BLACK);
                 break;
             case 3://确认 
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_QUEREN, FONT_SIZE_SMALL);
+                UICOM_DATA_TEXT_INIT(item, UICOM_STR_QUEREN, TEXT_SMALL_BLACK);
                 break;
             default:
                 break;
@@ -110,17 +110,17 @@ static u_int8 stopmenu_cell_data_init(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_
         switch (row)
         {
             case 0:// 合格数
-                UICOM_DATA_TEXT_INIT(item, NULL, FONT_SIZE_SMALL);
+                UICOM_DATA_TEXT_INIT(item, NULL, TEXT_SMALL_BLACK);
                 sprintf(strbuf, "%s %x %s", UICOM_STR_HEGESHU, item, UICOM_STR_DANWEIGE);
                 break;
             case 1://存储数据分组计数值清零
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_JISHUZHIQINGLING, FONT_SIZE_SMALL);
+                UICOM_DATA_TEXT_INIT(item, UICOM_STR_JISHUZHIQINGLING, TEXT_SMALL_BLACK);
                 break;
             case 2://串口输出结果
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_CHUANKOUSHUCHU, FONT_SIZE_SMALL);
+                UICOM_DATA_TEXT_INIT(item, UICOM_STR_CHUANKOUSHUCHU, TEXT_SMALL_BLACK);
                 break;
             case 3://取消 
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_QUXIAO, FONT_SIZE_SMALL);
+                UICOM_DATA_TEXT_INIT(item, UICOM_STR_QUXIAO, TEXT_SMALL_BLACK);
                 break;
             default:
                 break;

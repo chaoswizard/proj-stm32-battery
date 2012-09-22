@@ -10,7 +10,6 @@ void XFILLRAM(unsigned char dat);
 void printstr(unsigned char x,unsigned char y);
 void displaycursor(unsigned char x,unsigned char y,unsigned char w,unsigned char h);
 void putpixel(unsigned char x,unsigned char y,unsigned char pixel_mode);
-void line(unsigned char x1,unsigned char y1,unsigned char x2,unsigned char y2,unsigned char pixel_mode);
 void printSmall(unsigned char x,unsigned char y);
 void delay_us(unsigned int us);
 

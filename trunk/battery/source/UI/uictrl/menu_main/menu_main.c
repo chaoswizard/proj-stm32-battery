@@ -104,16 +104,16 @@ static u_int8 mainmenu_cell_data_init(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_
         switch (col)
         {
             case 0:// 序号
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_XUHAO, FONT_SIZE_SMALL);
+                UICOM_DATA_TEXT_INIT(item, UICOM_STR_XUHAO, TEXT_SMALL_BLACK);
                 break;
             case 1://当前值
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_DANGQIANZHI, FONT_SIZE_SMALL);
+                UICOM_DATA_TEXT_INIT(item, UICOM_STR_DANGQIANZHI, TEXT_SMALL_BLACK);
                 break;
             case 2://工作状态 
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_GONGZUOZHUANGTAI, FONT_SIZE_SMALL);
+                UICOM_DATA_TEXT_INIT(item, UICOM_STR_GONGZUOZHUANGTAI, TEXT_SMALL_BLACK);
                 break;
             case 3://通道切换
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_TONGDAOQIEHUAN, FONT_SIZE_SMALL);
+                UICOM_DATA_TEXT_INIT(item, UICOM_STR_TONGDAOQIEHUAN, TEXT_SMALL_BLACK);
                 break;
             default:
                 break;
@@ -124,34 +124,34 @@ static u_int8 mainmenu_cell_data_init(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_
     //===========非首行============
     if (0 == col)
     {
-        UICOM_DATA_TEXT_INIT(item, NULL, FONT_SIZE_SMALL);
+        UICOM_DATA_TEXT_INIT(item, NULL, TEXT_SMALL_BLACK);
         sprintf(strbuf, "04%d", gCurStartChNum+row);
     }
     else if (1 == col)
     {
-        UICOM_DATA_TEXT_INIT(item, NULL, FONT_SIZE_SMALL);
+        UICOM_DATA_TEXT_INIT(item, NULL, TEXT_SMALL_BLACK);
         sprintf(strbuf, "%d.%d", row, col);
     }
     else if (2 == col)
     {
         if (row % 2)
         {
-            UICOM_DATA_TEXT_INIT(item, UICOM_STR_FANGDIANZHONG, FONT_SIZE_SMALL);
+            UICOM_DATA_TEXT_INIT(item, UICOM_STR_FANGDIANZHONG, TEXT_SMALL_BLACK);
         }
         else
         {
-            UICOM_DATA_TEXT_INIT(item, UICOM_STR_FANGDIANJIESHU, FONT_SIZE_SMALL);
+            UICOM_DATA_TEXT_INIT(item, UICOM_STR_FANGDIANJIESHU, TEXT_SMALL_BLACK);
         }
     }
     else if (3 == col)
     {
         if (row % 2)
         {
-            UICOM_DATA_TEXT_INIT(item, UICOM_STR_QIYONG, FONT_SIZE_SMALL);
+            UICOM_DATA_TEXT_INIT(item, UICOM_STR_QIYONG, TEXT_SMALL_BLACK);
         }
         else
         {
-            UICOM_DATA_TEXT_INIT(item, UICOM_STR_TINGYONG, FONT_SIZE_SMALL);
+            UICOM_DATA_TEXT_INIT(item, UICOM_STR_TINGYONG, TEXT_SMALL_BLACK);
         }
     }
     

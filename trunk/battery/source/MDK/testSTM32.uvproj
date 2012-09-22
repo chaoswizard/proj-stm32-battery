@@ -611,9 +611,9 @@
               <FilePath>..\UI\uictrl\menu_main\menu_search_option.c</FilePath>
             </File>
             <File>
-              <FileName>menu_store_option.c</FileName>
+              <FileName>menu_setupoption.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\UI\uictrl\menu_main\menu_store_option.c</FilePath>
+              <FilePath>..\UI\uictrl\menu_main\menu_setupoption.c</FilePath>
             </File>
           </Files>
         </Group>

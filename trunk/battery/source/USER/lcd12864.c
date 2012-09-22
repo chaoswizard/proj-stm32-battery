@@ -5,6 +5,64 @@
 #include "global.h"
 #include "gui_menu_item.h"
 
+#define LCD_ROW_NUM                         (8)
+#define LCD_ROW_HEIGHT_PIXEL_NUM            (8)
+#define LCD_WIDTH_PIXEL_NUM                 (128)
+#define LCD_HEIGHT_PIXEL_NUM                (64)
+    
+
+#define Y_PIXLE_TO_ROW(pos_y)       ((pos_y) >> 3) 
+#define X_PIXLE_TO_COL(pos_x)       ((pos_x) & 0x3F) 
+
+#define LCD_POS_IS_INVALID(x, y) (((x) > (LCD_WIDTH_PIXEL_NUM - 1)) || ((y) > (LCD_HEIGHT_PIXEL_NUM - 1)))
+
+#define XLCD_DAT	1
+
+#define DEV_LCD_CS_A() {\
+    GPIOA->BRR |= 0x00000800;\
+    GPIOB->BSRR|= 0x00000100;\
+}
+
+#define DEV_LCD_CS_B() {\
+    GPIOA->BSRR |= 0x00000800;\
+    GPIOB->BRR |= 0x00000100;\
+}
+
+#define DEV_LCD_START_FILL() {\
+    GPIOA->BRR |= 0x00000800; \
+    GPIOB->BRR |= 0x00000100;\
+}
+
+#define DEV_LCD_END_FILL() {\
+    GPIOA->BSRR |= 0x00000800; \
+    GPIOB->BSRR |= 0x00000100;\
+}
+
+#define DEV_LCD_MOVE_POS(pos_x, pos_y)  XLCD_MOV_POS(pos_x, pos_y)
+#define DEV_LCD_WRITE(data)  XLCD_SEND_DATA((data))
+#define DEV_LCD_READ(data)   (data) = XLCD_RECV_DATA()
+
+
+#define DEV_LCD_CS(pos_x) {\
+    if((pos_x)<(LCD_WIDTH_PIXEL_NUM/2))\
+    {\
+        DEV_LCD_CS_A();\
+    } else { \
+       DEV_LCD_CS_B();\
+    }\
+}
+
+
+#define DEV_LCD_SET_DATA(pos_x, pos_y, data)  {\
+    DEV_LCD_MOVE_POS(pos_x, pos_y); \
+    DEV_LCD_WRITE(data);\
+}
+#define DEV_LCD_GET_DATA(pos_x, pos_y, data)  {\
+    DEV_LCD_MOVE_POS(pos_x, pos_y);\
+    DEV_LCD_READ(data); \
+}
+
+
 
 void WR_XLCD (unsigned char dat_comm,unsigned char content)
 {
@@ -104,6 +162,7 @@ void XLCD_MOV_POS(unsigned char x,unsigned char y)
 void XFILLRAM(unsigned char dat)
 {
 	unsigned char i,j;
+#if 0
 	GPIOA->BRR |= 0x00000800;				
 	GPIOB->BRR |= 0x00000100;				
     for(j=0;j<8;j++)
@@ -115,7 +174,19 @@ void XFILLRAM(unsigned char dat)
         }
     }
 	GPIOA->BSRR |= 0x00000800;				
-	GPIOB->BSRR	|= 0x00000100;				
+	GPIOB->BSRR	|= 0x00000100;	
+#else
+    DEV_LCD_START_FILL(); 
+    for(j=0;j<LCD_ROW_NUM;j++)
+    {
+        DEV_LCD_MOVE_POS(0, j);
+        for(i=0;i<(LCD_WIDTH_PIXEL_NUM/2);i++)
+        {
+            DEV_LCD_WRITE(dat);
+        }
+    }
+    DEV_LCD_END_FILL();
+#endif
 }
 
 
@@ -179,12 +250,62 @@ void displaycursor(unsigned char x,unsigned char y,unsigned char w,unsigned char
 
 void putpixel(unsigned char x, unsigned char y, unsigned char pixel_mode)
 {
-    Screen_PrintPixel(x, y, pixel_mode);
+	T_SCREEN_PIXEL tmp;
+
+    if (LCD_POS_IS_INVALID(x, y))
+    {
+        return;
+    }
+
+    DEV_LCD_CS(x);
+    DEV_LCD_GET_DATA(X_PIXLE_TO_COL(x), Y_PIXLE_TO_ROW(y), tmp);
+    if (pixel_mode == PIXEL_MODE_SET)
+    {
+        tmp |= (1<<((y & 0x07)));
+    }
+    else if (pixel_mode == PIXEL_MODE_CLEAR)    
+    {
+        tmp &= (~(1<<((y & 0x7))));
+    }
+    else if (pixel_mode == PIXEL_MODE_TURN) 
+    {
+        tmp ^= (1<<((y & 0x7)));
+    }
+    else if (pixel_mode == PIXEL_MODE_CURSOR)
+    {
+        tmp ^= 0xFF;
+    }
+    else
+    {// unknown mode
+        return;
+    }
+    DEV_LCD_SET_DATA(X_PIXLE_TO_COL(x), Y_PIXLE_TO_ROW(y), tmp);
 }
 
-void line(unsigned char x1,unsigned char y1,unsigned char x2,unsigned char y2,unsigned char pixel_mode)
+
+
+T_SCREEN_PIXEL XLCD_DRAW_FONT_BY_BYTE(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struct UICOM_1PP_BMP_INFO *info, enum PIXEL_COLOR fgcolor, enum PIXEL_COLOR bgcolor)
 {
-    Screen_PrintLine(x1, y1, x2, y2, pixel_mode);
+    T_SCREEN_PIXEL i, j,rowCnt, col, row;
+
+    rowCnt = info->height/8;
+    row = Y_PIXLE_TO_ROW(y);
+    for(j=0; j<rowCnt; j++)
+    {
+        col = x;
+        for(i=0; i<info->width; i++)
+        {
+            if (LCD_POS_IS_INVALID(col, j+y))
+            {
+                break;
+            }
+            DEV_LCD_CS(col);
+            DEV_LCD_SET_DATA(X_PIXLE_TO_COL(col), row + j, info->data[info->width*j + i]);
+            col++;
+        }
+    }
+
+    return info->width;
 }
 
 void printSmall(unsigned char x,unsigned char y)

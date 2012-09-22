@@ -268,7 +268,7 @@ u_int8 uicom_font_getdata(u_int8 *ch, struct UICOM_1PP_BMP_INFO *info, u_int8 fo
             val = 'A' + (val - 'a');
         }
         idx = val - 32;
-        if (fontsize > FONT_SIZE_SMALL)
+        if (fontsize != FONT_SIZE_SMALL)
         {
             if (idx < FONT16_ASCII_COUNT)
             {

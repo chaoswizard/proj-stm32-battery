@@ -29,6 +29,28 @@ enum  UICOM_DATA_TYPE {
     UICOM_DATA_TYPE_PICTURE,
 };
 
+enum PIXEL_COLOR {
+    PIXEL_MODE_CLEAR    = 0,
+    PIXEL_MODE_SET      = 1,
+    PIXEL_MODE_TURN     = 2,
+    PIXEL_MODE_CURSOR   = 3,
+};
+
+enum {
+    FONT_SIZE_SMALL    = 0,
+    FONT_SIZE_NORMAL   = 1,
+};
+
+
+#define TEXT_ATTR(size, bgColor, fgColor)   (((size)&0x3) | (((bgColor)&0x7)<<2) | (((fgColor)&0x7)<<5))
+#define TEXT_ATTR_SIZE(attr)                ((attr)& 0x3)
+#define TEXT_ATTR_COLOR_BG(attr)            (((attr)>>2)&0x7)
+#define TEXT_ATTR_COLOR_FG(attr)            (((attr)>>5)&0x7)
+
+
+#define TEXT_SMALL_BLACK                TEXT_ATTR(FONT_SIZE_SMALL, PIXEL_MODE_CLEAR, PIXEL_MODE_SET)
+#define TEXT_SMALL_WIGHT                TEXT_ATTR(FONT_SIZE_SMALL, PIXEL_MODE_SET, PIXEL_MODE_CLEAR)
+
 
 #define UICOM_DATA_TEXT_INIT(c, text, attrib)     {\
     ((struct UICOM_DATA *)(c))->type  = UICOM_DATA_TYPE_TEXT;\
@@ -50,11 +72,6 @@ struct UICOM_DATA {
 };
 
 typedef struct UICOM_DATA *PUICOM_DATA;
-
-enum {
-    FONT_SIZE_NORMAL   = 16,
-    FONT_SIZE_SMALL    = 6,
-};
 
 
 struct UICOM_1PP_BMP_INFO {

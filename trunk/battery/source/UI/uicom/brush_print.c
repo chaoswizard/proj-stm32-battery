@@ -7,68 +7,14 @@
 
 #define SCREEN_WIDTH_PIXEL_NUM                (128)
 #define SCREEN_HEIGHT_PIXEL_NUM               (64)
-#define SCREEN_ROW_NUM                         (8)
-#define SCREEN_ROW_HEIGHT_PIXEL_NUM            (8)
-
-
-#define Y_PIXLE_TO_ROW(pos_y)       ((pos_y) >> 3) 
-#define X_PIXLE_TO_COL(pos_x)       ((pos_x) & 0x3F) 
-
-#define SCREEN_POS_IS_INVALID(x, y) (((x) > (SCREEN_WIDTH_PIXEL_NUM - 1)) || ((y) > (SCREEN_HEIGHT_PIXEL_NUM - 1)))
-
-#define XLCD_DAT	1
-
-#define DEV_LCD_CS_A() {\
-    GPIOA->BRR |= 0x00000800;\
-    GPIOB->BSRR|= 0x00000100;\
-}
-
-#define DEV_LCD_CS_B() {\
-    GPIOA->BSRR |= 0x00000800;\
-    GPIOB->BRR |= 0x00000100;\
-}
-
-#define DEV_LCD_START_FILL() {\
-    GPIOA->BRR |= 0x00000800; \
-    GPIOB->BRR |= 0x00000100;\
-}
-
-#define DEV_LCD_END_FILL() {\
-    GPIOA->BSRR |= 0x00000800; \
-    GPIOB->BSRR |= 0x00000100;\
-}
-
-#define DEV_LCD_MOVE_POS(pos_x, pos_y)  XLCD_MOV_POS(pos_x, pos_y)
-#define DEV_LCD_WRITE(data)  XLCD_SEND_DATA((data))
-#define DEV_LCD_READ(data)   (data) = XLCD_RECV_DATA()
-
-
-#define DEV_LCD_CS(pos_x) {\
-    if((pos_x)<(SCREEN_WIDTH_PIXEL_NUM/2))\
-    {\
-        DEV_LCD_CS_A();\
-    } else { \
-       DEV_LCD_CS_B();\
-    }\
-}
-
-
-#define DEV_LCD_SET_DATA(pos_x, pos_y, data)  {\
-    DEV_LCD_MOVE_POS(pos_x, pos_y); \
-    DEV_LCD_WRITE(data);\
-}
-#define DEV_LCD_GET_DATA(pos_x, pos_y, data)  {\
-    DEV_LCD_MOVE_POS(pos_x, pos_y);\
-    DEV_LCD_READ(data); \
-}
-
+#define SCREEN_POS_IS_INVALID(x, y)           (((x) > (SCREEN_WIDTH_PIXEL_NUM - 1)) || ((y) > (SCREEN_HEIGHT_PIXEL_NUM - 1)))
 
 void Screen_PrintInit(void)
 {
     INIT_XLCD();
 }
 
-void Screen_PrintFillRect(struct SCREEN_ZONE *rect,  enum PIXEL_MODE pixel_mode)
+void Screen_PrintFillRect(struct SCREEN_ZONE *rect,  enum PIXEL_COLOR pixel_mode)
 {
     T_SCREEN_PIXEL i,j;
 
@@ -91,56 +37,18 @@ void Screen_PrintClear(struct SCREEN_ZONE *rect)
     }
     else
     {
-        DEV_LCD_START_FILL(); 
-        for(j=0;j<SCREEN_ROW_NUM;j++)
-        {
-            DEV_LCD_MOVE_POS(0, j);
-            for(i=0;i<(SCREEN_WIDTH_PIXEL_NUM/2);i++)
-            {
-                DEV_LCD_WRITE(0);
-            }
-        }
-        DEV_LCD_END_FILL();
+        XFILLRAM(0);
     }
 }
 
 
 
-void Screen_PrintPixel(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, enum PIXEL_MODE pixel_mode)
+void Screen_PrintPixel(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, enum PIXEL_COLOR pixel_mode)
 {
-	T_SCREEN_PIXEL tmp;
-
-    if (SCREEN_POS_IS_INVALID(x, y))
-    {
-        return;
-    }
-
-    DEV_LCD_CS(x);
-    DEV_LCD_GET_DATA(X_PIXLE_TO_COL(x), Y_PIXLE_TO_ROW(y), tmp);
-    if (pixel_mode == PIXEL_MODE_SET)
-    {
-        tmp |= (1<<((y & 0x07)));
-    }
-    else if (pixel_mode == PIXEL_MODE_CLEAR)    
-    {
-        tmp &= (~(1<<((y & 0x7))));
-    }
-    else if (pixel_mode == PIXEL_MODE_TURN) 
-    {
-        tmp ^= (1<<((y & 0x7)));
-    }
-    else if (pixel_mode == PIXEL_MODE_CURSOR)
-    {
-        tmp ^= 0xFF;
-    }
-    else
-    {// unknown mode
-        return;
-    }
-    DEV_LCD_SET_DATA(X_PIXLE_TO_COL(x), Y_PIXLE_TO_ROW(y), tmp);
+    putpixel(x, y, pixel_mode);
 }
 
-void Screen_PrintLine(T_SCREEN_PIXEL x1, T_SCREEN_PIXEL y1, T_SCREEN_PIXEL x2, T_SCREEN_PIXEL y2, enum PIXEL_MODE pixel_mode)
+void Screen_PrintLine(T_SCREEN_PIXEL x1, T_SCREEN_PIXEL y1, T_SCREEN_PIXEL x2, T_SCREEN_PIXEL y2, enum PIXEL_COLOR pixel_mode)
 {
     int xdelta,ydelta,xstep,ystep,change;
 
@@ -203,11 +111,11 @@ void Screen_PrintLine(T_SCREEN_PIXEL x1, T_SCREEN_PIXEL y1, T_SCREEN_PIXEL x2, T
 
 
 
-void Screen_PrintRect(struct OSD_ZONE *zone, enum PIXEL_MODE pixel_mode)
+void Screen_PrintRect(struct OSD_ZONE *zone, enum PIXEL_COLOR pixel_mode)
 {
-    //MY_DEBUG("\n|RECT|(%d,%d)[%d x %d]<%d,%d,%d,%d>\n", 
-     //      zone->zone.x, zone->zone.y, zone->zone.w, zone->zone.h,
-     //      zone->border.l, zone->border.t, zone->border.r, zone->border.b);
+    MY_DEBUG("\n|RECT|(%d,%d)[%dx%d]<%d,%d,%d,%d>\n", 
+           zone->zone.x, zone->zone.y, zone->zone.w, zone->zone.h,
+           zone->border.l, zone->border.t, zone->border.r, zone->border.b);
 
     if (zone->border.t > 0)
         Screen_PrintLine(zone->zone.x,                zone->zone.y, 
@@ -241,6 +149,7 @@ void Screen_PrintString(struct SCREEN_ZONE *rect, u_int8 *str, T_SCREEN_PIXEL_AT
 {
     u_int32 idx, codelen, len, fontwidth;
     struct UICOM_1PP_BMP_INFO  bmpInfo;
+    enum PIXEL_COLOR txtsize, fgColor, bgColor;
     //MY_DEBUG("\t[TXT] %s\n", str);
 
     if (NULL == str)
@@ -251,15 +160,18 @@ void Screen_PrintString(struct SCREEN_ZONE *rect, u_int8 *str, T_SCREEN_PIXEL_AT
     len = strlen(str);
     if (len)
     {
+        txtsize  = TEXT_ATTR_SIZE(attr);
+        fgColor  = TEXT_ATTR_COLOR_FG(attr);
+        bgColor  = TEXT_ATTR_COLOR_BG(attr);
         idx = 0;
         fontwidth = 0;
         while((str[idx] != '\0') && (idx < len))
         {
-            codelen = uicom_font_getdata(str+idx, &bmpInfo, attr);
+            codelen = uicom_font_getdata(str+idx, &bmpInfo, txtsize);
             if (codelen > 0)
             {
                 idx += codelen;
-                fontwidth += Screen_PrintFont(rect->x + fontwidth, rect->y, &bmpInfo);
+                fontwidth += Screen_PrintFont(rect->x + fontwidth, rect->y, &bmpInfo, fgColor, bgColor);
             }
             else
             {
@@ -274,47 +186,22 @@ void Screen_PrintBmp(struct SCREEN_ZONE *rect, u_int8 *data, T_SCREEN_PIXEL_ATTR
     MY_DEBUG("\t[BMP] %x\n", data);
 }
 
-T_SCREEN_PIXEL Screen_PrintFont(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struct UICOM_1PP_BMP_INFO *info)
+T_SCREEN_PIXEL Screen_PrintFont(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struct UICOM_1PP_BMP_INFO *info, enum PIXEL_COLOR fgcolor, enum PIXEL_COLOR bgcolor)
 {
     // byte mode
-    if (0 == (info->height % SCREEN_ROW_HEIGHT_PIXEL_NUM))
+    if (0 == (info->height % 8))
     {
-       return  Screen_PrintFont_By_Byte(x, y, info);
+       return  XLCD_DRAW_FONT_BY_BYTE(x, y, info, fgcolor, bgcolor);
     }
     else 
     {
-        return  Screen_PrintFont_By_Bit(x, y, info);
+        return  Screen_PrintFont_By_Bit(x, y, info, fgcolor, bgcolor);
     }
 }
 
 
-T_SCREEN_PIXEL Screen_PrintFont_By_Byte(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struct UICOM_1PP_BMP_INFO *info)
-{
-    T_SCREEN_PIXEL i, j,rowCnt, col, row;
 
-    rowCnt = info->height/SCREEN_ROW_HEIGHT_PIXEL_NUM;
-    row = Y_PIXLE_TO_ROW(y);
-    for(j=0; j<rowCnt; j++)
-    {
-        col = x;
-        for(i=0; i<info->width; i++)
-        {
-            if (SCREEN_POS_IS_INVALID(col, j+y))
-            {
-                break;
-            }
-            DEV_LCD_CS(col);
-            DEV_LCD_SET_DATA(X_PIXLE_TO_COL(col), row + j, info->data[info->width*j + i]);
-            col++;
-        }
-    }
-
-    return info->width;
-}
-
-
-
-T_SCREEN_PIXEL Screen_PrintFont_By_Bit(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struct UICOM_1PP_BMP_INFO *info)
+T_SCREEN_PIXEL Screen_PrintFont_By_Bit(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struct UICOM_1PP_BMP_INFO *info, enum PIXEL_COLOR fgcolor, enum PIXEL_COLOR bgcolor)
 {
     T_SCREEN_PIXEL i, j;
     u_int32 prePixelNum, curPixelPos;
@@ -329,13 +216,14 @@ T_SCREEN_PIXEL Screen_PrintFont_By_Bit(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struc
                 break;
             }
             curPixelPos = prePixelNum + j;
+            //if ((info->data[curPixelPos/8] << (curPixelPos % 8)) & 0x80)
             if ((info->data[curPixelPos/8]) & (1<<(curPixelPos % 8)))
             {
-                Screen_PrintPixel((x + i), (y + j), PIXEL_MODE_SET);
+                Screen_PrintPixel((x + i), (y + j), fgcolor);
             }
             else
             {
-                Screen_PrintPixel((x + i), (y + j), PIXEL_MODE_CLEAR);
+                Screen_PrintPixel((x + i), (y + j), bgcolor);
             }
         }
     }
