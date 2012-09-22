@@ -27,7 +27,7 @@ u_int8 ui_menu_shotcut_proc(struct EVENT_NODE_ITEM *e)
 {
     if (MSG_IS_START(e->sig))
     {
-        ui_mmi_enter(UI_NODE_LEAF_01, 1);
+        ui_mmi_enter(UI_NODE_MAINMENU, 1);
         return 1;
     }
     else if (MSG_IS_CANCLE(e->sig))

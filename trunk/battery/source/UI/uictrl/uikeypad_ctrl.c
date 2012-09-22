@@ -11,7 +11,6 @@ void ui_keypad_deinit(void)
 
 }
 
-
 void ui_keypad_scan(void)
 {
     struct EVENT_NODE_ITEM e;
@@ -21,4 +20,5 @@ void ui_keypad_scan(void)
         ui_mmi_send_msg(&e);
     }
 }
+
 

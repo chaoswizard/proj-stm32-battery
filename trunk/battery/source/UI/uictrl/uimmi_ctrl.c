@@ -33,14 +33,14 @@ DECLARE_SM_NODE_MAP(gMenuSetupOption);
 DECLARE_SM_NODE_MAP(gMenuChSwitch);
 
 static const struct SM_NODE_MAP  gFuncMapTab[] = {
-    UI_NODE_BRANCH_00, &gMenu_PowerOn,
-    UI_NODE_BRANCH_01, &gMenuStopCheck,
-    UI_NODE_LEAF_00, &gMenuWelcome, 
-    UI_NODE_LEAF_01, &gMenuMain, 
-    UI_NODE_LEAF_02, &gMenuCheckModeCfg, 
-    UI_NODE_LEAF_03, &gMenuSearchOption, 
-    UI_NODE_LEAF_04, &gMenuSetupOption, 
-    UI_NODE_LEAF_05, &gMenuChSwitch, 
+    UI_NODE_WELCOME, &gMenuWelcome, 
+    UI_NODE_MAINMENU, &gMenuMain, 
+    UI_NODE_CHECKSEUP, &gMenuCheckModeCfg, 
+    UI_NODE_SEARCHOPT, &gMenuSearchOption, 
+    UI_NODE_SETUPOPT, &gMenuSetupOption, 
+    UI_NODE_CHSWITCH, &gMenuChSwitch, 
+    UI_NODE_POWERON, &gMenu_PowerOn,
+    UI_NODE_STOPMENU, &gMenuStopCheck,
 };
 
 
@@ -165,8 +165,8 @@ static u_int8 ui_mmi_bypass_proc(struct EVENT_NODE_ITEM *e)
         switch (e->sig)
         {
             case EVENT_SYS_INIT:
-               // ui_mmi_enter(UI_NODE_BRANCH_00, 1);
-                ui_mmi_enter(UI_NODE_LEAF_00, 1);
+               // ui_mmi_enter(UI_NODE_POWERON, 1);
+                ui_mmi_enter(UI_NODE_WELCOME, 1);
                 ret = 1;
                 break;
             default:
@@ -321,23 +321,6 @@ void ui_mmi_send_msg(struct EVENT_NODE_ITEM *e)
 }
 
 
-enum UI_NODE_TYPE ui_mmi_nodetype(enum UI_NODE_NAME name)
-{
-    if ((name > UI_NODE_START) && (name < UI_NODE_SEPERATE))
-    {
-        return UI_NODE_TYPE_BRANCH;
-    }
-    else if ((name > UI_NODE_SEPERATE) && (name < UI_NODE_END))
-    {
-        return UI_NODE_TYPE_LEAF;
-    }
-    else
-    {
-        return UI_NODE_TYPE_NULL;
-    }
-}
-
-
 SWTMR_NODE_HANDLE ui_mmi_start_timer(u_int32 ms, void(*callbackFunc)(void *), void *callbackArg, u_int8 isLoop)
 {
     if (gUiMmiCtrl->tmrHandle && callbackFunc)
@@ -386,39 +369,39 @@ void ui_mmi_debug_handle(char *nameStr, SM_NODE_HANDLE me, struct EVENT_NODE_ITE
     switch (e->sig)
     {
         case EVENT_KEY_STOP:
-            ui_mmi_enter(UI_NODE_BRANCH_01, 0);
+            ui_mmi_enter(UI_NODE_STOPMENU, 0);
             break;
         
         case EVENT_KEY_OK:
-            ui_mmi_enter(UI_NODE_LEAF_00, 0);
+            ui_mmi_enter(UI_NODE_WELCOME, 0);
             break;
         case EVENT_KEY_NUM_1:
-            ui_mmi_enter(UI_NODE_LEAF_01, 0);
+            ui_mmi_enter(UI_NODE_MAINMENU, 0);
             break;
         case EVENT_KEY_NUM_2:
-            ui_mmi_enter(UI_NODE_LEAF_02, 0);
+            ui_mmi_enter(UI_NODE_CHECKSEUP, 0);
             break;
         case EVENT_KEY_NUM_3:
-            ui_mmi_enter(UI_NODE_LEAF_03, 0);
+            ui_mmi_enter(UI_NODE_SEARCHOPT, 0);
             break;
         case EVENT_KEY_NUM_4:
-            ui_mmi_enter(UI_NODE_LEAF_04, 0);
+            ui_mmi_enter(UI_NODE_SETUPOPT, 0);
             break;
         case EVENT_KEY_NUM_5:
-            ui_mmi_enter(UI_NODE_LEAF_05, 0);
+            ui_mmi_enter(UI_NODE_CHSWITCH, 0);
             break;
         case EVENT_KEY_NUM_6:
-            ui_mmi_enter(UI_NODE_BRANCH_01, 0);
+            ui_mmi_enter(UI_NODE_STOPMENU, 0);
             break;
         case EVENT_KEY_NUM_7:
-            ui_mmi_enter(UI_NODE_LEAF_01, 1);
+            ui_mmi_enter(UI_NODE_MAINMENU, 1);
             break;
         case EVENT_KEY_NUM_8:
-            ui_mmi_enter(UI_NODE_LEAF_02, 1);
+            ui_mmi_enter(UI_NODE_CHECKSEUP, 1);
             break;
             
         case EVENT_KEY_NUM_9:
-            ui_mmi_enter(UI_NODE_LEAF_03, 1);
+            ui_mmi_enter(UI_NODE_SEARCHOPT, 1);
             break;
             
         case EVENT_KEY_SUB:

@@ -171,7 +171,7 @@ static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
             setupmenu_paint(1);
             break;
         case EVENT_KEY_NUM_2:
-            ui_mmi_enter(UI_NODE_BRANCH_01, 0);
+            ui_mmi_enter(UI_NODE_STOPMENU, 0);
             break;
         default:
             break;
