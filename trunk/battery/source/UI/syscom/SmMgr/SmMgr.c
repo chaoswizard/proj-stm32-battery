@@ -1,8 +1,8 @@
 #include "common_define.h"
 #include "SmMgr.h"
 
-#define SMMGR_DEBUG        printf
-#define SMMGR_TRACE(s,n)   printf(s":%d", n)
+#define SMMGR_DEBUG        MY_DEBUG
+#define SMMGR_TRACE(s,n)   MY_DEBUG(s":%d", n)
 
 struct SM_MGR_CTRL {
     struct SMMGR_INIT_PARAM cfg;

@@ -243,7 +243,7 @@ u_int8 uicom_font_getdata(u_int8 *ch, struct UICOM_1PP_BMP_INFO *info, u_int8 fo
     u_int32 idx;
     u_int8  val;
 
-    //printf(":[%2X,%2X]\n",ch[0],ch[1]);  
+    //MY_DEBUG(":[%2X,%2X]\n",ch[0],ch[1]);  
     //CKJ
     if ((ch[0]>0xA0) && (ch[1]>0xA0))
     {
@@ -251,7 +251,7 @@ u_int8 uicom_font_getdata(u_int8 *ch, struct UICOM_1PP_BMP_INFO *info, u_int8 fo
         {
             if ((ch[0] == gFont16_CkjMapInfo[idx].code[0]) && (ch[1] == gFont16_CkjMapInfo[idx].code[1]))
             {
-                //printf("\tCJK[%2X,%2X]\n", gFont16_CkjMapInfo[idx].code[0], gFont16_CkjMapInfo[idx].code[1]);  
+                //MY_DEBUG("\tCJK[%2X,%2X]\n", gFont16_CkjMapInfo[idx].code[0], gFont16_CkjMapInfo[idx].code[1]);  
                 info->data   = (u_int8 *)gFont16_CkjMapInfo[idx].pixel;
                 info->size   = 28;
                 info->width  = 14;
@@ -272,7 +272,7 @@ u_int8 uicom_font_getdata(u_int8 *ch, struct UICOM_1PP_BMP_INFO *info, u_int8 fo
         {
             if (idx < FONT16_ASCII_COUNT)
             {
-                //printf("Ascii:[%d/%d:%d]\n",idx, ARRAY_SIZE(gFont16_AsciiMap), FONT16_ASCII_COUNT);  
+                //MY_DEBUG("Ascii:[%d/%d:%d]\n",idx, ARRAY_SIZE(gFont16_AsciiMap), FONT16_ASCII_COUNT);  
                 info->data   = (u_int8 *)&gFont16_AsciiMap[idx];
                 info->size   = 14;
                 info->width  = 7;
@@ -284,7 +284,7 @@ u_int8 uicom_font_getdata(u_int8 *ch, struct UICOM_1PP_BMP_INFO *info, u_int8 fo
         {
             if (idx < FONT6_ASCII_COUNT)
             {
-                //printf("Small:[%d/%d:%d]\n",idx, ARRAY_SIZE(gFont6_AsciiMap), FONT6_ASCII_COUNT);  
+                //MY_DEBUG("Small:[%d/%d:%d]\n",idx, ARRAY_SIZE(gFont6_AsciiMap), FONT6_ASCII_COUNT);  
                 info->data = (u_int8 *)&gFont6_AsciiMap[idx];
                 info->size   = 6;
                 info->width  = 8;

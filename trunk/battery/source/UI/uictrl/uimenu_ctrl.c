@@ -1,7 +1,11 @@
 #include "uimenu_ctrl.h"
+#include "brush_print.h"
+
 
 void ui_menu_init(void)
 {
+    Screen_PrintInit();
+    Screen_PrintClear(NULL);
 }
 
 void ui_menu_deinit(void)
