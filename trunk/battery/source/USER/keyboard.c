@@ -585,3 +585,67 @@ void drawPicture(void)
 	sprintf(mystr,"PAGE<%01d>",curPages+1);
 	printSmall(42,57);
 }
+
+
+//==========================================================
+#include "uimmi_ctrl.h"
+
+struct KEYBOARD_KEY_VAL_MAP {
+    unsigned int hdl;
+    EVENT_NODE_HANDLE  sig;
+};
+
+
+static const struct KEYBOARD_KEY_VAL_MAP gUiKeyNodeMapTabl[] = {
+    {0x10000,  EVENT_KEY_ADD},
+    {0x4,      EVENT_KEY_SUB},
+    {0x20000,  EVENT_KEY_UP},
+    {0x80,     EVENT_KEY_DOWN},
+    {0x100,    EVENT_KEY_LEFT},
+    {0x400,    EVENT_KEY_RIGHT},
+    {0x2,      EVENT_KEY_OK},
+    {0x1,      EVENT_KEY_ESC},
+    {0x400000, EVENT_KEY_RUN},
+    {0x40000,  EVENT_KEY_NUM_0},
+    {0x80000,  EVENT_KEY_NUM_1},
+    {0x100000, EVENT_KEY_NUM_2},
+    {0x200000, EVENT_KEY_NUM_3},
+    {0x800,    EVENT_KEY_NUM_4},
+    {0x1000,   EVENT_KEY_NUM_5},
+    {0x2000,   EVENT_KEY_NUM_6},
+    {0x8,      EVENT_KEY_NUM_7},
+    {0x10,     EVENT_KEY_NUM_8},
+    {0x20,     EVENT_KEY_NUM_9},
+};
+
+
+
+
+void keyboard_scan(void)
+{
+    struct EVENT_NODE_ITEM e;
+
+    //check whether any key press
+    if(Flag_keyPressed)
+    {
+        if(curKey!=0) 
+        {
+            s_int32 i;
+            for (i=0; i< ARRAY_SIZE(gUiKeyNodeMapTabl); i++)
+            {
+                if (curKey == gUiKeyNodeMapTabl[i].hdl)
+                {
+                    e.sig = gUiKeyNodeMapTabl[i].sig;
+                    ui_mmi_send_msg(&e);
+                    break;
+                }
+            }
+            curKey=0;  
+        }
+        Flag_keyPressed=0; 
+        preKey=0;
+    }    
+}
+
+
+
