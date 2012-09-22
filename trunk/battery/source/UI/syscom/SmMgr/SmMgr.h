@@ -54,16 +54,16 @@ struct SMMGR_INIT_PARAM {
 };
 
 
-HANDLE SmMgr_Open(struct SMMGR_INIT_PARAM *initParam);
-void SmMgr_Close(HANDLE handle);
-SM_NODE_HANDLE SmMgr_Proc(HANDLE handle, void *param);
-SM_NODE_HANDLE SmMgr_Return(HANDLE handle, SM_NODE_COUNT retLvl);
-SM_NODE_HANDLE SmMgr_Trans(HANDLE handle, SM_NODE_HANDLE newNode, u_int8 quitIfSameCur);
-SM_NODE_HANDLE SmMgr_GetCurrent(HANDLE handle);
-SM_NODE_HANDLE SmMgr_GetParent(HANDLE handle);
-void SmMgr_RegSuspend(HANDLE handle, void (*suspend)(SM_NODE_HANDLE me, SM_NODE_HANDLE child));
-void SmMgr_RegResume(HANDLE handle, void (*resume)(SM_NODE_HANDLE child, SM_NODE_HANDLE me));
-u_int8 SmMgr_IsInHistory(HANDLE handle, SM_NODE_HANDLE name);
+handle_t SmMgr_Open(struct SMMGR_INIT_PARAM *initParam);
+void SmMgr_Close(handle_t handle);
+SM_NODE_HANDLE SmMgr_Proc(handle_t handle, void *param);
+SM_NODE_HANDLE SmMgr_Return(handle_t handle, SM_NODE_COUNT retLvl);
+SM_NODE_HANDLE SmMgr_Trans(handle_t handle, SM_NODE_HANDLE newNode, u_int8 quitIfSameCur);
+SM_NODE_HANDLE SmMgr_GetCurrent(handle_t handle);
+SM_NODE_HANDLE SmMgr_GetParent(handle_t handle);
+void SmMgr_RegSuspend(handle_t handle, void (*suspend)(SM_NODE_HANDLE me, SM_NODE_HANDLE child));
+void SmMgr_RegResume(handle_t handle, void (*resume)(SM_NODE_HANDLE child, SM_NODE_HANDLE me));
+u_int8 SmMgr_IsInHistory(handle_t handle, SM_NODE_HANDLE name);
 
 #ifdef __cplusplus
 }

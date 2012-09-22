@@ -22,20 +22,16 @@ enum UI_NODE_NAME {
    UI_NODE_CHSWITCH,/*<0><X><1><3> Í¨µÀÇÐ»»Ñ¡Ôñlist[4][4] + button[2] + tips[1]*/
 } ;
 
-enum UI_NODE_TYPE {
-    UI_NODE_TYPE_NULL,
-    UI_NODE_TYPE_BRANCH,
-    UI_NODE_TYPE_LEAF,
-};
-
 
 void ui_mmi_open(void);
+void ui_mmi_start(void);
 void ui_mmi_close(void);
 void ui_mmi_init(void);
 void ui_mmi_deinit(void);
 void ui_mmi_enter(enum UI_NODE_NAME name, u_int8 closeCurrent);
 void ui_mmi_return(u_int8 retLvl);
-void ui_mmi_proc(void);
+void ui_mmi_poweroff(void);
+u_int8 ui_mmi_proc(void);
 void ui_mmi_send_msg(struct EVENT_NODE_ITEM *e);
 void ui_mmi_reg_resume(void (*resume)(SM_NODE_HANDLE child, SM_NODE_HANDLE me));
 void ui_mmi_reg_suspend(void (*suspend)(SM_NODE_HANDLE me, SM_NODE_HANDLE child));

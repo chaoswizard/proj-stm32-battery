@@ -24,7 +24,7 @@ static struct SWTMR_NODE_ITEM *SwTmrMgr_Remove(struct SWTMR_MGR_CTRL *pCtrl, u_i
 static struct SWTMR_NODE_ITEM *SwTmrMgr_GetFree(struct SWTMR_MGR_CTRL *pCtrl);
 static struct SWTMR_NODE_ITEM *SwTmrMgr_GetHead(struct SWTMR_MGR_CTRL *pCtrl, struct SWTMR_NODE_ITEM *reftimer);
 
-HANDLE SwTmrMgr_Open(struct SWTMR_INIT_PARAM *initParam)
+handle_t SwTmrMgr_Open(struct SWTMR_INIT_PARAM *initParam)
 {
     struct SWTMR_MGR_CTRL *pCtrl;
 
@@ -38,10 +38,10 @@ HANDLE SwTmrMgr_Open(struct SWTMR_INIT_PARAM *initParam)
     pCtrl->currentTickcount  = 0;
     pCtrl->current   = NULL;
 
-    return (HANDLE)pCtrl;
+    return (handle_t)pCtrl;
 }
 
-void SwTmrMgr_Close(HANDLE handle)
+void SwTmrMgr_Close(handle_t handle)
 {
     struct SWTMR_MGR_CTRL *pCtrl = (struct SWTMR_MGR_CTRL *)handle;
 
@@ -54,14 +54,14 @@ void SwTmrMgr_Close(HANDLE handle)
     pCtrl->current   = NULL;
 }
 
-u_int32 SwTmrMgr_GetCurTickCount(HANDLE handle)
+u_int32 SwTmrMgr_GetCurTickCount(handle_t handle)
 {
     struct SWTMR_MGR_CTRL *pCtrl = (struct SWTMR_MGR_CTRL *)handle;
     
     return pCtrl->currentTickcount;
 }
 
-u_int32 SwTmrMgr_ExistSchedule(HANDLE handle)
+u_int32 SwTmrMgr_ExistSchedule(handle_t handle)
 {
     struct SWTMR_MGR_CTRL *pCtrl = (struct SWTMR_MGR_CTRL *)handle;
     
@@ -128,7 +128,7 @@ static struct SWTMR_NODE_ITEM *SwTmrMgr_GetHead(struct SWTMR_MGR_CTRL *pCtrl, st
 }
 
 
-SWTMR_NODE_HANDLE SwTmrMgr_Start(HANDLE handle, u_int32 timeoutTenths, void(*callbackFunc)(void *), void *callbackArg, u_int8 isLoop)
+SWTMR_NODE_HANDLE SwTmrMgr_Start(handle_t handle, u_int32 timeoutTenths, void(*callbackFunc)(void *), void *callbackArg, u_int8 isLoop)
 {
     struct SWTMR_NODE_ITEM *newEntry;
     struct SWTMR_MGR_CTRL *pCtrl = (struct SWTMR_MGR_CTRL *)handle;
@@ -157,7 +157,7 @@ SWTMR_NODE_HANDLE SwTmrMgr_Start(HANDLE handle, u_int32 timeoutTenths, void(*cal
     return newEntry->tmr_id;
 }
 
-SWTMR_NODE_HANDLE SwTmrMgr_Change(HANDLE handle, SWTMR_NODE_COUNT tmrHdl, u_int32 timeoutTenths)
+SWTMR_NODE_HANDLE SwTmrMgr_Change(handle_t handle, SWTMR_NODE_COUNT tmrHdl, u_int32 timeoutTenths)
 {
 	struct SWTMR_NODE_ITEM *entry;
     struct SWTMR_MGR_CTRL *pCtrl = (struct SWTMR_MGR_CTRL *)handle;
@@ -174,7 +174,7 @@ SWTMR_NODE_HANDLE SwTmrMgr_Change(HANDLE handle, SWTMR_NODE_COUNT tmrHdl, u_int3
     return SWTMR_INVALID_NODE;
 }
 
-SWTMR_NODE_HANDLE SwTmrMgr_Stop(HANDLE handle, SWTMR_NODE_HANDLE tmrHdl)
+SWTMR_NODE_HANDLE SwTmrMgr_Stop(handle_t handle, SWTMR_NODE_HANDLE tmrHdl)
 {
 	struct SWTMR_NODE_ITEM *entry;
     struct SWTMR_MGR_CTRL *pCtrl = (struct SWTMR_MGR_CTRL *)handle;
@@ -189,7 +189,7 @@ SWTMR_NODE_HANDLE SwTmrMgr_Stop(HANDLE handle, SWTMR_NODE_HANDLE tmrHdl)
     return SWTMR_INVALID_NODE;
 }
 
-SWTMR_NODE_HANDLE SwTmrMgr_Proc(HANDLE handle)
+SWTMR_NODE_HANDLE SwTmrMgr_Proc(handle_t handle)
 {
    struct SWTMR_NODE_ITEM *current;
    struct SWTMR_MGR_CTRL *pCtrl = (struct SWTMR_MGR_CTRL *)handle;
@@ -313,7 +313,7 @@ static void SwTmrMgr_Add(struct SWTMR_MGR_CTRL *pCtrl, struct SWTMR_NODE_ITEM *n
 }
 
 
-void SwTmrMgr_Dump(HANDLE handle)
+void SwTmrMgr_Dump(handle_t handle)
 {    
     struct SWTMR_NODE_ITEM *head, *entry;
     struct SWTMR_MGR_CTRL *pCtrl = (struct SWTMR_MGR_CTRL *)handle;

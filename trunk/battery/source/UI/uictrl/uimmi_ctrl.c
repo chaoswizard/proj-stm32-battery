@@ -10,9 +10,9 @@ static struct EVENT_NODE_ITEM gEventQuenue[10];
 static struct SWTMR_NODE_ITEM gSwTmrList[4];
 
 struct UI_MMI_CTRL {
-    HANDLE smHandle;
-    HANDLE evtHandle;
-    HANDLE tmrHandle;
+    handle_t smHandle;
+    handle_t evtHandle;
+    handle_t tmrHandle;
 };
 
 static struct UI_MMI_CTRL gUiMmiCtrlInstance;
@@ -225,13 +225,13 @@ static u_int8 ui_mmi_bypass_proc(struct EVENT_NODE_ITEM *e)
 
 
 
-void ui_mmi_proc(void)
+u_int8 ui_mmi_proc(void)
 {
     struct EVENT_NODE_ITEM e;
 
     if (NULL == gUiMmiCtrl)
     {
-        return;
+        return 0;
     }
 
     if (gUiMmiCtrl->tmrHandle)
@@ -243,35 +243,34 @@ void ui_mmi_proc(void)
     
     if (0 == EventMgr_Read(gUiMmiCtrl->evtHandle, &e, EVENT_OPT_MODE_FIFO))
     {
-        return;
+        return 0;
     }
 
     //UI_MMI_TRACE("<Recv>:%d\n", e.sig);
     if (ui_mmi_bypass_proc(&e))
     { 
-        return;
+        return 1;
     }
 
     if (SMNODE_IS_INVALID(SmMgr_GetCurrent(gUiMmiCtrl->smHandle)))
     {
         ui_menu_shotcut_proc(&e);
-        return;
+        return 1;
     }
     
     if (ui_menu_bypass_proc(&e))
     {
-        return;
+        return 1;
     }
     
     SmMgr_Proc(gUiMmiCtrl->smHandle, &e);
 
-    
+    return 1;
 }
 
 void ui_mmi_close(void)
 {
     ui_mmi_deinit();
-    //exit(0);
 }
 
 void ui_mmi_open(void)
@@ -337,6 +336,12 @@ void ui_mmi_stop_timer(SWTMR_NODE_HANDLE tmrHdl)
     {
         SwTmrMgr_Stop(gUiMmiCtrl->tmrHandle, tmrHdl);
     }
+}
+
+void ui_mmi_poweroff(void)
+{
+
+
 }
 
 

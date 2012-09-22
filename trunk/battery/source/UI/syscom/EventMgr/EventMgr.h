@@ -112,10 +112,10 @@ enum  EVENT_OPT_MODE {
     EVENT_OPT_MODE_STACK,
 };
 
-HANDLE EventMgr_Open(struct EVTMGR_INIT_PARAM *initParam);
-void EventMgr_Close(HANDLE handle);
-EVENT_NODE_COUNT EventMgr_Read(HANDLE handle, struct EVENT_NODE_ITEM *event, enum  EVENT_OPT_MODE mode);
-EVENT_NODE_COUNT EventMgr_Write(HANDLE handle, struct EVENT_NODE_ITEM *event, enum  EVENT_OPT_MODE mode);
+handle_t EventMgr_Open(struct EVTMGR_INIT_PARAM *initParam);
+void EventMgr_Close(handle_t handle);
+EVENT_NODE_COUNT EventMgr_Read(handle_t handle, struct EVENT_NODE_ITEM *event, enum  EVENT_OPT_MODE mode);
+EVENT_NODE_COUNT EventMgr_Write(handle_t handle, struct EVENT_NODE_ITEM *event, enum  EVENT_OPT_MODE mode);
 
 
 #ifdef __cplusplus

@@ -16,7 +16,7 @@ struct EVENT_MGR_CTRL {
 static struct EVENT_MGR_CTRL gEvtMgrInstance;
 
 
-HANDLE EventMgr_Open(struct EVTMGR_INIT_PARAM *initParam)
+handle_t EventMgr_Open(struct EVTMGR_INIT_PARAM *initParam)
 {
     struct EVENT_MGR_CTRL *pEvtMgr;
 
@@ -29,10 +29,10 @@ HANDLE EventMgr_Open(struct EVTMGR_INIT_PARAM *initParam)
     pEvtMgr->freeCnt = pEvtMgr->cfg.len;
     pEvtMgr->readyCnt = 0;
 
-    return (HANDLE)pEvtMgr;
+    return (handle_t)pEvtMgr;
 }
 
-void EventMgr_Close(HANDLE handle)
+void EventMgr_Close(handle_t handle)
 {
     struct EVENT_MGR_CTRL *pCtrl = (struct EVENT_MGR_CTRL *)handle;
 
@@ -40,7 +40,7 @@ void EventMgr_Close(HANDLE handle)
     memset(pCtrl, 0, sizeof(struct EVENT_MGR_CTRL));
 }
 
-EVENT_NODE_COUNT EventMgr_Write(HANDLE handle, struct EVENT_NODE_ITEM *event, enum  EVENT_OPT_MODE mode)
+EVENT_NODE_COUNT EventMgr_Write(handle_t handle, struct EVENT_NODE_ITEM *event, enum  EVENT_OPT_MODE mode)
 {
     struct EVENT_MGR_CTRL *pCtrl = (struct EVENT_MGR_CTRL *)handle;
     EVENT_NODE_COUNT cur;
@@ -72,7 +72,7 @@ EVENT_NODE_COUNT EventMgr_Write(HANDLE handle, struct EVENT_NODE_ITEM *event, en
     return cur;
 }
 
-EVENT_NODE_COUNT EventMgr_Read(HANDLE handle, struct EVENT_NODE_ITEM *event, enum  EVENT_OPT_MODE mode)
+EVENT_NODE_COUNT EventMgr_Read(handle_t handle, struct EVENT_NODE_ITEM *event, enum  EVENT_OPT_MODE mode)
 {
     struct EVENT_MGR_CTRL *pCtrl = (struct EVENT_MGR_CTRL *)handle;
     EVENT_NODE_COUNT cur;

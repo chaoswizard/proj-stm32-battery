@@ -37,19 +37,19 @@ struct SWTMR_INIT_PARAM {
     SWTMR_NODE_COUNT tmrCount;
 };
 
-HANDLE SwTmrMgr_Open(struct SWTMR_INIT_PARAM *initParam);
-void SwTmrMgr_Close(HANDLE handle);
-void SwTmrMgr_Dump(HANDLE handle);
+handle_t SwTmrMgr_Open(struct SWTMR_INIT_PARAM *initParam);
+void SwTmrMgr_Close(handle_t handle);
+void SwTmrMgr_Dump(handle_t handle);
 
 
-SWTMR_NODE_HANDLE SwTmrMgr_Start(HANDLE handle, u_int32 timeoutTenths, void(*callbackFunc)(void *), void *callbackArg, u_int8 isLoop);
-SWTMR_NODE_HANDLE SwTmrMgr_Stop(HANDLE handle, SWTMR_NODE_HANDLE timerHandle);
-SWTMR_NODE_HANDLE SwTmrMgr_Change(HANDLE handle, SWTMR_NODE_HANDLE timerHandle, u_int32 timeoutTenths);
-SWTMR_NODE_HANDLE SwTmrMgr_Proc(HANDLE handle);
+SWTMR_NODE_HANDLE SwTmrMgr_Start(handle_t handle, u_int32 timeoutTenths, void(*callbackFunc)(void *), void *callbackArg, u_int8 isLoop);
+SWTMR_NODE_HANDLE SwTmrMgr_Stop(handle_t handle, SWTMR_NODE_HANDLE timerHandle);
+SWTMR_NODE_HANDLE SwTmrMgr_Change(handle_t handle, SWTMR_NODE_HANDLE timerHandle, u_int32 timeoutTenths);
+SWTMR_NODE_HANDLE SwTmrMgr_Proc(handle_t handle);
 
 
-u_int32 SwTmrMgr_ExistSchedule(HANDLE handle);
-u_int32 SwTmrMgr_GetCurTickCount(HANDLE handle);
+u_int32 SwTmrMgr_ExistSchedule(handle_t handle);
+u_int32 SwTmrMgr_GetCurTickCount(handle_t handle);
 
 #endif
 

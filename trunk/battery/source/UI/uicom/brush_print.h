@@ -11,28 +11,6 @@
 #include "bits_types.h"
 #include "ui_com_obj.h"
 
-enum SCREEN_PIXEL_MODE {
-    SCREEN_PIXEL_MODE_NULL,
-};
-
-enum SCREEN_LINE_MODE {
-    SCREEN_LINE_MODE_NULL,
-};
-
-enum SCREEN_CURSOR_MODE {
-    SCREEN_CURSOR_RECT,
-    SCREEN_CURSOR_ELLIPSE,
-};
-
-enum SCREEN_FONT_MODE {
-    SCREEN_FONT_NULL,
-};
-
-
-enum SCREEN_RECT_MODE {
-    SCREEN_RECT_MODE_NULL,
-};
-
 
 //color | width | pixelMode
 typedef u_int8  T_SCREEN_PIXEL_ATTR;
@@ -89,6 +67,8 @@ void Screen_PrintCursor(struct OSD_ZONE *zone, T_SCREEN_PIXEL_ATTR attr);
 void Screen_PrintString(struct SCREEN_ZONE *rect, u_int8 *str, T_SCREEN_PIXEL_ATTR attr);
 void Screen_PrintBmp(struct SCREEN_ZONE *rect, u_int8 *data, T_SCREEN_PIXEL_ATTR attr);
 void Screen_PrintClear(struct SCREEN_ZONE *rect);
+void Screen_PrintUpdate(void);
+
 T_SCREEN_PIXEL Screen_PrintFont(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struct UICOM_1PP_BMP_INFO *info, enum PIXEL_COLOR fgcolor, enum PIXEL_COLOR bgcolor);
 T_SCREEN_PIXEL Screen_PrintFont_By_Bit(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struct UICOM_1PP_BMP_INFO *info, enum PIXEL_COLOR fgcolor, enum PIXEL_COLOR bgcolor);
 

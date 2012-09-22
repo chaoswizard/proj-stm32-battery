@@ -15,7 +15,7 @@ static struct SM_NODE_PROC_TAB *SmMgr_GetFuncTab(struct SM_MGR_CTRL *pCtrl, SM_N
 static SM_NODE_HANDLE SmMgr_Pop(struct SM_MGR_CTRL *pCtrl, u_int8 isResume);
 static SM_NODE_COUNT SmMgr_Push(struct SM_MGR_CTRL *pCtrl, SM_NODE_HANDLE newNode, u_int8 suspendCur);
 
-u_int8 SmMgr_IsInHistory(HANDLE handle, SM_NODE_HANDLE name)
+u_int8 SmMgr_IsInHistory(handle_t handle, SM_NODE_HANDLE name)
 {
    struct SM_MGR_CTRL *pCtrl = (struct SM_MGR_CTRL *)handle;
    s_int32 i;
@@ -30,7 +30,7 @@ u_int8 SmMgr_IsInHistory(HANDLE handle, SM_NODE_HANDLE name)
 
    return 0;
 }
-SM_NODE_HANDLE SmMgr_GetCurrent(HANDLE handle)
+SM_NODE_HANDLE SmMgr_GetCurrent(handle_t handle)
 {
     struct SM_MGR_CTRL *pCtrl = (struct SM_MGR_CTRL *)handle;
     
@@ -44,7 +44,7 @@ SM_NODE_HANDLE SmMgr_GetCurrent(HANDLE handle)
     }
 }
 
-SM_NODE_HANDLE SmMgr_GetParent(HANDLE handle)
+SM_NODE_HANDLE SmMgr_GetParent(handle_t handle)
 {
     struct SM_MGR_CTRL *pCtrl = (struct SM_MGR_CTRL *)handle;
 
@@ -164,7 +164,7 @@ static SM_NODE_HANDLE SmMgr_Pop(struct SM_MGR_CTRL *pCtrl, u_int8 isResume)
     return pCtrl->currentIdx;
 }
 
-HANDLE  SmMgr_Open(struct SMMGR_INIT_PARAM *initParam)
+handle_t  SmMgr_Open(struct SMMGR_INIT_PARAM *initParam)
 {
     struct SM_MGR_CTRL *pSmMgr;
 
@@ -174,10 +174,10 @@ HANDLE  SmMgr_Open(struct SMMGR_INIT_PARAM *initParam)
     memcpy(&pSmMgr->cfg, initParam, sizeof(struct SMMGR_INIT_PARAM));
 
 
-    return (HANDLE)pSmMgr;
+    return (handle_t)pSmMgr;
 }
 
-void  SmMgr_Close(HANDLE handle)
+void  SmMgr_Close(handle_t handle)
 {
     struct SM_MGR_CTRL *pCtrl = (struct SM_MGR_CTRL *)handle;
 
@@ -189,7 +189,7 @@ void  SmMgr_Close(HANDLE handle)
     memset(pCtrl, 0, sizeof(struct SM_MGR_CTRL));
 }
 
-SM_NODE_HANDLE SmMgr_Proc(HANDLE handle, void *param)
+SM_NODE_HANDLE SmMgr_Proc(handle_t handle, void *param)
 {
     struct SM_NODE_PROC_TAB *tab;
     struct SM_MGR_CTRL *pCtrl = (struct SM_MGR_CTRL *)handle;
@@ -210,7 +210,7 @@ SM_NODE_HANDLE SmMgr_Proc(HANDLE handle, void *param)
     return curNode;
 }
 
-void SmMgr_RegSuspend(HANDLE handle, void (*suspend)(SM_NODE_HANDLE me, SM_NODE_HANDLE child))
+void SmMgr_RegSuspend(handle_t handle, void (*suspend)(SM_NODE_HANDLE me, SM_NODE_HANDLE child))
 {
     struct SM_MGR_CTRL *pCtrl = (struct SM_MGR_CTRL *)handle;
 
@@ -219,7 +219,7 @@ void SmMgr_RegSuspend(HANDLE handle, void (*suspend)(SM_NODE_HANDLE me, SM_NODE_
         pCtrl->cfg.nodeStack[pCtrl->currentIdx].suspend = suspend;
     }
 }
-void SmMgr_RegResume(HANDLE handle, void (*resume)(SM_NODE_HANDLE child, SM_NODE_HANDLE me))
+void SmMgr_RegResume(handle_t handle, void (*resume)(SM_NODE_HANDLE child, SM_NODE_HANDLE me))
 {
     struct SM_MGR_CTRL *pCtrl = (struct SM_MGR_CTRL *)handle;
 
@@ -230,7 +230,7 @@ void SmMgr_RegResume(HANDLE handle, void (*resume)(SM_NODE_HANDLE child, SM_NODE
 }
 
 
-SM_NODE_HANDLE SmMgr_Return(HANDLE handle, SM_NODE_COUNT retLvl)
+SM_NODE_HANDLE SmMgr_Return(handle_t handle, SM_NODE_COUNT retLvl)
 {
     struct SM_MGR_CTRL *pCtrl = (struct SM_MGR_CTRL *)handle;
 
@@ -243,7 +243,7 @@ SM_NODE_HANDLE SmMgr_Return(HANDLE handle, SM_NODE_COUNT retLvl)
     return SmMgr_GetCurrent(handle);
 }
 
-SM_NODE_HANDLE SmMgr_Trans(HANDLE handle, SM_NODE_HANDLE newNode, u_int8 quitIfSameCur)
+SM_NODE_HANDLE SmMgr_Trans(handle_t handle, SM_NODE_HANDLE newNode, u_int8 quitIfSameCur)
 {
     struct SM_MGR_CTRL *pCtrl = (struct SM_MGR_CTRL *)handle;
     SM_NODE_HANDLE curNode;

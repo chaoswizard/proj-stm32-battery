@@ -168,6 +168,7 @@ void gmenu_content_tab_draw(struct GMENU_CONTENT_TAB *table, u_int8 row, u_int8 
         table->rowCount = row;
         table->colCount = col;
         uicom_obj_tab(row, col, table, table_cell_content_proc, 0);
+        Screen_PrintUpdate();
     }
 }
 
@@ -185,6 +186,7 @@ void gmenu_content_tab_clear_row(struct GMENU_CONTENT_TAB *table, u_int8 row1, u
             row1++;
         }
     }
+    Screen_PrintUpdate();
 }
 
 

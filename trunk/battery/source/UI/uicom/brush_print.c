@@ -11,10 +11,12 @@
 #define SCREEN_PUT_PIXEL(x, y, mode)           putpixel(x, y, mode)
 #define SCREEN_INIT()                          INIT_XLCD()
 #define SCREEN_CLEAR()                         XFILLRAM(0)
+#define SCREEN_UPDATE()                        
 #else
 #define SCREEN_PUT_PIXEL(x, y, mode)
 #define SCREEN_INIT()
 #define SCREEN_CLEAR()                         //system("cls")
+#define SCREEN_UPDATE()    
 #endif
 
 
@@ -38,8 +40,6 @@ void Screen_PrintFillRect(struct SCREEN_ZONE *rect,  enum PIXEL_COLOR pixel_mode
 
 void Screen_PrintClear(struct SCREEN_ZONE *rect)
 {
-    T_SCREEN_PIXEL i,j;
-    
     if (rect)
     {
         Screen_PrintFillRect(rect, PIXEL_MODE_CLEAR);
@@ -122,9 +122,9 @@ void Screen_PrintLine(T_SCREEN_PIXEL x1, T_SCREEN_PIXEL y1, T_SCREEN_PIXEL x2, T
 
 void Screen_PrintRect(struct OSD_ZONE *zone, enum PIXEL_COLOR pixel_mode)
 {
-    MY_DEBUG("\n|RECT|(%d,%d)[%dx%d]<%d,%d,%d,%d>\n", 
-           zone->zone.x, zone->zone.y, zone->zone.w, zone->zone.h,
-           zone->border.l, zone->border.t, zone->border.r, zone->border.b);
+    //MY_DEBUG("\n|RECT|(%d,%d)[%dx%d]<%d,%d,%d,%d>\n", 
+     //      zone->zone.x, zone->zone.y, zone->zone.w, zone->zone.h,
+     //      zone->border.l, zone->border.t, zone->border.r, zone->border.b);
 
     if (zone->border.t > 0)
         Screen_PrintLine(zone->zone.x,                zone->zone.y, 
@@ -193,6 +193,11 @@ void Screen_PrintString(struct SCREEN_ZONE *rect, u_int8 *str, T_SCREEN_PIXEL_AT
 void Screen_PrintBmp(struct SCREEN_ZONE *rect, u_int8 *data, T_SCREEN_PIXEL_ATTR attr)
 {
     MY_DEBUG("\t[BMP] %x\n", data);
+}
+
+void Screen_PrintUpdate(void)
+{
+    SCREEN_UPDATE();
 }
 
 T_SCREEN_PIXEL Screen_PrintFont(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struct UICOM_1PP_BMP_INFO *info, enum PIXEL_COLOR fgcolor, enum PIXEL_COLOR bgcolor)
