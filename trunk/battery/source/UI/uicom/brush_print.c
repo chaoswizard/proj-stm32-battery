@@ -11,12 +11,10 @@
 #define SCREEN_PUT_PIXEL(x, y, mode)           putpixel(x, y, mode)
 #define SCREEN_INIT()                          INIT_XLCD()
 #define SCREEN_CLEAR()                         XFILLRAM(0)
-#define SCREEN_UPDATE()                        
 #else
 #define SCREEN_PUT_PIXEL(x, y, mode)
 #define SCREEN_INIT()
 #define SCREEN_CLEAR()                         //system("cls")
-#define SCREEN_UPDATE()    
 #endif
 
 
@@ -193,11 +191,6 @@ void Screen_PrintString(struct SCREEN_ZONE *rect, u_int8 *str, T_SCREEN_PIXEL_AT
 void Screen_PrintBmp(struct SCREEN_ZONE *rect, u_int8 *data, T_SCREEN_PIXEL_ATTR attr)
 {
     MY_DEBUG("\t[BMP] %x\n", data);
-}
-
-void Screen_PrintUpdate(void)
-{
-    SCREEN_UPDATE();
 }
 
 T_SCREEN_PIXEL Screen_PrintFont(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struct UICOM_1PP_BMP_INFO *info, enum PIXEL_COLOR fgcolor, enum PIXEL_COLOR bgcolor)
