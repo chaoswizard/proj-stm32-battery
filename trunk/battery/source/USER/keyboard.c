@@ -619,12 +619,9 @@ static const struct KEYBOARD_KEY_VAL_MAP gUiKeyNodeMapTabl[] = {
 };
 
 
-
-
-void keyboard_scan(void)
+u_int8 keyboard_scan(struct EVENT_NODE_ITEM *e)
 {
-    struct EVENT_NODE_ITEM e;
-
+    u_int8 ret = 0;
     //check whether any key press
     if(Flag_keyPressed)
     {
@@ -635,8 +632,8 @@ void keyboard_scan(void)
             {
                 if (curKey == gUiKeyNodeMapTabl[i].hdl)
                 {
-                    e.sig = gUiKeyNodeMapTabl[i].sig;
-                    ui_mmi_send_msg(&e);
+                    e->sig = gUiKeyNodeMapTabl[i].sig;
+                    ret = 1;
                     break;
                 }
             }
@@ -645,7 +642,10 @@ void keyboard_scan(void)
         Flag_keyPressed=0; 
         preKey=0;
     }    
+
+    return ret;
 }
+
 
 
 

@@ -14,6 +14,11 @@ void ui_keypad_deinit(void)
 
 void ui_keypad_scan(void)
 {
-    keyboard_scan();
+    struct EVENT_NODE_ITEM e;
+    
+    if (keyboard_scan(&e))
+    {
+        ui_mmi_send_msg(&e);
+    }
 }
 
