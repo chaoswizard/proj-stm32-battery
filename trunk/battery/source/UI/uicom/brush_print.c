@@ -1,9 +1,6 @@
 #include "brush_print.h"
 #include "common_define.h"
-#include "stm32f10x.h"
-#include "lcd12864.h"
 
-#define USE_HW_LCD
 
 #define SCREEN_WIDTH_PIXEL_NUM                (128)
 #define SCREEN_HEIGHT_PIXEL_NUM               (64)
