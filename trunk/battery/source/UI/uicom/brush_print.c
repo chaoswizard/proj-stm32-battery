@@ -8,14 +8,17 @@
 #define SCREEN_POS_IS_INVALID(x, y)           (((x) > (SCREEN_WIDTH_PIXEL_NUM - 1)) || ((y) > (SCREEN_HEIGHT_PIXEL_NUM - 1)))
 
 #ifdef USE_HW_LCD
-#define SCREEN_PUT_PIXEL(x, y, mode)           putpixel(x, y, mode)
-#define SCREEN_INIT()                          INIT_XLCD()
-#define SCREEN_CLEAR()                         XFILLRAM(0)
+#define SCREEN_PUT_PIXEL(x, y, mode)                     putpixel(x, y, mode)
+#define SCREEN_INIT()                                    INIT_XLCD()
+#define SCREEN_CLEAR()                                   XFILLRAM(0)
+#define SCREEN_SET_BYTE(x, y, data, fgcolor, bgcolor)    XLCD_SET_BYTE(x, y, data)
 #else
 #define SCREEN_PUT_PIXEL(x, y, mode)
 #define SCREEN_INIT()
 #define SCREEN_CLEAR()                         //system("cls")
+#define SCREEN_SET_BYTE(x, y, data, fgcolor, bgcolor)    Screen_Print_8Bit_V(x, y, data, fgcolor, bgcolor)
 #endif
+
 
 
 void Screen_PrintInit(void)
@@ -193,16 +196,59 @@ void Screen_PrintBmp(struct SCREEN_ZONE *rect, u_int8 *data, T_SCREEN_PIXEL_ATTR
     MY_DEBUG("\t[BMP] %x\n", data);
 }
 
+
+
+void Screen_Print_8Bit_V(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, u_int8 data, enum PIXEL_COLOR fgcolor, enum PIXEL_COLOR bgcolor)
+{
+    T_SCREEN_PIXEL i;
+    for (i=0;i<8;i++)
+    {
+        if (data &(1<< i))
+        {
+            Screen_PrintPixel(x, (y + i), fgcolor);
+        }
+        else
+        {
+            Screen_PrintPixel(x, (y + i), bgcolor);
+        }
+    }
+}
+
+
+  
+T_SCREEN_PIXEL Screen_PrintFont_By_Byte(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struct UICOM_1PP_BMP_INFO *info, enum PIXEL_COLOR fgcolor, enum PIXEL_COLOR bgcolor)
+{
+    T_SCREEN_PIXEL i, j,rowCnt, col, row;
+
+    rowCnt = info->height/8;
+    row = y/8;
+    for(j=0; j<rowCnt; j++)
+    {
+        col = x;
+        for(i=0; i<info->width; i++)
+        {
+            if (SCREEN_POS_IS_INVALID(col, j+y))
+            {
+                break;
+            }
+            SCREEN_SET_BYTE(col, row + j, info->data[info->width*j + i], fgcolor, bgcolor);
+            
+            col++;
+        }
+    }
+
+    return info->width;
+}
+
+
 T_SCREEN_PIXEL Screen_PrintFont(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struct UICOM_1PP_BMP_INFO *info, enum PIXEL_COLOR fgcolor, enum PIXEL_COLOR bgcolor)
 {
-#ifdef USE_HW_LCD
     // byte mode
     if (0 == (info->height % 8))
     {
-       return  XLCD_DRAW_FONT_BY_BYTE(x, y, info, fgcolor, bgcolor);
+       return  Screen_PrintFont_By_Byte(x, y, info, fgcolor, bgcolor);
     }
     else 
-#endif
     {
         return  Screen_PrintFont_By_Bit(x, y, info, fgcolor, bgcolor);
     }

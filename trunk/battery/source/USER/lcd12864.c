@@ -283,29 +283,10 @@ void putpixel(unsigned char x, unsigned char y, unsigned char pixel_mode)
 }
 
 
-
-T_SCREEN_PIXEL XLCD_DRAW_FONT_BY_BYTE(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struct UICOM_1PP_BMP_INFO *info, enum PIXEL_COLOR fgcolor, enum PIXEL_COLOR bgcolor)
+void XLCD_SET_BYTE(T_SCREEN_PIXEL col, T_SCREEN_PIXEL row, u_int8 data)
 {
-    T_SCREEN_PIXEL i, j,rowCnt, col, row;
-
-    rowCnt = info->height/8;
-    row = Y_PIXLE_TO_ROW(y);
-    for(j=0; j<rowCnt; j++)
-    {
-        col = x;
-        for(i=0; i<info->width; i++)
-        {
-            if (LCD_POS_IS_INVALID(col, j+y))
-            {
-                break;
-            }
-            DEV_LCD_CS(col);
-            DEV_LCD_SET_DATA(X_PIXLE_TO_COL(col), row + j, info->data[info->width*j + i]);
-            col++;
-        }
-    }
-
-    return info->width;
+    DEV_LCD_CS(col);
+    DEV_LCD_SET_DATA(X_PIXLE_TO_COL(col), row , data);
 }
 
 void printSmall(unsigned char x,unsigned char y)

@@ -67,9 +67,11 @@ void Screen_PrintCursor(struct OSD_ZONE *zone, T_SCREEN_PIXEL_ATTR attr);
 void Screen_PrintString(struct SCREEN_ZONE *rect, u_int8 *str, T_SCREEN_PIXEL_ATTR attr);
 void Screen_PrintBmp(struct SCREEN_ZONE *rect, u_int8 *data, T_SCREEN_PIXEL_ATTR attr);
 void Screen_PrintClear(struct SCREEN_ZONE *rect);
+void Screen_Print_8Bit_V(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, u_int8 data, enum PIXEL_COLOR fgcolor, enum PIXEL_COLOR bgcolor);
 
 T_SCREEN_PIXEL Screen_PrintFont(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struct UICOM_1PP_BMP_INFO *info, enum PIXEL_COLOR fgcolor, enum PIXEL_COLOR bgcolor);
 T_SCREEN_PIXEL Screen_PrintFont_By_Bit(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struct UICOM_1PP_BMP_INFO *info, enum PIXEL_COLOR fgcolor, enum PIXEL_COLOR bgcolor);
+T_SCREEN_PIXEL Screen_PrintFont_By_Byte(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struct UICOM_1PP_BMP_INFO *info, enum PIXEL_COLOR fgcolor, enum PIXEL_COLOR bgcolor);
 
 #ifdef __cplusplus
 }
