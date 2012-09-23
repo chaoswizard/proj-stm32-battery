@@ -22,6 +22,13 @@ extern "C" {
 #define SMNODE_IS_VALID(v)        ((v) > SM_INVALID_NODE)
 #define SMNODE_IS_INVALID(v)      ((v) == SM_INVALID_NODE)
 
+//MUST exit current node 
+#define SM_EXIT_CUR      (0x01)
+//if new node exist ,MUST exit old node 
+#define SM_EXIT_NEW      (0x02)
+//New Node MUST exit  when Trans Next 
+#define SM_HOLD_NEW      (0x04)
+
 typedef u_int8  SM_NODE_HANDLE;
 typedef u_int8  SM_NODE_COUNT;
 
@@ -58,7 +65,7 @@ handle_t SmMgr_Open(struct SMMGR_INIT_PARAM *initParam);
 void SmMgr_Close(handle_t handle);
 SM_NODE_HANDLE SmMgr_Proc(handle_t handle, void *param);
 SM_NODE_HANDLE SmMgr_Return(handle_t handle, SM_NODE_COUNT retLvl);
-SM_NODE_HANDLE SmMgr_Trans(handle_t handle, SM_NODE_HANDLE newNode, u_int8 quitIfSameCur);
+u_int8 SmMgr_Trans(handle_t handle, SM_NODE_HANDLE newNode, u_int8 quitIfSameCur);
 SM_NODE_HANDLE SmMgr_GetCurrent(handle_t handle);
 SM_NODE_HANDLE SmMgr_GetParent(handle_t handle);
 void SmMgr_RegSuspend(handle_t handle, void (*suspend)(SM_NODE_HANDLE me, SM_NODE_HANDLE child));

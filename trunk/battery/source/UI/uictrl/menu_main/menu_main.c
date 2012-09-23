@@ -1,23 +1,21 @@
 #include "uimmi_ctrl.h"
 #include "gui_menu_item.h"
 
-#define THIS_MENU_NAME  "MainFace"
-//"主工作界面"
+#define THIS_MENU_NAME  "主工作界面"
+//"MainFace"
 
 #define  MAINMENU_TAB_ROW_NUM   6
 #define  MAINMENU_TAB_COL_NUM   4
 
-#define MAINMENU_TAB_ORIGN_X   (0)
-#define MAINMENU_TAB_ORIGN_Y   (0)
-#define MAINMENU_TAB_W         MAIN_LCD_WIDTH
-#define MAINMENU_TAB_H         MAIN_LCD_HEIGHT
+#define MAINMENU_TAB_ORIGN_X   (1)
+#define MAINMENU_TAB_ORIGN_Y   (1)
+#define MAINMENU_TAB_W         126
 
 
 #define MAINMENU_TAB_COL_H          10
-#define MAINMENU_TAB_COL_W          (MAINMENU_TAB_W/MAINMENU_TAB_COL_NUM)
 #define MAINMENU_TAB_COL0_W         28
 #define MAINMENU_TAB_COL1_W         32
-#define MAINMENU_TAB_COL2_W         28
+#define MAINMENU_TAB_COL2_W         32
 #define MAINMENU_TAB_COL3_W         32
 
 static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
@@ -82,7 +80,7 @@ static void mainmenu_cell_zone_init(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT row
             zone->zone.x = (MAINMENU_TAB_ORIGN_X + MAINMENU_TAB_COL0_W + MAINMENU_TAB_COL1_W + MAINMENU_TAB_COL2_W);
             break;
         default:
-            cellWidth = MAINMENU_TAB_COL_W;
+            cellWidth = 1;
             break;
     }
 
@@ -125,16 +123,16 @@ static u_int8 mainmenu_cell_data_init(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_
     if (0 == col)
     {
         UICOM_DATA_TEXT_INIT(item, NULL, TEXT_SMALL_BLACK);
-        sprintf(strbuf, "04%d", gCurStartChNum+row);
+        sprintf(strbuf, "%04d", gCurStartChNum+row);
     }
     else if (1 == col)
     {
         UICOM_DATA_TEXT_INIT(item, NULL, TEXT_SMALL_BLACK);
-        sprintf(strbuf, "%d.%d", row, col);
+        sprintf(strbuf, "%03d.%d", row+gCurStartChNum, col);
     }
     else if (2 == col)
     {
-        if (row % 2)
+        if (((row)% 2) && (gCurStartChNum%9))
         {
             UICOM_DATA_TEXT_INIT(item, UICOM_STR_FANGDIANZHONG, TEXT_SMALL_BLACK);
         }
@@ -145,7 +143,7 @@ static u_int8 mainmenu_cell_data_init(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_
     }
     else if (3 == col)
     {
-        if (row % 2)
+        if (((row)% 2) && (gCurStartChNum%7))
         {
             UICOM_DATA_TEXT_INIT(item, UICOM_STR_QIYONG, TEXT_SMALL_BLACK);
         }
@@ -180,24 +178,20 @@ static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
 
 static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 {
+    ui_mmi_debug_handle(THIS_MENU_NAME, me, e);
+    
     if (MSG_IS_ENTRY(e->sig))
     {
+        Screen_PrintClear(NULL);
         menu_main_paint(0);
     }
     
     switch (e->sig)
     {
-        case EVENT_KEY_NUM_1:
+        case EVENT_KEY_NUM_0:
             gCurStartChNum += 4;
             menu_main_paint(1);
             break;
-        case EVENT_KEY_NUM_2:
-            ui_mmi_enter(UI_NODE_STOPMENU, 0);
-            break;
-        case EVENT_KEY_NUM_3:
-            ui_mmi_enter(UI_NODE_SETUPOPT, 0);
-            break;
-            
         default:
             break;
         

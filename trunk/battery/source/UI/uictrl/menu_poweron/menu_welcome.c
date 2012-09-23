@@ -2,8 +2,8 @@
 #include "gui_menu_item.h"
 
 
-#define THIS_MENU_NAME   "Welcome"
-//"»¶Ó­"
+#define THIS_MENU_NAME   "»¶Ó­"
+//"Welcome"
 static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
 static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
 static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next);
@@ -15,8 +15,8 @@ DEFINE_SM_NODE_MAP(gMenuWelcome,
 
 
 //==========================================================
-#define WECLCOME_GONGSI_1_X  7
-#define WECLCOME_GONGSI_1_Y  16
+#define WECLCOME_GONGSI_1_X  2
+#define WECLCOME_GONGSI_1_Y  7
 #define WECLCOME_GONGSI_1_W  120
 #define WECLCOME_GONGSI_1_H  16
 
@@ -36,7 +36,6 @@ static void  menu_welcome_paint(void)
 {
     struct SCREEN_ZONE rect;
     
-    gmenu_win_clear(NULL);
     
     SCREEN_ZONE_INIT(&rect, WECLCOME_GONGSI_1_X, WECLCOME_GONGSI_1_Y, WECLCOME_GONGSI_1_W, WECLCOME_GONGSI_1_H);
     Screen_PrintString(&rect, UICOM_STR_GONGSIMING0, TEXT_BIG_BLACK);
@@ -75,6 +74,7 @@ static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 
     if (MSG_IS_ENTRY(e->sig))
     {
+        Screen_PrintClear(NULL);
         menu_welcome_paint();
     }
 }

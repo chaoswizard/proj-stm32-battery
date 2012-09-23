@@ -12,7 +12,7 @@ struct SM_MGR_CTRL {
 static struct SM_MGR_CTRL gSmMgrInstance;
 
 static struct SM_NODE_PROC_TAB *SmMgr_GetFuncTab(struct SM_MGR_CTRL *pCtrl, SM_NODE_HANDLE Node);
-static SM_NODE_HANDLE SmMgr_Pop(struct SM_MGR_CTRL *pCtrl, u_int8 isResume);
+static SM_NODE_COUNT SmMgr_Pop(struct SM_MGR_CTRL *pCtrl, u_int8 isResume);
 static SM_NODE_COUNT SmMgr_Push(struct SM_MGR_CTRL *pCtrl, SM_NODE_HANDLE newNode, u_int8 suspendCur);
 
 u_int8 SmMgr_IsInHistory(handle_t handle, SM_NODE_HANDLE name)
@@ -117,7 +117,7 @@ static SM_NODE_COUNT SmMgr_Push(struct SM_MGR_CTRL *pCtrl, SM_NODE_HANDLE newNod
     return pCtrl->currentIdx;
 }
 
-static SM_NODE_HANDLE SmMgr_Pop(struct SM_MGR_CTRL *pCtrl, u_int8 isResume)
+static SM_NODE_COUNT SmMgr_Pop(struct SM_MGR_CTRL *pCtrl, u_int8 isResume)
 {
     struct SM_NODE_PROC_TAB *tab;
     struct SM_NODE_ITEM  *me, *next;
@@ -243,13 +243,15 @@ SM_NODE_HANDLE SmMgr_Return(handle_t handle, SM_NODE_COUNT retLvl)
     return SmMgr_GetCurrent(handle);
 }
 
-SM_NODE_HANDLE SmMgr_Trans(handle_t handle, SM_NODE_HANDLE newNode, u_int8 quitIfSameCur)
+//Trans SM node By User ruler
+u_int8 SmMgr_Trans(handle_t handle, SM_NODE_HANDLE newNode, u_int8 flag)
 {
     struct SM_MGR_CTRL *pCtrl = (struct SM_MGR_CTRL *)handle;
     SM_NODE_HANDLE curNode;
+    u_int8 transFlag;
     u_int8 isSuspendCur;
 
-    //if new node  has pushed , need pop child node
+    //if new node  has pushed , need pop child node(MUST pop pre OLD node)
     if (SmMgr_IsInHistory(handle, newNode))
     {
         while (1)
@@ -266,17 +268,19 @@ SM_NODE_HANDLE SmMgr_Trans(handle_t handle, SM_NODE_HANDLE newNode, u_int8 quitI
             }
          }
     }
-    
-    if (SmMgr_GetCurrent(handle) == newNode)
+
+    transFlag = 0;
+    if ((SmMgr_GetCurrent(handle) == newNode) || (SM_EXIT_CUR & flag))
     {
-        if (quitIfSameCur)
+        if ((SM_EXIT_NEW |SM_EXIT_CUR )& flag)
         {
             SmMgr_Pop(pCtrl, 0);//close and reopen
             isSuspendCur = 0;
+            transFlag |= SM_EXIT_NEW;
         }
         else
         {
-            return SmMgr_GetCurrent(handle);// is current is same, just entry again
+            return transFlag;
         }
     }
     else
@@ -286,6 +290,6 @@ SM_NODE_HANDLE SmMgr_Trans(handle_t handle, SM_NODE_HANDLE newNode, u_int8 quitI
     
     SmMgr_Push(pCtrl, newNode, isSuspendCur);
 
-    return SmMgr_GetCurrent(handle);
+    return transFlag;
 }
 

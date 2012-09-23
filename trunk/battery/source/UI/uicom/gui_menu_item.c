@@ -31,11 +31,6 @@ void gmenu_item_clear(PGUI_MENU_ITEM item)
         }
     }
 }
-
-void gmenu_win_clear(struct SCREEN_ZONE *win)
-{
-    Screen_PrintClear(win);
-}
 //==========================================================
 void gmenu_list_item_draw(struct GMENU_ITEM_LIST *list, u_int8 pos, enum OSD_OBJ_DRAW_TYPE type)
 {

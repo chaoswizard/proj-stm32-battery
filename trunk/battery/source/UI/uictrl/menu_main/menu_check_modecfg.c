@@ -1,7 +1,7 @@
 #include "uimmi_ctrl.h"
 
-#define THIS_MENU_NAME   "MonitorModeCfg"
-//"监测模式设置选项"
+#define THIS_MENU_NAME   "监测模式设置选项"
+//"MonitorModeCfg"
 
 static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
 static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);

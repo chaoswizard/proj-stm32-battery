@@ -286,7 +286,7 @@ void putpixel(unsigned char x, unsigned char y, unsigned char pixel_mode)
 void XLCD_SET_BYTE(T_SCREEN_PIXEL col, T_SCREEN_PIXEL row, u_int8 data)
 {
     DEV_LCD_CS(col);
-    DEV_LCD_SET_DATA(X_PIXLE_TO_COL(col), row , data);
+    DEV_LCD_SET_DATA(X_PIXLE_TO_COL(col), Y_PIXLE_TO_ROW(row) , data);
 }
 
 void printSmall(unsigned char x,unsigned char y)

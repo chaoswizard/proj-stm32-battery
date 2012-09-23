@@ -44,7 +44,6 @@ enum ITEM_INIT_STATUS{
     PAINT_STATUS_SKIP_DATA,
 };
 void gmenu_item_draw(PGUI_MENU_ITEM item,  enum OSD_OBJ_DRAW_TYPE type);
-void gmenu_win_clear(struct SCREEN_ZONE *win);
 void gmenu_item_clear(PGUI_MENU_ITEM item);
 
 //==========================================================

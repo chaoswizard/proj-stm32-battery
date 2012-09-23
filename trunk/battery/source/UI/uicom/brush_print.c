@@ -201,6 +201,7 @@ void Screen_PrintBmp(struct SCREEN_ZONE *rect, u_int8 *data, T_SCREEN_PIXEL_ATTR
 void Screen_Print_8Bit_V(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, u_int8 data, enum PIXEL_COLOR fgcolor, enum PIXEL_COLOR bgcolor)
 {
     T_SCREEN_PIXEL i;
+    
     for (i=0;i<8;i++)
     {
         if (data &(1<< i))
@@ -218,21 +219,26 @@ void Screen_Print_8Bit_V(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, u_int8 data, enum P
   
 T_SCREEN_PIXEL Screen_PrintFont_By_Byte(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, struct UICOM_1PP_BMP_INFO *info, enum PIXEL_COLOR fgcolor, enum PIXEL_COLOR bgcolor)
 {
-    T_SCREEN_PIXEL i, j,rowCnt, col, row;
+    T_SCREEN_PIXEL i, j,k,rowCnt, col, row;
+
 
     rowCnt = info->height/8;
-    row = y/8;
+
+    //MY_DEBUG("\n|FONT|(%d,%d)[%dx%d]_%d_[%d]\n", 
+   //       x,y,info->width,info->height,info->size, rowCnt);
+    
     for(j=0; j<rowCnt; j++)
     {
         col = x;
+        row = y + (j*8);
+        k = info->width*j;
         for(i=0; i<info->width; i++)
         {
-            if (SCREEN_POS_IS_INVALID(col, j+y))
+            if (SCREEN_POS_IS_INVALID(col, row))
             {
                 break;
             }
-            SCREEN_SET_BYTE(col, row + j, info->data[info->width*j + i], fgcolor, bgcolor);
-            
+            SCREEN_SET_BYTE(col, row, info->data[k + i], fgcolor, bgcolor);
             col++;
         }
     }

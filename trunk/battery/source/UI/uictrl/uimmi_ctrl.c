@@ -158,7 +158,7 @@ void ui_mmi_reg_resume(void (*resume)(SM_NODE_HANDLE child, SM_NODE_HANDLE me))
 
 static u_int8 ui_mmi_bypass_proc(struct EVENT_NODE_ITEM *e)
 {
-    u_int8 ret = 0, flag = 0;
+    u_int8 ret = 0;
     
     if (MSG_IS_SYS(e->sig))
     {
@@ -177,43 +177,31 @@ static u_int8 ui_mmi_bypass_proc(struct EVENT_NODE_ITEM *e)
     {
         union SM_EVENT_PARAM *smEvt = (union SM_EVENT_PARAM *)&(e->param);
         struct EVENT_NODE_ITEM ne;
-        SM_NODE_HANDLE  node;
         
         switch (e->sig)
         {
         case EVENT_SM_TRANS:
             if (SMNODE_IS_VALID(smEvt->trans.target))
             {
-                flag = SmMgr_IsInHistory(gUiMmiCtrl->smHandle, smEvt->trans.target);
-                node = SmMgr_Trans(gUiMmiCtrl->smHandle, smEvt->trans.target, smEvt->trans.quitCurrent);
-                // trans sm node, and trans successuful
-                if (SMNODE_IS_VALID(node) && (node == smEvt->trans.target))
-                {
-                    if ((!flag) || (flag && (smEvt->trans.quitCurrent)))// new state first trans or close then reopen
+                // new state first trans or close then reopen
+                if (SM_EXIT_NEW  & SmMgr_Trans(gUiMmiCtrl->smHandle, smEvt->trans.target, 
+                                                (smEvt->trans.quitCurrent)?SM_EXIT_CUR:0))
                     {
                         ne.sig = EVENT_SM_INIT;
                         ui_mmi_send_msg(&ne);
                     }
-                    flag = 1;
-                }
-                else
-                {
-                    MY_DEBUG("\nSys Trans Failed.\n");
-                    flag = 0;
-                }
             }
             ret = 1;
             break;
         case EVENT_SM_RETURN:
             SmMgr_Return(gUiMmiCtrl->smHandle, smEvt->ret.retLvl);
             ret = 1;
-            flag = 1;
             break;
         default:
             break;
         } 
 
-        if (flag && SMNODE_IS_VALID(SmMgr_GetCurrent(gUiMmiCtrl->smHandle)))
+        if (ret && SMNODE_IS_VALID(SmMgr_GetCurrent(gUiMmiCtrl->smHandle)))
         {
             ne.sig = EVENT_SM_ENTRY;
             ui_mmi_send_msg(&ne);
@@ -374,46 +362,39 @@ void ui_mmi_debug_handle(char *nameStr, SM_NODE_HANDLE me, struct EVENT_NODE_ITE
     switch (e->sig)
     {
         case EVENT_KEY_STOP:
-            ui_mmi_enter(UI_NODE_STOPMENU, 0);
+            ui_mmi_enter(UI_NODE_STOPMENU, 1);
             break;
         
         case EVENT_KEY_OK:
-            ui_mmi_enter(UI_NODE_WELCOME, 0);
+            ui_mmi_enter(UI_NODE_WELCOME, 1);
             break;
         case EVENT_KEY_NUM_1:
-            ui_mmi_enter(UI_NODE_MAINMENU, 0);
-            break;
-        case EVENT_KEY_NUM_2:
-            ui_mmi_enter(UI_NODE_CHECKSEUP, 0);
-            break;
-        case EVENT_KEY_NUM_3:
-            ui_mmi_enter(UI_NODE_SEARCHOPT, 0);
-            break;
-        case EVENT_KEY_NUM_4:
-            ui_mmi_enter(UI_NODE_SETUPOPT, 0);
-            break;
-        case EVENT_KEY_NUM_5:
-            ui_mmi_enter(UI_NODE_CHSWITCH, 0);
-            break;
-        case EVENT_KEY_NUM_6:
-            ui_mmi_enter(UI_NODE_STOPMENU, 0);
-            break;
-        case EVENT_KEY_NUM_7:
             ui_mmi_enter(UI_NODE_MAINMENU, 1);
             break;
-        case EVENT_KEY_NUM_8:
+        case EVENT_KEY_NUM_2:
             ui_mmi_enter(UI_NODE_CHECKSEUP, 1);
             break;
-            
-        case EVENT_KEY_NUM_9:
+        case EVENT_KEY_NUM_3:
             ui_mmi_enter(UI_NODE_SEARCHOPT, 1);
+            break;
+        case EVENT_KEY_NUM_4:
+            ui_mmi_enter(UI_NODE_SETUPOPT, 1);
+            break;
+        case EVENT_KEY_NUM_5:
+            ui_mmi_enter(UI_NODE_CHSWITCH, 1);
+            break;
+        case EVENT_KEY_NUM_6:
+            ui_mmi_enter(UI_NODE_STOPMENU, 1);
+            break;
+        case EVENT_KEY_NUM_7:
+            break;
+        case EVENT_KEY_NUM_8:
+            break;
+        case EVENT_KEY_NUM_9:
             break;
             
         case EVENT_KEY_SUB:
             ui_mmi_return(1);
-            break;
-        case EVENT_KEY_NUM_0:
-            ui_mmi_return(3);
             break;
         default:
             break;
