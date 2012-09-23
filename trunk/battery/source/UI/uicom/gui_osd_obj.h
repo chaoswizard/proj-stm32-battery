@@ -100,7 +100,7 @@ struct OSD_OBJ_CONTENT_INFO text = \
 #define LDEF_OSD_TEXT(text, x, y, w, h)   \
     static DEF_OSD_TEXT(text, x, y, w, h)
 
-#define OSD_TEXT_INIT(text, str)   UICOM_DATA_TEXT_INIT((&((text)->content)), str)
+#define OSD_TEXT_INIT(text, str)   UICOM_DATA_FILL((&((text)->content)), str)
 
 #define DEF_OSD_EDIT_TEXT(text, x, y, w, h)   \
 struct OSD_OBJ_CONTENT_INFO text = \
@@ -125,7 +125,7 @@ struct OSD_OBJ_BUTTON_INFO button = \
 #define LDEF_OSD_BUTTON_TEXT(button, x, y, w, h, text, attr)   \
     static DEF_OSD_BUTTON_TEXT(button, x, y, w, h, text, attr)
 
-#define OSD_BUTTON_TEXT_SET(button, str)   UICOM_DATA_TEXT_INIT((&((button)->content)), str)
+#define OSD_BUTTON_TEXT_SET(button, str)   UICOM_DATA_FILL((&((button)->content)), str)
 //----------------------------------------------------------------------
 #define DEF_OSD_BUTTON_PIC(button, x, y, w, h, text, attr)   \
 struct OSD_OBJ_BUTTON_INFO button = \
@@ -138,7 +138,6 @@ struct OSD_OBJ_BUTTON_INFO button = \
 #define LDEF_OSD_BUTTON_PIC(button, x, y, w, h, text, attr)   \
     static DEF_OSD_BUTTON_PIC(button, x, y, w, h, text, attr)
 
-#define OSD_BUTTON_PIC_INIT(button, bmp)   UICOM_DATA_PIC_INIT((&((button)->content)), bmp)
 //==========================================================
 void gui_osd_obj_draw(POSD_OBJ_HEAD obj, enum OSD_OBJ_DRAW_TYPE drawType);
 void gui_osd_obj_clear(POSD_OBJ_HEAD obj);

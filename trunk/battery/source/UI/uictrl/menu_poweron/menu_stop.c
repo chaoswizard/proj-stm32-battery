@@ -21,13 +21,14 @@ DEFINE_SM_NODE_MAP(gMenuStopCheck,
 #define STOPTAB_CELL_H  12
 #define STOPTAB_X(x)   (x+1)
 #define STOPTAB_Y(y)   ((y*(STOPTAB_CELL_H+2))+4)
+#define STOPTAB_YY(y)   (STOPTAB_Y(y)+2)
 static void stopmenu_cell_zone_init(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col)
 {
     struct SCREEN_ZONE cellPosTable[STOPMENU_TAB_ROW_NUM][STOPMENU_TAB_COL_NUM] = {
         {{STOPTAB_X(0),STOPTAB_Y(0),  61,STOPTAB_CELL_H},{STOPTAB_X(63),STOPTAB_Y(0), 61,STOPTAB_CELL_H}},
         {{STOPTAB_X(0),STOPTAB_Y(1), 61,STOPTAB_CELL_H},{STOPTAB_X(63),STOPTAB_Y(1), 61,STOPTAB_CELL_H}},
         {{STOPTAB_X(0),STOPTAB_Y(2), 61,STOPTAB_CELL_H},{STOPTAB_X(63),STOPTAB_Y(2), 61,STOPTAB_CELL_H}},
-        {{STOPTAB_X(15),STOPTAB_Y(3), 30,STOPTAB_CELL_H},{STOPTAB_X(63+15),STOPTAB_Y(3), 30,STOPTAB_CELL_H}},
+        {{STOPTAB_X(15),STOPTAB_YY(3), 30,STOPTAB_CELL_H},{STOPTAB_X(63+15),STOPTAB_YY(3), 30,STOPTAB_CELL_H}},
     };
     
     zone->border.l = 1;
@@ -39,7 +40,7 @@ static void stopmenu_cell_zone_init(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT row
 }
 
 
-static u_int8 stopmenu_cell_data_init(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col);
+static u_int8 stopmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum OSD_OBJ_DRAW_TYPE type);
 LDEF_MENU_CONTENT_TAB(gStopMenuTable, stopmenu_cell_zone_init, stopmenu_cell_data_init);
   
 static void stop_main_paint(u_int8 isClear)
@@ -52,25 +53,27 @@ static void stop_main_paint(u_int8 isClear)
 }
 
 
-static u_int8 stopmenu_cell_data_init(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col)
+static u_int8 stopmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum OSD_OBJ_DRAW_TYPE type)
 {
+    zone->x = 2;
+    zone->y = 3;
+    UICOM_DATA_TEXT_ATTR(item, TEXT_SMALL_BLACK);
     if (0 == col)
     {
         switch (row)
         {
             case 0:// 已检测产品数量
-                UICOM_DATA_TEXT_INIT(item, NULL, TEXT_SMALL_BLACK);
-                sprintf(strbuf, "%s %d", UICOM_STR_YIJIANCESHULIANF, 80);
+                sprintf(UICOM_DATA_BUF(item), "%s %d", UICOM_STR_YIJIANCESHULIANF, 80);
                 break;
             case 1://合格率
-                UICOM_DATA_TEXT_INIT(item, NULL, TEXT_SMALL_BLACK);
-                sprintf(strbuf, "%s %d%%", UICOM_STR_HEGELV, 100);
+                sprintf(UICOM_DATA_BUF(item), "%s %d%%", UICOM_STR_HEGELV, 100);
                 break;
             case 2://选项设置 
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_XUANXIANGSHEZHI, TEXT_SMALL_BLACK);
+                UICOM_DATA_FILL(item, UICOM_STR_XUANXIANGSHEZHI);
                 break;
             case 3://确认 
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_QUEREN, TEXT_SMALL_BLACK);
+                UICOM_DATA_FILL(item, UICOM_STR_QUEREN);
+                zone->x += 6;
                 break;
             default:
                 break;
@@ -82,24 +85,24 @@ static u_int8 stopmenu_cell_data_init(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_
         switch (row)
         {
             case 0:// 合格数
-                UICOM_DATA_TEXT_INIT(item, NULL, TEXT_SMALL_BLACK);
-                sprintf(strbuf, "%s %d", UICOM_STR_HEGESHU, 80);
+                sprintf(UICOM_DATA_BUF(item), "%s %d", UICOM_STR_HEGESHU, 80);
                 break;
             case 1://存储数据分组计数值清零
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_JISHUZHIQINGLING, TEXT_SMALL_BLACK);
+                UICOM_DATA_FILL(item, UICOM_STR_JISHUZHIQINGLING);
                 break;
             case 2://串口输出结果
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_CHUANKOUSHUCHU, TEXT_SMALL_BLACK);
+                UICOM_DATA_FILL(item, UICOM_STR_CHUANKOUSHUCHU);
                 break;
             case 3://取消 
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_QUXIAO, TEXT_SMALL_BLACK);
+                UICOM_DATA_FILL(item, UICOM_STR_QUXIAO);
+                zone->x += 4;
                 break;
             default:
                 break;
         }
     }
     
-    return ITEM_STATUS_NORMAL; 
+    return PAINT_STATUS_NORMAL; 
 }
 
 

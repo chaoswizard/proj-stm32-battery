@@ -615,6 +615,21 @@
               <FileType>1</FileType>
               <FilePath>..\UI\uictrl\menu_main\menu_setupoption.c</FilePath>
             </File>
+            <File>
+              <FileName>menu_pop_inputbox.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\UI\uictrl\menu_poweron\menu_pop_inputbox.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu_pop_yesno.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\UI\uictrl\menu_poweron\menu_pop_yesno.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu_store_option.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\UI\uictrl\menu_main\menu_store_option.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

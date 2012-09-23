@@ -42,6 +42,10 @@ struct SCREEN_ZONE {
     (zone)->x = xx;(zone)->y = yy;(zone)->w = ww;(zone)->h = hh;\
 }
 
+#define SCREEN_BORDER_INIT(border, ll, tt, rr, bb) {\
+    (border)->l = ll;(border)->t = tt;(border)->r = rr;(border)->b = bb;\
+}
+
 struct RECT_BORDER {
     T_SCREEN_PIXEL_ATTR l; // left
     T_SCREEN_PIXEL_ATTR t; // top

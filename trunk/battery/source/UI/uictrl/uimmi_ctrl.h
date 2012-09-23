@@ -20,6 +20,9 @@ enum UI_NODE_NAME {
    UI_NODE_SEARCHOPT,/*<0><X><1><2> 查询选项edittext[2] + button[2]*/
    UI_NODE_SETUPOPT,/*<0><X><1><3> 设置选项edittext[2] + button[2]*/
    UI_NODE_CHSWITCH,/*<0><X><1><3> 通道切换选择list[4][4] + button[2] + tips[1]*/
+   UI_NODE_SAVEOPT,/*存储选项设置菜单*/
+   UI_NODE_POP_INPUTBOX,/*输入框*/
+   UI_NODE_POP_YESORNO,/*确认框*/
 } ;
 
 

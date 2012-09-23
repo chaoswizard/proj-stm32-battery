@@ -27,7 +27,7 @@ DEFINE_SM_NODE_MAP(gMenuMain,
                                   menu_pub_handle,
                                   menu_pub_exit);
 
-static u_int8 mainmenu_cell_data_init(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col);
+static u_int8 mainmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum OSD_OBJ_DRAW_TYPE type);
 static void mainmenu_cell_zone_init(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col);
 
 static u_int8 gCurStartChNum = 0;
@@ -90,70 +90,72 @@ static void mainmenu_cell_zone_init(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT row
     
 }
 
-static u_int8 mainmenu_cell_data_init(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col)
+static u_int8 mainmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum OSD_OBJ_DRAW_TYPE type)
 {
+    zone->x = 2;
+    zone->y = 2;
+
+    UICOM_DATA_TEXT_ATTR(item, TEXT_SMALL_BLACK)
     if (0 == row)
     {
         if (0 != gCurStartChNum)//是否非第一次绘制
         {
-            //return PAINT_STATUS_SKIP_ALL;
+            //return PAINT_STATUS_NULL;
         }
         
         switch (col)
         {
             case 0:// 序号
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_XUHAO, TEXT_SMALL_BLACK);
+                UICOM_DATA_FILL(item, UICOM_STR_XUHAO);
                 break;
             case 1://当前值
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_DANGQIANZHI, TEXT_SMALL_BLACK);
+                UICOM_DATA_FILL(item, UICOM_STR_DANGQIANZHI);
                 break;
             case 2://工作状态 
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_GONGZUOZHUANGTAI, TEXT_SMALL_BLACK);
+                UICOM_DATA_FILL(item, UICOM_STR_GONGZUOZHUANGTAI);
                 break;
             case 3://通道切换
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_TONGDAOQIEHUAN, TEXT_SMALL_BLACK);
+                UICOM_DATA_FILL(item, UICOM_STR_TONGDAOQIEHUAN);
                 break;
             default:
                 break;
         }
-        return ITEM_STATUS_NORMAL; 
+        return PAINT_STATUS_NORMAL; 
     }
 
     //===========非首行============
     if (0 == col)
     {
-        UICOM_DATA_TEXT_INIT(item, NULL, TEXT_SMALL_BLACK);
-        sprintf(strbuf, "%04d", gCurStartChNum+row);
+        sprintf(UICOM_DATA_BUF(item), "%04d", gCurStartChNum+row);
     }
     else if (1 == col)
     {
-        UICOM_DATA_TEXT_INIT(item, NULL, TEXT_SMALL_BLACK);
-        sprintf(strbuf, "%03d.%d", row+gCurStartChNum, col);
+        sprintf(UICOM_DATA_BUF(item), "%03d.%d", row+gCurStartChNum, col);
     }
     else if (2 == col)
     {
         if (((row)% 2) && (gCurStartChNum%9))
         {
-            UICOM_DATA_TEXT_INIT(item, UICOM_STR_FANGDIANZHONG, TEXT_SMALL_BLACK);
+            UICOM_DATA_FILL(item, UICOM_STR_FANGDIANZHONG);
         }
         else
         {
-            UICOM_DATA_TEXT_INIT(item, UICOM_STR_FANGDIANJIESHU, TEXT_SMALL_BLACK);
+            UICOM_DATA_FILL(item, UICOM_STR_FANGDIANJIESHU);
         }
     }
     else if (3 == col)
     {
         if (((row)% 2) && (gCurStartChNum%7))
         {
-            UICOM_DATA_TEXT_INIT(item, UICOM_STR_QIYONG, TEXT_SMALL_BLACK);
+            UICOM_DATA_FILL(item, UICOM_STR_QIYONG);
         }
         else
         {
-            UICOM_DATA_TEXT_INIT(item, UICOM_STR_TINGYONG, TEXT_SMALL_BLACK);
+            UICOM_DATA_FILL(item, UICOM_STR_TINGYONG);
         }
     }
     
-    return ITEM_STATUS_NORMAL; 
+    return PAINT_STATUS_NORMAL; 
 }
 
 

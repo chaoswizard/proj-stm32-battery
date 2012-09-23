@@ -48,21 +48,24 @@ enum {
 #define TEXT_ATTR_COLOR_FG(attr)            (((attr)>>5)&0x7)
 
 
-#define TEXT_SMALL_BLACK                TEXT_ATTR(FONT_SIZE_SMALL, PIXEL_MODE_CLEAR, PIXEL_MODE_SET)
+#define TEXT_SMALL_BLACK              TEXT_ATTR(FONT_SIZE_SMALL, PIXEL_MODE_CLEAR, PIXEL_MODE_SET)
 #define TEXT_BIG_BLACK                TEXT_ATTR(FONT_SIZE_NORMAL, PIXEL_MODE_CLEAR, PIXEL_MODE_SET)
 
+#define UICOM_DATA_BUF(c)   ((struct UICOM_DATA *)(c))->data
 
-#define UICOM_DATA_TEXT_INIT(c, text, attrib)     {\
+#define UICOM_DATA_FILL(c, strm)     {\
+    ((struct UICOM_DATA *)(c))->data  = strm;\
+}
+
+#define UICOM_DATA_TEXT_ATTR(c, attrib)     {\
     ((struct UICOM_DATA *)(c))->type  = UICOM_DATA_TYPE_TEXT;\
     ((struct UICOM_DATA *)(c))->attr  = attrib;\
-    ((struct UICOM_DATA *)(c))->data  = text;\
 }
 
 
-#define UICOM_DATA_PIC_INIT(c, pic, attrib)     {\
+#define UICOM_DATA_PIC_ATTR(c, attrib)     {\
     ((struct UICOM_DATA *)(c))->type  = UICOM_DATA_TYPE_PICTURE;\
     ((struct UICOM_DATA *)(c))->attr  = attrib;\
-    ((struct UICOM_DATA *)(c))->data  = pic;\
 }
 
 struct UICOM_DATA {

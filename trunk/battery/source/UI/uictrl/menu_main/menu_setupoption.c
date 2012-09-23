@@ -20,13 +20,14 @@ DEFINE_SM_NODE_MAP(gMenuSetupOption,
 #define SETUPOPTTAB_CELL_H  12
 #define SETUPOPTTAB_X(x)   (x+1)
 #define SETUPOPTTAB_Y(y)   ((y*(SETUPOPTTAB_CELL_H+2))+4)
+#define SETUPOPTTAB_YY(y)   (SETUPOPTTAB_Y(y)+2)
 static void setupmenu_cell_zone_init(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col)
 {
     struct SCREEN_ZONE cellPosTable[SETUPMENU_TAB_ROW_NUM][SETUPMENU_TAB_COL_NUM] = {
         {{SETUPOPTTAB_X(0),SETUPOPTTAB_Y(0),  61,SETUPOPTTAB_CELL_H},{SETUPOPTTAB_X(63),SETUPOPTTAB_Y(0), 61,SETUPOPTTAB_CELL_H}},
         {{SETUPOPTTAB_X(0),SETUPOPTTAB_Y(1), 61,SETUPOPTTAB_CELL_H},{SETUPOPTTAB_X(63),SETUPOPTTAB_Y(1), 61,SETUPOPTTAB_CELL_H}},
         {{SETUPOPTTAB_X(0),SETUPOPTTAB_Y(2), 61,SETUPOPTTAB_CELL_H},{SETUPOPTTAB_X(63),SETUPOPTTAB_Y(2), 61,SETUPOPTTAB_CELL_H}},
-        {{SETUPOPTTAB_X(15),SETUPOPTTAB_Y(3), 30,SETUPOPTTAB_CELL_H},{SETUPOPTTAB_X(63+15),SETUPOPTTAB_Y(3), 30,SETUPOPTTAB_CELL_H}},
+        {{SETUPOPTTAB_X(15),SETUPOPTTAB_YY(3), 30,SETUPOPTTAB_CELL_H},{SETUPOPTTAB_X(63+15),SETUPOPTTAB_YY(3), 30,SETUPOPTTAB_CELL_H}},
     };
     
     zone->border.l = 1;
@@ -39,7 +40,7 @@ static void setupmenu_cell_zone_init(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT ro
 
 
 
-static u_int8 setupmenu_cell_data_init(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col);
+static u_int8 setupmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum OSD_OBJ_DRAW_TYPE type);
 
 
 
@@ -58,23 +59,28 @@ static void setupmenu_paint(u_int8 isClear)
 
 
 
-static u_int8 setupmenu_cell_data_init(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col)
+static u_int8 setupmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum OSD_OBJ_DRAW_TYPE type)
 {
+    zone->x = 2;
+    zone->y = 3;
+
+    UICOM_DATA_TEXT_ATTR(item, TEXT_SMALL_BLACK);
     if (0 == col)
     {
         switch (row)
         {
             case 0:// 模式设置
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_MOSHIXUANXAIN, TEXT_SMALL_BLACK);
+                UICOM_DATA_FILL(item, UICOM_STR_MOSHIXUANXAIN);
                 break;
             case 1://存储选项
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_CUNCHUXUANXIANG, TEXT_SMALL_BLACK);
+                UICOM_DATA_FILL(item, UICOM_STR_CUNCHUXUANXIANG);
                 break;
             case 2://还原出厂设置 
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_RESETFACTORY, TEXT_SMALL_BLACK);
+                UICOM_DATA_FILL(item, UICOM_STR_RESETFACTORY);
                 break;
             case 3://确认 
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_QUEREN, TEXT_SMALL_BLACK);
+                UICOM_DATA_FILL(item, UICOM_STR_QUEREN);
+                zone->x += 6;
                 break;
             default:
                 break;
@@ -86,23 +92,24 @@ static u_int8 setupmenu_cell_data_init(PUICOM_DATA item, u_int8 *strbuf, T_UICOM
         switch (row)
         {
             case 0:// 通道切换
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_TONGDAOQIEHUAN, TEXT_SMALL_BLACK);
+                UICOM_DATA_FILL(item, UICOM_STR_TONGDAOQIEHUAN);
                 break;
             case 1://查询选项
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_CHAXUNOPTION, TEXT_SMALL_BLACK);
+                UICOM_DATA_FILL(item, UICOM_STR_CHAXUNOPTION);
                 break;
             case 2://其他选项
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_QITAXUANXIANG, TEXT_SMALL_BLACK);
+                UICOM_DATA_FILL(item, UICOM_STR_QITAXUANXIANG);
                 break;
             case 3://取消 
-                UICOM_DATA_TEXT_INIT(item, UICOM_STR_QUXIAO, TEXT_SMALL_BLACK);
+                UICOM_DATA_FILL(item, UICOM_STR_QUXIAO);
+                zone->x += 4;
                 break;
             default:
                 break;
         }
     }
     
-    return ITEM_STATUS_NORMAL; 
+    return PAINT_STATUS_NORMAL; 
 }
 
 

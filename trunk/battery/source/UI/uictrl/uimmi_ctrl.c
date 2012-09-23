@@ -31,6 +31,11 @@ DECLARE_SM_NODE_MAP(gMenuCheckModeCfg);
 DECLARE_SM_NODE_MAP(gMenuSearchOption);
 DECLARE_SM_NODE_MAP(gMenuSetupOption);
 DECLARE_SM_NODE_MAP(gMenuChSwitch);
+DECLARE_SM_NODE_MAP(gStoreOptionSetupMenu);
+DECLARE_SM_NODE_MAP(gPopMenuInputBoxMenu);
+DECLARE_SM_NODE_MAP(gPopMenuYesOrNoMenu);
+
+
 
 static const struct SM_NODE_MAP  gFuncMapTab[] = {
     UI_NODE_WELCOME, &gMenuWelcome, 
@@ -41,6 +46,9 @@ static const struct SM_NODE_MAP  gFuncMapTab[] = {
     UI_NODE_CHSWITCH, &gMenuChSwitch, 
     UI_NODE_POWERON, &gMenu_PowerOn,
     UI_NODE_STOPMENU, &gMenuStopCheck,
+    UI_NODE_SAVEOPT, &gStoreOptionSetupMenu,
+    UI_NODE_POP_INPUTBOX, &gPopMenuInputBoxMenu,
+    UI_NODE_POP_YESORNO, &gPopMenuYesOrNoMenu,
 };
 
 
@@ -387,13 +395,15 @@ void ui_mmi_debug_handle(char *nameStr, SM_NODE_HANDLE me, struct EVENT_NODE_ITE
             ui_mmi_enter(UI_NODE_STOPMENU, 1);
             break;
         case EVENT_KEY_NUM_7:
+            ui_mmi_enter(UI_NODE_SAVEOPT, 1);
             break;
         case EVENT_KEY_NUM_8:
+            ui_mmi_enter(UI_NODE_POP_INPUTBOX, 0);
             break;
         case EVENT_KEY_NUM_9:
+            ui_mmi_enter(UI_NODE_POP_YESORNO, 0);
             break;
-            
-        case EVENT_KEY_SUB:
+            case EVENT_KEY_SUB:
             ui_mmi_return(1);
             break;
         default:

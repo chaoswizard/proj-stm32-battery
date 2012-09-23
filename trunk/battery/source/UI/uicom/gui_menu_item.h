@@ -17,59 +17,41 @@
 extern "C" {
 #endif
 
-#define MAIN_LCD_WIDTH   (128)
-#define MAIN_LCD_HEIGHT  (64)
-
-struct GUI_MENU_ITEM {
-    POSD_OBJ_HEAD *objs;
-    void (*initobj)(T_UICOM_OBJ_COUNT idx, POSD_OBJ_HEAD obj);
-    T_UICOM_OBJ_COUNT objsCount;
-};
-
-typedef struct GUI_MENU_ITEM *PGUI_MENU_ITEM;
-
-#define DEF_MENU_ITEM(item, objsTab, initobj)   \
-struct GUI_MENU_ITEM item = \
-{  \
-    objsTab, initobj, ARRAY_SIZE(objsTab)\
-}
-#define LDEF_MENU_ITEM(item, objsTab, initobj)   \
-    static DEF_MENU_ITEM(item, objsTab, initobj)
-
-
-enum ITEM_INIT_STATUS{
-    ITEM_STATUS_NORMAL,
-    PAINT_STATUS_SKIP_ALL,
-    PAINT_STATUS_SKIP_BORDER,
-    PAINT_STATUS_SKIP_DATA,
-};
-void gmenu_item_draw(PGUI_MENU_ITEM item,  enum OSD_OBJ_DRAW_TYPE type);
-void gmenu_item_clear(PGUI_MENU_ITEM item);
+#define PAINT_STATUS_NULL         0
+#define PAINT_STATUS_NORMAL       0xFF
+#define PAINT_STATUS_BORDER       0x1
+#define PAINT_STATUS_DATA         0x2
+//=============================
+#define PAINT_STATUS_TEXT_BOX    (PAINT_STATUS_BORDER | PAINT_STATUS_DATA)
+#define PAINT_STATUS_TEXT_ONLY   (PAINT_STATUS_DATA)
+#define PAINT_STATUS_BOX_ONLY    (PAINT_STATUS_BORDER)
 
 //==========================================================
-struct GMENU_ITEM_LIST {
-    struct GUI_MENU_ITEM    *list;
-    void (*inititem)(T_UICOM_OBJ_COUNT idx, PGUI_MENU_ITEM item);
+struct GMENU_CONTENT_LIST {
+    // return child count
+    u_int8 (*initzone)(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT pos);
+    // init children
+    u_int8 (*inititem)(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum OSD_OBJ_DRAW_TYPE type);
     T_UICOM_OBJ_COUNT         len;
-    T_UICOM_OBJ_COUNT         curFocus;//[0, len-1]
+    T_UICOM_OBJ_COUNT         curFocus;
 };
 
-#define DEF_MENU_ITEM_LIST(list, itemTab, inititem)   \
-struct GMENU_ITEM_LIST list = \
+#define DEF_MENU_CONTENT_LIST(list, initzone, inititem)   \
+struct GMENU_CONTENT_LIST list = \
 {  \
-    itemTab, inititem, ARRAY_SIZE(itemTab), 0\
+    initzone, inititem, 1, 0\
 }
-#define LDEF_MENU_ITEM_LIST(list, itemTab, inititem)   \
-    static DEF_MENU_ITEM_LIST(list, itemTab, inititem)
+#define LDEF_MENU_CONTENT_LIST(list, initzone, inititem)   \
+    static DEF_MENU_CONTENT_LIST(list, initzone, inititem)
 
 
-void gmenu_list_draw(struct GMENU_ITEM_LIST *list, u_int8 focus, u_int8 drawAttr);
-void gmenu_list_item_draw(struct GMENU_ITEM_LIST *list, u_int8 pos, enum OSD_OBJ_DRAW_TYPE type);
+void gmenu_content_list_draw(struct GMENU_CONTENT_LIST *list, u_int8 len, u_int8 focus);
+void gmenu_content_list_clear(struct GMENU_CONTENT_LIST *list, u_int8 pos1, u_int8 pos2, u_int8 isClearBorder);
 
 //==========================================================
 struct GMENU_CONTENT_TAB {
     void   (*initzone)(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col);
-    u_int8 (*inititem)(PUICOM_DATA item, u_int8 *strbuf, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col);
+    u_int8 (*inititem)(struct SCREEN_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum OSD_OBJ_DRAW_TYPE type);
     T_UICOM_OBJ_COUNT          rowCount;
     T_UICOM_OBJ_COUNT          colCount;
     T_UICOM_OBJ_COUNT          rowFocus;//[1, rowCount], if row==0, means focus row
@@ -86,6 +68,8 @@ struct GMENU_CONTENT_TAB tab = \
 
 void gmenu_content_tab_draw(struct GMENU_CONTENT_TAB *table, u_int8 row, u_int8 col, u_int8 rowfocus, u_int8 colfocus);
 void gmenu_content_tab_clear_row(struct GMENU_CONTENT_TAB *table, u_int8 row1, u_int8 row2, u_int8 isClearBorder);
+void gmenu_content_tab_clear_col(struct GMENU_CONTENT_TAB *table, u_int8 col1, u_int8 col2, u_int8 isClearBorder);
+//==========================================================
 
 #ifdef __cplusplus
 }
