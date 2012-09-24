@@ -15,7 +15,7 @@
 #define MONITORSET_LIST_YY(y)   (MONITORSET_LIST_Y(y)+1)
 
 static u_int8 modesetup_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT pos);
-static u_int8 modesetup_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum OSD_OBJ_DRAW_TYPE type);
+static u_int8 modesetup_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum T_UICOM_STATUS type);
 
 LDEF_MENU_CONTENT_LIST(gCheckModeSetupMenu, modesetup_menu_cell_zone_int, modesetup_menu_cell_data_int);
 
@@ -63,9 +63,9 @@ static u_int8 modesetup_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_OBJ_CO
 #define MONITORSET_LIST_BOX_W  36
 #define MONITORSET_LIST_BOX_H  10
 
-static u_int8 modesetup_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum OSD_OBJ_DRAW_TYPE type)
+static u_int8 modesetup_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum T_UICOM_STATUS type)
 {
-    u_int8 colPosIdx = 0, status  = PAINT_STATUS_TEXT_ONLY;
+    u_int8 colPosIdx = 0, status  = DRAW_MODE_TEXT_ONLY;
     struct SCREEN_ZONE colPosTable[4] = {
         {1,   2,  MONITORSET_LIST_BOX_W,MONITORSET_LIST_BOX_H},
         {48,  2,  MONITORSET_LIST_BOX_W,MONITORSET_LIST_BOX_H},
@@ -83,13 +83,13 @@ static u_int8 modesetup_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA it
             if ((pos == 0) || (pos == 1))
             {
                 colPosIdx = 1;
-                status = PAINT_STATUS_TEXT_BOX;
+                status = DRAW_MODE_TEXT_BOX;
             }
             else if (pos == 2)
             {
                 colPosIdx = 3;
                 zone->border.l = 2;
-                status = PAINT_STATUS_TEXT_BOX;
+                status = DRAW_MODE_TEXT_BOX;
             }
             break;
         case 2:
@@ -103,7 +103,7 @@ static u_int8 modesetup_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA it
             {
                 colPosIdx = 3;
                 zone->border.l = 2;
-                status = PAINT_STATUS_TEXT_BOX;
+                status = DRAW_MODE_TEXT_BOX;
             }
             break;
         default:

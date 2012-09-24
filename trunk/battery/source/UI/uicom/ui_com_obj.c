@@ -4,7 +4,7 @@
 
 void uicom_obj_list(T_UICOM_OBJ_COUNT len, void *param, 
                           void (*paint)(T_UICOM_OBJ_COUNT pos, void *param), 
-                          u_int8 paintOrder)
+                          T_UICOM_ORDER_FLAG paintOrder)
 {
     T_UICOM_OBJ_COUNT idx;
     
@@ -17,7 +17,7 @@ void uicom_obj_list(T_UICOM_OBJ_COUNT len, void *param,
 
 void uicom_obj_tab(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, void *param, 
                           void (*paint)(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, void *param), 
-                          u_int8 paintOrder)
+                          T_UICOM_ORDER_FLAG paintOrder)
 {
     T_UICOM_OBJ_COUNT rowIdx, colIdx;
     

@@ -17,7 +17,7 @@
 #define INPUTBOX_LIST_Y(y)    ((y) + (INPUTBOX_POPMENU_Y))
  
 static u_int8 inputbox_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT pos);
-static u_int8 inputbox_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum OSD_OBJ_DRAW_TYPE type);
+static u_int8 inputbox_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum T_UICOM_STATUS type);
 
 LDEF_MENU_CONTENT_LIST(gPopMenuInputBoxList, inputbox_menu_cell_zone_int, inputbox_menu_cell_data_int);
 
@@ -42,9 +42,9 @@ static u_int8 inputbox_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_OBJ_COU
 }
 
 
-static u_int8 inputbox_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum OSD_OBJ_DRAW_TYPE type)
+static u_int8 inputbox_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum T_UICOM_STATUS type)
 {
-    u_int8 colPosIdx = 0, status  = PAINT_STATUS_TEXT_ONLY;
+    u_int8 colPosIdx = 0, status  = DRAW_MODE_TEXT_ONLY;
 
 
     UICOM_DATA_TEXT_ATTR(item, TEXT_SMALL_BLACK);

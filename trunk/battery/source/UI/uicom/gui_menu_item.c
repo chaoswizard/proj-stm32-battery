@@ -2,11 +2,12 @@
 
 
 //==========================================================
-void gmenu_content_list_cell_draw(struct GMENU_CONTENT_LIST *list, u_int8 pos, enum OSD_OBJ_DRAW_TYPE type)
+void gmenu_content_list_cell_draw(struct GMENU_CONTENT_LIST *list, u_int8 pos, enum T_UICOM_STATUS type)
 {
     if (list && list->inititem)
     {
-        u_int8 idx, itemcount,status;
+        T_UICOM_OBJ_COUNT idx, itemcount;
+        T_UICOM_PAINT_FLAG status;
         struct OSD_ZONE groupzone, cellzone;
         struct UICOM_DATA content = {0};
         u_int8 str[64];
@@ -20,12 +21,12 @@ void gmenu_content_list_cell_draw(struct GMENU_CONTENT_LIST *list, u_int8 pos, e
             status = (list->inititem)(&cellzone, &content, pos, idx, type);
             cellzone.zone.x += groupzone.zone.x;
             cellzone.zone.y += groupzone.zone.y;
-            if (PAINT_STATUS_BORDER & status)
+            if (PAINT_FLAG_BORDER & status)
             {
                 Screen_PrintRect(&cellzone, PIXEL_MODE_SET);
             }
 
-            if (PAINT_STATUS_DATA & status)
+            if (PAINT_FLAG_DATA & status)
             {
                 cellzone.zone.x += cellzone.border.l;
                 cellzone.zone.y += cellzone.border.t;
@@ -69,17 +70,17 @@ void gmenu_content_list_clear(struct GMENU_CONTENT_LIST *list, u_int8 pos1, u_in
 
 static void list_cell_content_proc(T_UICOM_OBJ_COUNT pos, struct GMENU_CONTENT_LIST *list)
 {
-    enum OSD_OBJ_DRAW_TYPE type;
+    enum T_UICOM_STATUS type;
 
     if (pos < list->len)
     {
         if (list->curFocus == pos)
         {
-            type = OSD_OBJ_DRAW_SELECTED;
+            type = UICOM_STATUS_SELECTED;
         }
         else
         {
-            type = OSD_OBJ_DRAW_NORMAL;
+            type = UICOM_STATUS_NORMAL;
         }
         gmenu_content_list_cell_draw(list, pos, type);
     }
@@ -97,8 +98,8 @@ void gmenu_content_list_draw(struct GMENU_CONTENT_LIST *list, u_int8 len, u_int8
 
 
 //==========================================================
-
-void gmenu_content_tab_cell_draw(struct GMENU_CONTENT_TAB *table, u_int8 row, u_int8 col, enum OSD_OBJ_DRAW_TYPE type)
+void gmenu_content_tab_cell_draw(struct GMENU_CONTENT_TAB *table, 
+        T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum T_UICOM_STATUS type)
 {
     if (table && table->inititem)
     {
@@ -114,12 +115,12 @@ void gmenu_content_tab_cell_draw(struct GMENU_CONTENT_TAB *table, u_int8 row, u_
             struct OSD_ZONE zone = {0};
             
             (table->initzone)(&zone, row, col);
-            if (PAINT_STATUS_BORDER & status)
+            if (PAINT_FLAG_BORDER & status)
             {
                 Screen_PrintRect(&zone, PIXEL_MODE_SET);
             }
 
-            if (PAINT_STATUS_DATA & status)
+            if (PAINT_FLAG_DATA & status)
             {
                 zone.zone.x += dataZone.x;
                 zone.zone.y += dataZone.y;
@@ -130,7 +131,9 @@ void gmenu_content_tab_cell_draw(struct GMENU_CONTENT_TAB *table, u_int8 row, u_
 }
 
 
-void gmenu_content_tab_cell_clear(struct GMENU_CONTENT_TAB *table, u_int8 row, u_int8 col, u_int8 isClearBorder)
+void gmenu_content_tab_cell_clear(struct GMENU_CONTENT_TAB *table, 
+                                T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, 
+                                bool_t isClearBorder)
 {
     if (table->initzone)
     {
@@ -149,25 +152,28 @@ void gmenu_content_tab_cell_clear(struct GMENU_CONTENT_TAB *table, u_int8 row, u
 }
 
 
-static void table_cell_content_proc(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, struct GMENU_CONTENT_TAB *table)
+static void table_cell_content_proc(T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, 
+                                                struct GMENU_CONTENT_TAB *table)
 {
-   enum OSD_OBJ_DRAW_TYPE type;
+   enum T_UICOM_STATUS type;
 
    if (col < table->colCount && row < table->rowCount)
    {
        if ((col==table->colFocus && row==table->rowFocus))// || (col==0) || (row==0)
        {
-           type = OSD_OBJ_DRAW_SELECTED;
+           type = UICOM_STATUS_SELECTED;
        }
        else
        {
-           type = OSD_OBJ_DRAW_NORMAL;
+           type = UICOM_STATUS_NORMAL;
        }
        gmenu_content_tab_cell_draw(table, row, col, type);
    }
 }
 
-void gmenu_content_tab_draw(struct GMENU_CONTENT_TAB *table, u_int8 row, u_int8 col, u_int8 rowfocus, u_int8 colfocus)
+void gmenu_content_tab_draw(struct GMENU_CONTENT_TAB *table, 
+                        T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, 
+                        T_UICOM_OBJ_COUNT rowfocus, T_UICOM_OBJ_COUNT colfocus)
 {
     if (table)
     {
@@ -179,11 +185,13 @@ void gmenu_content_tab_draw(struct GMENU_CONTENT_TAB *table, u_int8 row, u_int8 
     }
 }
 
-void gmenu_content_tab_clear_row(struct GMENU_CONTENT_TAB *table, u_int8 row1, u_int8 row2, u_int8 isClearBorder)
+void gmenu_content_tab_clear_row(struct GMENU_CONTENT_TAB *table, 
+                                T_UICOM_OBJ_COUNT row1, T_UICOM_OBJ_COUNT row2,
+                                bool_t isClearBorder)
 {
     if (table)
     {
-        u_int8 i;
+        T_UICOM_OBJ_COUNT i;
         while(row1<=row2)
         {
             for (i=0;i<table->colCount;i++)
@@ -195,7 +203,9 @@ void gmenu_content_tab_clear_row(struct GMENU_CONTENT_TAB *table, u_int8 row1, u
     }
 }
 
-void gmenu_content_tab_clear_col(struct GMENU_CONTENT_TAB *table, u_int8 col1, u_int8 col2, u_int8 isClearBorder)
+void gmenu_content_tab_clear_col(struct GMENU_CONTENT_TAB *table, 
+                                T_UICOM_OBJ_COUNT col1, T_UICOM_OBJ_COUNT col2, 
+                                bool_t isClearBorder)
 {
     if (table)
     {

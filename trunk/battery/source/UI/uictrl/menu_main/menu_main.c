@@ -27,7 +27,7 @@ DEFINE_SM_NODE_MAP(gMenuMain,
                                   menu_pub_handle,
                                   menu_pub_exit);
 
-static u_int8 mainmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum OSD_OBJ_DRAW_TYPE type);
+static u_int8 mainmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum T_UICOM_STATUS type);
 static void mainmenu_cell_zone_init(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col);
 
 static u_int8 gCurStartChNum = 0;
@@ -90,7 +90,7 @@ static void mainmenu_cell_zone_init(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT row
     
 }
 
-static u_int8 mainmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum OSD_OBJ_DRAW_TYPE type)
+static u_int8 mainmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum T_UICOM_STATUS type)
 {
     zone->x = 2;
     zone->y = 2;
@@ -120,7 +120,7 @@ static u_int8 mainmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item,
             default:
                 break;
         }
-        return PAINT_STATUS_NORMAL; 
+        return PAINT_FLAG_NORMAL; 
     }
 
     //===========·ÇÊ×ÐÐ============
@@ -155,7 +155,7 @@ static u_int8 mainmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item,
         }
     }
     
-    return PAINT_STATUS_NORMAL; 
+    return PAINT_FLAG_NORMAL; 
 }
 
 

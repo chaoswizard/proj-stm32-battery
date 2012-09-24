@@ -40,7 +40,7 @@ static void stopmenu_cell_zone_init(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT row
 }
 
 
-static u_int8 stopmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum OSD_OBJ_DRAW_TYPE type);
+static u_int8 stopmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum T_UICOM_STATUS type);
 LDEF_MENU_CONTENT_TAB(gStopMenuTable, stopmenu_cell_zone_init, stopmenu_cell_data_init);
   
 static void stop_main_paint(u_int8 isClear)
@@ -53,7 +53,7 @@ static void stop_main_paint(u_int8 isClear)
 }
 
 
-static u_int8 stopmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum OSD_OBJ_DRAW_TYPE type)
+static u_int8 stopmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum T_UICOM_STATUS type)
 {
     zone->x = 2;
     zone->y = 3;
@@ -102,7 +102,7 @@ static u_int8 stopmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item,
         }
     }
     
-    return PAINT_STATUS_NORMAL; 
+    return PAINT_FLAG_NORMAL; 
 }
 
 

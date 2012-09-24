@@ -22,12 +22,6 @@ enum OSD_OBJ_TYPE {
     OSD_OBJ_BUTTON,//°´Å¥(RECT + TEXT)
 };
 
-enum OSD_OBJ_DRAW_TYPE {
-    OSD_OBJ_DRAW_NORMAL,
-    OSD_OBJ_DRAW_SELECTED,
-    OSD_OBJ_DRAW_DISABLE,
-};
-
 
 //----------------------------------------------------------------------
 // type: obj types
@@ -139,12 +133,12 @@ struct OSD_OBJ_BUTTON_INFO button = \
     static DEF_OSD_BUTTON_PIC(button, x, y, w, h, text, attr)
 
 //==========================================================
-void gui_osd_obj_draw(POSD_OBJ_HEAD obj, enum OSD_OBJ_DRAW_TYPE drawType);
+void gui_osd_obj_draw(POSD_OBJ_HEAD obj, enum T_UICOM_STATUS drawType);
 void gui_osd_obj_clear(POSD_OBJ_HEAD obj);
-void gui_osd_rect_draw(struct OSD_OBJ_RECT_INFO *rect, enum OSD_OBJ_DRAW_TYPE drawType);
-void gui_osd_content_draw(struct OSD_OBJ_CONTENT_INFO *content, enum OSD_OBJ_DRAW_TYPE drawType);
-void gui_osd_button_draw(struct OSD_OBJ_BUTTON_INFO *button, enum OSD_OBJ_DRAW_TYPE drawType);
-void gui_osd_msel_draw(struct OSD_OBJ_BUTTON_INFO *button, enum OSD_OBJ_DRAW_TYPE drawType);
+void gui_osd_rect_draw(struct OSD_OBJ_RECT_INFO *rect, enum T_UICOM_STATUS drawType);
+void gui_osd_content_draw(struct OSD_OBJ_CONTENT_INFO *content, enum T_UICOM_STATUS drawType);
+void gui_osd_button_draw(struct OSD_OBJ_BUTTON_INFO *button, enum T_UICOM_STATUS drawType);
+void gui_osd_msel_draw(struct OSD_OBJ_BUTTON_INFO *button, enum T_UICOM_STATUS drawType);
 void gui_osd_data_draw(struct UICOM_DATA *data, struct SCREEN_ZONE *zone);
 
 //==========================================================

@@ -7,17 +7,11 @@
 #define SCREEN_HEIGHT_PIXEL_NUM               (64)
 #define SCREEN_POS_IS_INVALID(x, y)           (((x) > (SCREEN_WIDTH_PIXEL_NUM - 1)) || ((y) > (SCREEN_HEIGHT_PIXEL_NUM - 1)))
 
-#ifdef USE_HW_LCD
+
 #define SCREEN_PUT_PIXEL(x, y, mode)                     putpixel(x, y, mode)
 #define SCREEN_INIT()                                    INIT_XLCD()
 #define SCREEN_CLEAR()                                   XFILLRAM(0)
 #define SCREEN_SET_BYTE(x, y, data, fgcolor, bgcolor)    XLCD_SET_BYTE(x, y, data)
-#else
-#define SCREEN_PUT_PIXEL(x, y, mode)
-#define SCREEN_INIT()
-#define SCREEN_CLEAR()                         //system("cls")
-#define SCREEN_SET_BYTE(x, y, data, fgcolor, bgcolor)    Screen_Print_8Bit_V(x, y, data, fgcolor, bgcolor)
-#endif
 
 
 
@@ -159,7 +153,8 @@ void Screen_PrintString(struct SCREEN_ZONE *rect, u_int8 *str, T_SCREEN_PIXEL_AT
 {
     u_int32 idx, codelen, len, fontwidth;
     struct UICOM_1PP_BMP_INFO  bmpInfo;
-    enum PIXEL_COLOR txtsize, fgColor, bgColor;
+    enum PIXEL_COLOR  fgColor, bgColor;
+    T_UICOM_FONT_SIZE txtsize;
     //MY_DEBUG("\t[TXT] %s\n", str);
 
     if (NULL == str)

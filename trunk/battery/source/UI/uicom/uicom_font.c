@@ -238,7 +238,7 @@ static const unsigned char gFont6_AsciiMap[][6]={//Lucida Console
 };
 
 
-u_int8 uicom_font_getdata(u_int8 *ch, struct UICOM_1PP_BMP_INFO *info, u_int8 fontsize)
+u_int8 uicom_font_getdata(u_int8 *ch, struct UICOM_1PP_BMP_INFO *info, T_UICOM_FONT_SIZE fontsize)
 {
     u_int32 idx;
     u_int8  val;

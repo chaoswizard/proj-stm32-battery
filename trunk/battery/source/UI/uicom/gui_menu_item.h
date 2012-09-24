@@ -17,23 +17,19 @@
 extern "C" {
 #endif
 
-#define PAINT_STATUS_NULL         0
-#define PAINT_STATUS_NORMAL       0xFF
-#define PAINT_STATUS_BORDER       0x1
-#define PAINT_STATUS_DATA         0x2
-//=============================
-#define PAINT_STATUS_TEXT_BOX    (PAINT_STATUS_BORDER | PAINT_STATUS_DATA)
-#define PAINT_STATUS_TEXT_ONLY   (PAINT_STATUS_DATA)
-#define PAINT_STATUS_BOX_ONLY    (PAINT_STATUS_BORDER)
+//----------------------------------------------------------------------
+#define DRAW_MODE_TEXT_BOX    (PAINT_FLAG_BORDER | PAINT_FLAG_DATA)
+#define DRAW_MODE_TEXT_ONLY   (PAINT_FLAG_DATA)
+#define DRAW_MODE_BOX_ONLY    (PAINT_FLAG_BORDER)
 
 //==========================================================
 struct GMENU_CONTENT_LIST {
     // return child count
-    u_int8 (*initzone)(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT pos);
+    T_UICOM_OBJ_COUNT   (*initzone)(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT pos);
     // init children
-    u_int8 (*inititem)(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum OSD_OBJ_DRAW_TYPE type);
-    T_UICOM_OBJ_COUNT         len;
-    T_UICOM_OBJ_COUNT         curFocus;
+    T_UICOM_PAINT_FLAG (*inititem)(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum T_UICOM_STATUS type);
+    T_UICOM_OBJ_COUNT   len;
+    T_UICOM_OBJ_COUNT   curFocus;
 };
 
 #define DEF_MENU_CONTENT_LIST(list, initzone, inititem)   \
@@ -51,7 +47,7 @@ void gmenu_content_list_clear(struct GMENU_CONTENT_LIST *list, u_int8 pos1, u_in
 //==========================================================
 struct GMENU_CONTENT_TAB {
     void   (*initzone)(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col);
-    u_int8 (*inititem)(struct SCREEN_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum OSD_OBJ_DRAW_TYPE type);
+    T_UICOM_PAINT_FLAG (*inititem)(struct SCREEN_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum T_UICOM_STATUS type);
     T_UICOM_OBJ_COUNT          rowCount;
     T_UICOM_OBJ_COUNT          colCount;
     T_UICOM_OBJ_COUNT          rowFocus;//[1, rowCount], if row==0, means focus row
