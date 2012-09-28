@@ -34,6 +34,8 @@ DECLARE_SM_NODE_MAP(gMenuChSwitch);
 DECLARE_SM_NODE_MAP(gStoreOptionSetupMenu);
 DECLARE_SM_NODE_MAP(gPopMenuInputBoxMenu);
 DECLARE_SM_NODE_MAP(gPopMenuYesOrNoMenu);
+DECLARE_SM_NODE_MAP(gMenuShowCurve);
+
 
 
 
@@ -49,6 +51,7 @@ static const struct SM_NODE_MAP  gFuncMapTab[] = {
     UI_NODE_SAVEOPT, &gStoreOptionSetupMenu,
     UI_NODE_POP_INPUTBOX, &gPopMenuInputBoxMenu,
     UI_NODE_POP_YESORNO, &gPopMenuYesOrNoMenu,
+    UI_NODE_SHOWCURVE, &gMenuShowCurve,
 };
 
 
@@ -58,11 +61,11 @@ void ui_mmi_init(void)
     {
         return;
     }
-    gUiMmiCtrl = &gUiMmiCtrlInstance;
+        gUiMmiCtrl = &gUiMmiCtrlInstance;
     
     {
         struct SMMGR_INIT_PARAM  smParam = {
-            (struct SM_NODE_MAP  *)gFuncMapTab, ARRAY_SIZE(gFuncMapTab),
+            (struct SM_NODE_MAP *)gFuncMapTab, ARRAY_SIZE(gFuncMapTab),
             gSmTraceBuf, ARRAY_SIZE(gSmTraceBuf)
         };
         
@@ -70,7 +73,7 @@ void ui_mmi_init(void)
         gUiMmiCtrl->smHandle  = SmMgr_Open(&smParam);
     }
 
-    {
+        {
         struct EVTMGR_INIT_PARAM  evtParm = {
             gEventQuenue, ARRAY_SIZE(gEventQuenue),
             NULL, NULL, NULL, NULL
@@ -86,7 +89,7 @@ void ui_mmi_init(void)
     }
     ui_keypad_init();
     ui_menu_init();
-}
+    }
 
 void ui_mmi_start(void)
 {
@@ -194,10 +197,10 @@ static u_int8 ui_mmi_bypass_proc(struct EVENT_NODE_ITEM *e)
                 // new state first trans or close then reopen
                 if (SM_EXIT_NEW  & SmMgr_Trans(gUiMmiCtrl->smHandle, smEvt->trans.target, 
                                                 (smEvt->trans.quitCurrent)?SM_EXIT_CUR:0))
-                    {
-                        ne.sig = EVENT_SM_INIT;
-                        ui_mmi_send_msg(&ne);
-                    }
+                {
+                    ne.sig = EVENT_SM_INIT;
+                    ui_mmi_send_msg(&ne);
+                }
             }
             ret = 1;
             break;
@@ -254,12 +257,10 @@ u_int8 ui_mmi_proc(void)
         return 1;
     }
     
-    if (ui_menu_bypass_proc(&e))
+    if (SMNODE_IS_VALID(SmMgr_Proc(gUiMmiCtrl->smHandle, &e)))
     {
-        return 1;
+        ui_menu_bypass_proc(&e);
     }
-    
-    SmMgr_Proc(gUiMmiCtrl->smHandle, &e);
 
     return 1;
 }
@@ -271,7 +272,7 @@ void ui_mmi_close(void)
 
 void ui_mmi_open(void)
 {
-    ui_mmi_init();
+   ui_mmi_init();
 }
 
 void ui_mmi_deinit(void)
@@ -337,7 +338,6 @@ void ui_mmi_stop_timer(SWTMR_NODE_HANDLE tmrHdl)
 void ui_mmi_poweroff(void)
 {
 
-
 }
 
 
@@ -363,7 +363,7 @@ void ui_mmi_debug_resume(char *nameStr, SM_NODE_HANDLE me, SM_NODE_HANDLE child)
 
 
 
-void ui_mmi_debug_handle(char *nameStr, SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
+u_int8 ui_mmi_debug_handle(char *nameStr, SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 {
     MY_DEBUG("´¦ÀíÖÐ (%s): me[%d]  evt[%d]\n", nameStr, me, e->sig);
 
@@ -403,13 +403,16 @@ void ui_mmi_debug_handle(char *nameStr, SM_NODE_HANDLE me, struct EVENT_NODE_ITE
         case EVENT_KEY_NUM_9:
             ui_mmi_enter(UI_NODE_POP_YESORNO, 0);
             break;
-            case EVENT_KEY_SUB:
-            ui_mmi_return(1);
+        case EVENT_KEY_SUB:
+            ui_mmi_enter(UI_NODE_SHOWCURVE, 0);
             break;
         default:
             break;
         
     }
+    
+    return SM_PROC_RET_DFT;
+    
 }
 
 //==========================================================

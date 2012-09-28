@@ -23,6 +23,7 @@ enum UI_NODE_NAME {
    UI_NODE_SAVEOPT,/*存储选项设置菜单*/
    UI_NODE_POP_INPUTBOX,/*输入框*/
    UI_NODE_POP_YESORNO,/*确认框*/
+   UI_NODE_SHOWCURVE,/*曲线*/
 } ;
 
 
@@ -41,7 +42,7 @@ void ui_mmi_reg_suspend(void (*suspend)(SM_NODE_HANDLE me, SM_NODE_HANDLE child)
 void ui_mmi_stop_timer(SWTMR_NODE_HANDLE tmrHdl);
 SWTMR_NODE_HANDLE ui_mmi_start_timer(u_int32 ms, void(*callbackFunc)(void *), void *callbackArg, u_int8 isLoop);
 
-void ui_mmi_debug_handle(char *nameStr, SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
+u_int8 ui_mmi_debug_handle(char *nameStr, SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
 void ui_mmi_debug_enter(char *nameStr, SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
 void ui_mmi_debug_exit(char *nameStr, SM_NODE_HANDLE me, SM_NODE_HANDLE next);
 void ui_mmi_debug_suspend(char *nameStr, SM_NODE_HANDLE me, SM_NODE_HANDLE child);

@@ -199,12 +199,15 @@ SM_NODE_HANDLE SmMgr_Proc(handle_t handle, void *param)
     {
         return SM_INVALID_NODE;
     }
-    
+
     tab = SmMgr_GetFuncTab(pCtrl, curNode);
 
     if (tab && tab->handle)
     {
-        (tab->handle)(curNode, param);
+        if (SM_PROC_RET_STAY != (tab->handle)(curNode, param))
+        {
+            return SM_INVALID_NODE;
+        }
     }
 
     return curNode;

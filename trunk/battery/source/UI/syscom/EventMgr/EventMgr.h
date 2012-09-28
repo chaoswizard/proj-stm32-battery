@@ -15,6 +15,7 @@ typedef u_int8 EVENT_NODE_COUNT;
 #define MSG_IS_SM(msg)         (((msg) >= EVENT_SM_INIT) && ((msg) <= EVENT_SM_EXIT))
 #define MSG_IS_SYS(msg)        (((msg) >= EVENT_SYS_INIT) && ((msg) <= EVENT_SYS_EXIT))
 #define MSG_IS_CANCLE(msg)     ((msg) == EVENT_KEY_ESC)
+#define MSG_IS_ENTER(msg)      ((msg) == EVENT_KEY_OK)
 #define MSG_IS_STOP(msg)       ((msg) == EVENT_KEY_STOP)
 #define MSG_IS_START(msg)      ((msg) == EVENT_KEY_RUN)
 #define MSG_IS_ENTRY(msg)      ((msg) == EVENT_SM_ENTRY)

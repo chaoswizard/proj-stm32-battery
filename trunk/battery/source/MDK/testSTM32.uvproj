@@ -345,7 +345,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_MD_VL, USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\USER;..\LIB\STM32F10x_StdPeriph_Driver\inc;..\LIB\CMSIS\CM3\CoreSupport;..\LIB\CMSIS\CM3\DeviceSupport\ST\STM32F10x;..\UI\include;..\UI\syscom\EventMgr;..\UI\syscom\SmMgr;..\UI\syscom\TimerMgr;..\UI\uicom;..\UI\uictrl;..\UI\uictrl\menu_main;..\UI\uictrl\menu_poweron</IncludePath>
+              <IncludePath>..\USER;..\LIB\STM32F10x_StdPeriph_Driver\inc;..\LIB\CMSIS\CM3\CoreSupport;..\LIB\CMSIS\CM3\DeviceSupport\ST\STM32F10x;..\UI\include;..\UI\syscom\EventMgr;..\UI\syscom\SmMgr;..\UI\syscom\TimerMgr;..\UI\uicom;..\UI\uictrl;..\UI\uictrl\menu_main;..\UI\uictrl\menu_poweron;..\UI\syscom</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -570,6 +570,16 @@
               <FileType>1</FileType>
               <FilePath>..\UI\syscom\TimerMgr\SwTmrMgr.c</FilePath>
             </File>
+            <File>
+              <FileName>syscom_util.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\UI\syscom\syscom_util.c</FilePath>
+            </File>
+            <File>
+              <FileName>syscom_util.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\UI\syscom\syscom_util.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -629,6 +639,11 @@
               <FileName>menu_store_option.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\UI\uictrl\menu_main\menu_store_option.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu_showcurve.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\UI\uictrl\menu_poweron\menu_showcurve.c</FilePath>
             </File>
           </Files>
         </Group>

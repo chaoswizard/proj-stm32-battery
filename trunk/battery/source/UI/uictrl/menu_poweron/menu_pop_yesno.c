@@ -16,12 +16,12 @@
 #define INPUTBOX_LIST_X(x)    ((x) + (YESNO_POPMENU_X))
 #define INPUTBOX_LIST_Y(y)    ((y) + (YESNO_POPMENU_Y))
  
-static u_int8 yesno_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT pos);
-static u_int8 yesno_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum T_UICOM_STATUS type);
+static u_int8 yesno_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_COUNT pos);
+static u_int8 yesno_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_COUNT pos, T_UICOM_COUNT childIdx, enum T_UICOM_STATUS type);
 
 LDEF_MENU_CONTENT_LIST(gPopMenuYesNoMenu, yesno_menu_cell_zone_int, yesno_menu_cell_data_int);
 
-static u_int8 yesno_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT pos)
+static u_int8 yesno_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_COUNT pos)
 {
     u_int8  count = 0;
     struct SCREEN_ZONE cellPosTable[INPUTBOX_LIST_NUM] = {
@@ -41,12 +41,12 @@ static u_int8 yesno_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT 
 }
 
 
-static u_int8 yesno_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum T_UICOM_STATUS type)
+static u_int8 yesno_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_COUNT pos, T_UICOM_COUNT childIdx, enum T_UICOM_STATUS type)
 {
     u_int8 colPosIdx = 0, status  = DRAW_MODE_TEXT_ONLY;
 
 
-    UICOM_DATA_TEXT_ATTR(item, TEXT_SMALL_BLACK);
+    UICOM_DATA_TEXT_ATTR_RST(item, TEXT_SMALL_BLACK);
     if (0 == pos)//х╥хо
     {
         switch (childIdx)
@@ -80,7 +80,7 @@ static void yesno_menu_paint(u_int8 isClear)
 {
     if (isClear)
     {
-       gmenu_content_list_clear(&gPopMenuYesNoMenu, 1, INPUTBOX_LIST_NUM-1, 0);
+       gmenu_content_list_clear_all(&gPopMenuYesNoMenu,  0);
     }
     gmenu_content_list_draw(&gPopMenuYesNoMenu, INPUTBOX_LIST_NUM, 0);
 }
@@ -104,7 +104,7 @@ static void yesno_menu_pop(u_int8 isClearBg)
 }
 
 static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
-static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
+static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
 static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next);
 
 DEFINE_SM_NODE_MAP(gPopMenuYesOrNoMenu,
@@ -133,7 +133,7 @@ static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
     ui_mmi_reg_resume(menu_pub_resume);
 }
 
-static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
+static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 {
     ui_mmi_debug_handle(THIS_MENU_NAME, me, e);
     if (MSG_IS_ENTRY(e->sig))
@@ -144,12 +144,22 @@ static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
     switch (e->sig)
     {
         case EVENT_KEY_NUM_0:
-            yesno_menu_paint(1);
-            break;
+        yesno_menu_paint(1);
+        break;
+        case EVENT_KEY_RIGHT:
+        case EVENT_KEY_DOWN:
+        gmenu_content_list_movefocus(&gPopMenuYesNoMenu, 1, 1);
+        break;
+        case EVENT_KEY_UP:
+        case EVENT_KEY_LEFT:
+        gmenu_content_list_movefocus(&gPopMenuYesNoMenu, -1, 1);
+        break;
         default:
             break;
         
     }
+
+    return SM_PROC_RET_DFT;
 }
 
 static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next)
@@ -158,5 +168,9 @@ static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next)
 }
 
 
+void gmenu_pop_yesno(struct gmenu_pop_yesno_param *param)
+{
+
+}
 
 

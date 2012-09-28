@@ -238,14 +238,14 @@ static const unsigned char gFont6_AsciiMap[][6]={//Lucida Console
 };
 
 
-u_int8 uicom_font_getdata(u_int8 *ch, struct UICOM_1PP_BMP_INFO *info, T_UICOM_FONT_SIZE fontsize)
+u_int8 uicom_font_getdata(u_int8 *ch, u_int8 chsize ,struct UICOM_1PP_BMP_INFO *info, T_UICOM_FONT_SIZE fontsize)
 {
     u_int32 idx;
     u_int8  val;
 
     //MY_DEBUG(":[%2X,%2X]\n",ch[0],ch[1]);  
     //CKJ
-    if ((ch[0]>0xA0) && (ch[1]>0xA0))
+    if (UTIL_MUTICHAR_LEN == chsize)
     {
         for (idx=0; idx < FONT16_CKJ_COUNT; idx++)
         {
@@ -256,16 +256,16 @@ u_int8 uicom_font_getdata(u_int8 *ch, struct UICOM_1PP_BMP_INFO *info, T_UICOM_F
                 info->size   = 28;
                 info->width  = 14;
                 info->height = 16;
-                return 2;
+                return info->width;
             }
         }
     }
-    else
+    else if (1 == chsize)
     {
         val = ch[0];
         if ((val <= 'z') && (val >= 'a'))//小写转为大写，当前无小写字库
         {
-            val = 'A' + (val - 'a');
+            val = 'A' - 'a' + val;
         }
         idx = val - 32;
         if (fontsize != FONT_SIZE_SMALL)
@@ -277,7 +277,7 @@ u_int8 uicom_font_getdata(u_int8 *ch, struct UICOM_1PP_BMP_INFO *info, T_UICOM_F
                 info->size   = 14;
                 info->width  = 7;
                 info->height = 16;
-                return 1;
+                return info->width;
             }
         }
         else
@@ -287,9 +287,9 @@ u_int8 uicom_font_getdata(u_int8 *ch, struct UICOM_1PP_BMP_INFO *info, T_UICOM_F
                 //MY_DEBUG("Small:[%d/%d:%d]\n",idx, ARRAY_SIZE(gFont6_AsciiMap), FONT6_ASCII_COUNT);  
                 info->data = (u_int8 *)&gFont6_AsciiMap[idx];
                 info->size   = 6;
-                info->width  = 8;
-                info->height = 6;
-                return 1;
+                info->width  = 6;
+                info->height = 8;
+                return info->width;
             }
         }
     }

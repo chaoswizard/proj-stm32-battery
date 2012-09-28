@@ -3,43 +3,43 @@
 #define THIS_MENU_NAME   "¿ª»ú"
 // "PowerOn"
 
-static void menu_poweron_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
-static void menu_poweron_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
-static void menu_poweron_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next);
+static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
+static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
+static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next);
 
 DEFINE_SM_NODE_MAP(gMenu_PowerOn,
-                                  menu_poweron_enter,
-                                  menu_poweron_handle,
-                                  menu_poweron_exit);
+                                  menu_pub_enter,
+                                  menu_pub_handle,
+                                  menu_pub_exit);
 
 
 
 
-static void menu_poweron_suspend(SM_NODE_HANDLE me, SM_NODE_HANDLE child)
+static void menu_pub_suspend(SM_NODE_HANDLE me, SM_NODE_HANDLE child)
 {
     ui_mmi_debug_suspend(THIS_MENU_NAME, me, child);
 }
 
-static void menu_poweron_resume(SM_NODE_HANDLE me, SM_NODE_HANDLE child)
+static void menu_pub_resume(SM_NODE_HANDLE me, SM_NODE_HANDLE child)
 {
     ui_mmi_debug_resume(THIS_MENU_NAME, child, me);
 }
 
 
-static void menu_poweron_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
+static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
 {
     ui_mmi_debug_enter(THIS_MENU_NAME, parent, me);
-    ui_mmi_reg_suspend(menu_poweron_suspend);
-    ui_mmi_reg_resume(menu_poweron_resume);
+    ui_mmi_reg_suspend(menu_pub_suspend);
+    ui_mmi_reg_resume(menu_pub_resume);
 }
 
-static void menu_poweron_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
+static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 {
     ui_mmi_debug_handle(THIS_MENU_NAME, me, e);
-
+    return SM_PROC_RET_DFT;
 }
 
-static void menu_poweron_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next)
+static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next)
 {
     ui_mmi_debug_exit(THIS_MENU_NAME, next, me);
 }

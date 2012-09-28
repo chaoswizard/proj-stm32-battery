@@ -271,12 +271,8 @@ void putpixel(unsigned char x, unsigned char y, unsigned char pixel_mode)
     {
         tmp ^= (1<<((y & 0x7)));
     }
-    else if (pixel_mode == PIXEL_MODE_CURSOR)
-    {
-        tmp ^= 0xFF;
-    }
     else
-    {// unknown mode
+    {
         return;
     }
     DEV_LCD_SET_DATA(X_PIXLE_TO_COL(x), Y_PIXLE_TO_ROW(y), tmp);

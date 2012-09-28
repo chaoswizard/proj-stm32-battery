@@ -5,7 +5,7 @@
 //"Stop"
 
 static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
-static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
+static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
 static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next);
 
 DEFINE_SM_NODE_MAP(gMenuStopCheck,
@@ -22,7 +22,7 @@ DEFINE_SM_NODE_MAP(gMenuStopCheck,
 #define STOPTAB_X(x)   (x+1)
 #define STOPTAB_Y(y)   ((y*(STOPTAB_CELL_H+2))+4)
 #define STOPTAB_YY(y)   (STOPTAB_Y(y)+2)
-static void stopmenu_cell_zone_init(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col)
+static void stopmenu_cell_zone_init(struct OSD_ZONE *zone, T_UICOM_COUNT row, T_UICOM_COUNT col)
 {
     struct SCREEN_ZONE cellPosTable[STOPMENU_TAB_ROW_NUM][STOPMENU_TAB_COL_NUM] = {
         {{STOPTAB_X(0),STOPTAB_Y(0),  61,STOPTAB_CELL_H},{STOPTAB_X(63),STOPTAB_Y(0), 61,STOPTAB_CELL_H}},
@@ -40,7 +40,7 @@ static void stopmenu_cell_zone_init(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT row
 }
 
 
-static u_int8 stopmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum T_UICOM_STATUS type);
+static u_int8 stopmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_COUNT row, T_UICOM_COUNT col, enum T_UICOM_STATUS type);
 LDEF_MENU_CONTENT_TAB(gStopMenuTable, stopmenu_cell_zone_init, stopmenu_cell_data_init);
   
 static void stop_main_paint(u_int8 isClear)
@@ -53,11 +53,11 @@ static void stop_main_paint(u_int8 isClear)
 }
 
 
-static u_int8 stopmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_OBJ_COUNT row, T_UICOM_OBJ_COUNT col, enum T_UICOM_STATUS type)
+static u_int8 stopmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_COUNT row, T_UICOM_COUNT col, enum T_UICOM_STATUS type)
 {
     zone->x = 2;
     zone->y = 3;
-    UICOM_DATA_TEXT_ATTR(item, TEXT_SMALL_BLACK);
+    UICOM_DATA_TEXT_ATTR_RST(item, TEXT_SMALL_BLACK);
     if (0 == col)
     {
         switch (row)
@@ -124,7 +124,7 @@ static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
     ui_mmi_reg_resume(menu_pub_resume);
 }
 
-static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
+static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 {
     ui_mmi_debug_handle(THIS_MENU_NAME, me, e);
     if (MSG_IS_ENTRY(e->sig))
@@ -132,6 +132,7 @@ static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
         Screen_PrintClear(NULL);
         stop_main_paint(0);
     }
+    else 
     switch (e->sig)
     {
         case EVENT_KEY_NUM_0:
@@ -139,8 +140,8 @@ static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
             break;
         default:
             break;
-        
     }
+    return SM_PROC_RET_DFT;
 }
 
 static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next)

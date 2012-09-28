@@ -11,9 +11,10 @@
 #define SCREEN_PUT_PIXEL(x, y, mode)                     putpixel(x, y, mode)
 #define SCREEN_INIT()                                    INIT_XLCD()
 #define SCREEN_CLEAR()                                   XFILLRAM(0)
-#define SCREEN_SET_BYTE(x, y, data, fgcolor, bgcolor)    XLCD_SET_BYTE(x, y, data)
+//#define SCREEN_SET_BYTE(x, y, data, fgcolor, bgcolor)    XLCD_SET_BYTE(x, y, data)
+#define SCREEN_SET_BYTE(x, y, data, fgcolor, bgcolor)    Screen_Print_8Bit_V(x, y, data, fgcolor, bgcolor)
 
-
+//Screen_Print_8Bit_V
 
 void Screen_PrintInit(void)
 {
@@ -138,55 +139,139 @@ void Screen_PrintRect(struct OSD_ZONE *zone, enum PIXEL_COLOR pixel_mode)
                          zone->zone.x + zone->zone.w, zone->zone.y + zone->zone.h, pixel_mode);
 
 }
-void Screen_PrintEllipse(struct SCREEN_ZONE *rect, T_SCREEN_PIXEL_ATTR attr)
+
+void Screen_PrintEllipse(struct SCREEN_ZONE *rect, T_UICOM_PIXEL_ATTR attr)
 {
 
 }
 
-void Screen_PrintCursor(struct OSD_ZONE *zone, T_SCREEN_PIXEL_ATTR attr)
+void Screen_PrintCursor(struct OSD_ZONE *zone, T_UICOM_PIXEL_ATTR attr)
 {
-    Screen_PrintFillRect(&zone->zone, PIXEL_MODE_CURSOR);
+    Screen_PrintFillRect(&zone->zone, PIXEL_MODE_TURN);
 }
 
-
-void Screen_PrintString(struct SCREEN_ZONE *rect, u_int8 *str, T_SCREEN_PIXEL_ATTR attr)
+void Screen_PrintMapRule(struct OSD_ZONE *zone, enum PIXEL_COLOR pixel_mode)
 {
-    u_int32 idx, codelen, len, fontwidth;
+    u_int16 align, next, limt;
+    
+    if (zone->border.t > 0)
+    {
+        align= zone->zone.y + 1;
+        next = zone->zone.x; 
+        limt = zone->zone.x + zone->zone.w;
+        do
+        {
+            Screen_PrintPixel(next, align, pixel_mode);
+            next += zone->border.t;
+        }while (next < limt);
+    }
+
+    if (zone->border.l > 0)
+    {
+        align= zone->zone.x + 1;
+        next = zone->zone.y + zone->zone.h; 
+        limt = zone->zone.y;
+        do
+        {
+            Screen_PrintPixel(align, next, pixel_mode);
+            if (next < zone->border.l)
+            {
+                break;
+            }
+            else
+            {
+                next -= zone->border.l;
+            }
+            //MY_DEBUG("\tLL_(%d,%d)+%d = %d\n", align, next, zone->border.b, limt);
+        }while (next >= limt);
+    }
+
+    if (zone->border.r > 0)
+    {
+        align= zone->zone.x + zone->zone.w - 1;
+        next = zone->zone.y + zone->zone.h; 
+        limt = zone->zone.y;
+        do
+        {
+            Screen_PrintPixel(align, next,  pixel_mode);
+            if (next < zone->border.r)
+            {
+                break;
+            }
+            else
+            {
+                next -= zone->border.r;
+            }
+        }while (next >= limt);
+    }
+
+    if (zone->border.b > 0)
+    {
+        align= zone->zone.y + zone->zone.h -1;
+        next = zone->zone.x; 
+        limt = zone->zone.x + zone->zone.w;
+        do
+        {
+            //MY_DEBUG("BB_(%d,%d)+%d = %d\n", next, align, zone->border.b, limt);
+            Screen_PrintPixel(next, align, pixel_mode);
+            next += zone->border.b;
+        }while (next <= limt);
+    }
+}
+
+void Screen_PrintString(struct SCREEN_ZONE *rect, u_int8 *str, T_UICOM_DATA_ATTR attr)
+{
+    u_int32 idx, codelen, len, fontwidth, focusbitmap;
+    u_int8 pos;
     struct UICOM_1PP_BMP_INFO  bmpInfo;
     enum PIXEL_COLOR  fgColor, bgColor;
     T_UICOM_FONT_SIZE txtsize;
+    struct SCREEN_ZONE zone;
     //MY_DEBUG("\t[TXT] %s\n", str);
-
     if (NULL == str)
     {
         return;
     }
-    
-    len = strlen(str);
+
+    len = util_strlen(str);
     if (len)
     {
-        txtsize  = TEXT_ATTR_SIZE(attr);
-        fgColor  = TEXT_ATTR_COLOR_FG(attr);
-        bgColor  = TEXT_ATTR_COLOR_BG(attr);
+        txtsize     = TEXT_ATTR_GET_SIZE(attr);
+        fgColor     = TEXT_ATTR_GET_COLOR_FG(attr);
+        bgColor     = TEXT_ATTR_GET_COLOR_BG(attr);
+        focusbitmap = TEXT_ATTR_GET_FOCUS(attr);
         idx = 0;
         fontwidth = 0;
-        while((str[idx] != '\0') && (idx < len))
+        pos = 0;
+        zone.y  =  (rect->y > 0) ? (rect->y - 1): 0;
+        while(UTIL_STR_NOT_NULL(&str[idx]) && (idx < len))
         {
-            codelen = uicom_font_getdata(str+idx, &bmpInfo, txtsize);
-            if (codelen > 0)
-            {
-                idx += codelen;
-                fontwidth += Screen_PrintFont(rect->x + fontwidth, rect->y, &bmpInfo, fgColor, bgColor);
+            codelen = util_charsize(str+idx);
+            //default code len
+            if (0 == codelen) codelen = 1;
+            //
+            if (uicom_font_getdata(str+idx, codelen,&bmpInfo, txtsize) > 0)
+            {       
+                zone.x  = rect->x + fontwidth;
+                zone.w =  bmpInfo.width;
+                zone.h =  bmpInfo.height;
+                if (1 == codelen)
+                {
+                   zone.h += 1;//assic char border more bigger.  
+                }
+                fontwidth += Screen_PrintFont(zone.x , rect->y, &bmpInfo, fgColor, bgColor);
+                if (focusbitmap&(1<<pos))
+                {
+                    Screen_PrintFillRect(&zone, PIXEL_MODE_TURN);
+                }
+                pos++;
             }
-            else
-            {
-                idx += 1;
-            }
+            idx += codelen;
         }
     }
 }
 
-void Screen_PrintBmp(struct SCREEN_ZONE *rect, u_int8 *data, T_SCREEN_PIXEL_ATTR attr)
+void Screen_PrintBmp(struct SCREEN_ZONE *rect, u_int8 *data, T_UICOM_DATA_ATTR attr)
 {
     MY_DEBUG("\t[BMP] %x\n", data);
 }
@@ -201,7 +286,7 @@ void Screen_Print_8Bit_V(T_SCREEN_PIXEL x, T_SCREEN_PIXEL y, u_int8 data, enum P
     {
         if (data &(1<< i))
         {
-            Screen_PrintPixel(x, (y + i), fgcolor);
+            Screen_PrintPixel(x, (y + i),fgcolor);
         }
         else
         {

@@ -5,7 +5,7 @@
 #define THIS_MENU_NAME   "»¶Ó­"
 //"Welcome"
 static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
-static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
+static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
 static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next);
 
 DEFINE_SM_NODE_MAP(gMenuWelcome,
@@ -75,7 +75,7 @@ static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
     ui_mmi_reg_resume(menu_pub_resume);
 }
 
-static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
+static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 {
     ui_mmi_debug_handle(THIS_MENU_NAME, me, e);
 
@@ -84,6 +84,7 @@ static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
         Screen_PrintClear(NULL);
         menu_welcome_paint();
     }
+    return SM_PROC_RET_DFT;
 }
 
 static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next)

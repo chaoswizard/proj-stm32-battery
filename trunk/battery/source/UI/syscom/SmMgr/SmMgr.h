@@ -32,10 +32,18 @@ extern "C" {
 typedef u_int8  SM_NODE_HANDLE;
 typedef u_int8  SM_NODE_COUNT;
 
+#define SM_PROC_RET_DFT     SM_PROC_RET_STAY
+#define SM_PROC_RET_FINISH  SM_PROC_RET_BYPASS
+
+enum SM_PROC_RET {
+    SM_PROC_RET_STAY = 0,
+    SM_PROC_RET_BYPASS,
+};
+
 // node func map
 struct SM_NODE_PROC_TAB {
     void (*enter)(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
-    void (*handle)(SM_NODE_HANDLE me, void *param);
+    enum SM_PROC_RET (*handle)(SM_NODE_HANDLE me, void *param);
     void (*exit)(SM_NODE_HANDLE me, SM_NODE_HANDLE next);
 };
 

@@ -14,12 +14,12 @@
 #define STORESETUP_LIST_Y(y)   ((y*(STORESETUP_LIST_CELL_H+2))+1)
 #define STORESETUP_LIST_YY(y)   (STORESETUP_LIST_Y(y)+1)
 
-static u_int8 storesetup_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT pos);
-static u_int8 storesetup_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum T_UICOM_STATUS type);
+static u_int8 storesetup_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_COUNT pos);
+static u_int8 storesetup_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_COUNT pos, T_UICOM_COUNT childIdx, enum T_UICOM_STATUS type);
 
 LDEF_MENU_CONTENT_LIST(gStoreOptionSetupList, storesetup_menu_cell_zone_int, storesetup_menu_cell_data_int);
 
-static u_int8 storesetup_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT pos)
+static u_int8 storesetup_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_COUNT pos)
 {
     u_int8  count = 0;
     struct SCREEN_ZONE cellPosTable[STORESETUP_LIST_NUM] = {
@@ -63,7 +63,7 @@ static u_int8 storesetup_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_OBJ_C
 #define STORESETUP_LIST_BOX_W  36
 #define STORESETUP_LIST_BOX_H  10
 
-static u_int8 storesetup_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum T_UICOM_STATUS type)
+static u_int8 storesetup_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_COUNT pos, T_UICOM_COUNT childIdx, enum T_UICOM_STATUS type)
 {
     u_int8 colPosIdx = 0 , status  = DRAW_MODE_TEXT_ONLY;
     struct SCREEN_ZONE colPosTable[6] = {
@@ -115,7 +115,7 @@ static u_int8 storesetup_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA i
 
     memcpy(&zone->zone, &colPosTable[colPosIdx], sizeof(struct SCREEN_ZONE));
 
-    UICOM_DATA_TEXT_ATTR(item, TEXT_SMALL_BLACK);
+    UICOM_DATA_TEXT_ATTR_RST(item, TEXT_SMALL_BLACK);
 
     if (0 == pos)//´æ´¢½éÖÊ
     {
@@ -203,7 +203,7 @@ static void storageoptsetup_menu_paint(u_int8 isClear)
 {
     if (isClear)
     {
-       gmenu_content_list_clear(&gStoreOptionSetupList, 1, STORESETUP_LIST_NUM-1, 0);
+       gmenu_content_list_clear_all(&gStoreOptionSetupList, 0);
     }
     gmenu_content_list_draw(&gStoreOptionSetupList, STORESETUP_LIST_NUM, 0);
 }
@@ -211,7 +211,7 @@ static void storageoptsetup_menu_paint(u_int8 isClear)
 
 
 static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
-static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
+static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
 static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next);
 
 DEFINE_SM_NODE_MAP(gStoreOptionSetupMenu,
@@ -240,7 +240,7 @@ static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
     ui_mmi_reg_resume(menu_pub_resume);
 }
 
-static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
+static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 {
     ui_mmi_debug_handle(THIS_MENU_NAME, me, e);
     if (MSG_IS_ENTRY(e->sig))
@@ -248,6 +248,7 @@ static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
         Screen_PrintClear(NULL);
         storageoptsetup_menu_paint(0);
     }
+    else
     switch (e->sig)
     {
         case EVENT_KEY_NUM_0:
@@ -257,6 +258,8 @@ static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
             break;
         
     }
+    
+    return SM_PROC_RET_DFT;
 }
 
 static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next)

@@ -13,12 +13,12 @@
 #define SEARCHOPT_LIST_Y(y)   ((y*(SEARCHOPT_LIST_CELL_H+4))+4)
 #define SEARCHOPT_LIST_YY(y)   (SEARCHOPT_LIST_Y(y)+4)
 
-static u_int8 searchopt_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT pos);
-static u_int8 searchopt_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum T_UICOM_STATUS type);
+static u_int8 searchopt_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_COUNT pos);
+static u_int8 searchopt_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_COUNT pos, T_UICOM_COUNT childIdx, enum T_UICOM_STATUS type);
 
 LDEF_MENU_CONTENT_LIST(gSearchoptionsetupList, searchopt_menu_cell_zone_int, searchopt_menu_cell_data_int);
 
-static u_int8 searchopt_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT pos)
+static u_int8 searchopt_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_COUNT pos)
 {
     u_int8  count = 0;
     struct SCREEN_ZONE cellPosTable[SEARCHOPT_LIST_NUM] = {
@@ -58,7 +58,7 @@ static u_int8 searchopt_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_OBJ_CO
 #define SEARCHOPT_LIST_BOX_W  36
 #define SEARCHOPT_LIST_BOX_H  10
 
-static u_int8 searchopt_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum T_UICOM_STATUS type)
+static u_int8 searchopt_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_COUNT pos, T_UICOM_COUNT childIdx, enum T_UICOM_STATUS type)
 {
     u_int8 colPosIdx = 0, status  = DRAW_MODE_TEXT_ONLY;
     struct SCREEN_ZONE colPosTable[5] = {
@@ -104,7 +104,7 @@ static u_int8 searchopt_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA it
 
     memcpy(&zone->zone, &colPosTable[colPosIdx], sizeof(struct SCREEN_ZONE));
 
-    UICOM_DATA_TEXT_ATTR(item, TEXT_SMALL_BLACK);
+    UICOM_DATA_TEXT_ATTR_RST(item, TEXT_SMALL_BLACK);
 
     if (0 == pos)//显示第几条曲线
     {
@@ -177,14 +177,14 @@ static void searchoptsetup_menu_paint(u_int8 isClear)
 {
     if (isClear)
     {
-       gmenu_content_list_clear(&gSearchoptionsetupList, 1, SEARCHOPT_LIST_NUM-1, 0);
+       gmenu_content_list_clear_all(&gSearchoptionsetupList, 0);
     }
     gmenu_content_list_draw(&gSearchoptionsetupList, SEARCHOPT_LIST_NUM, 0);
 }
 
 
 static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
-static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
+static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
 static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next);
 
 DEFINE_SM_NODE_MAP(gMenuSearchOption,
@@ -213,7 +213,7 @@ static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
     ui_mmi_reg_resume(menu_pub_resume);
 }
 
-static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
+static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 {
     ui_mmi_debug_handle(THIS_MENU_NAME, me, e);
     if (MSG_IS_ENTRY(e->sig))
@@ -221,6 +221,7 @@ static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
         Screen_PrintClear(NULL);
         searchoptsetup_menu_paint(0);
     }
+    else 
     switch (e->sig)
     {
         case EVENT_KEY_NUM_0:
@@ -230,6 +231,8 @@ static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
             break;
         
     }
+    
+    return SM_PROC_RET_DFT;
 }
 
 static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next)

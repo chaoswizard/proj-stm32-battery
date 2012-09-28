@@ -24,12 +24,12 @@
 #define CHANNELSW_LIST_Y(y)   (((y)*(CHANNELSW_LIST_CELL_H))+10)
 #define CHANNELSW_LIST_YY(y)  (CHANNELSW_LIST_Y(y)+2)
 
-static u_int8 channelsw_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT pos);
-static u_int8 channelsw_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum T_UICOM_STATUS type);
+static u_int8 channelsw_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_COUNT pos);
+static u_int8 channelsw_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_COUNT pos, T_UICOM_COUNT childIdx, enum T_UICOM_STATUS type);
 
 LDEF_MENU_CONTENT_LIST(gSearchoptionsetupList, channelsw_menu_cell_zone_int, channelsw_menu_cell_data_int);
 
-static u_int8 channelsw_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_OBJ_COUNT pos)
+static u_int8 channelsw_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_COUNT pos)
 {
     u_int8  row = 0, col;
     if (pos < CHANNELSW_NUM_PER_PAGE)
@@ -75,7 +75,7 @@ static u_int8 channelsw_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_OBJ_CO
 #define CHANNELSW_LIST_BOX_W  36
 #define CHANNELSW_LIST_BOX_H  12
 
-static u_int8 channelsw_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_OBJ_COUNT pos, T_UICOM_OBJ_COUNT childIdx, enum T_UICOM_STATUS type)
+static u_int8 channelsw_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_COUNT pos, T_UICOM_COUNT childIdx, enum T_UICOM_STATUS type)
 {
     u_int8 colPosIdx = 0, status  = DRAW_MODE_TEXT_ONLY;
     struct SCREEN_ZONE colPosTable[3] = {
@@ -92,7 +92,7 @@ static u_int8 channelsw_menu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA it
 
     memcpy(&zone->zone, &colPosTable[colPosIdx], sizeof(struct SCREEN_ZONE));
 
-    UICOM_DATA_TEXT_ATTR(item, TEXT_SMALL_BLACK);
+    UICOM_DATA_TEXT_ATTR_RST(item, TEXT_SMALL_BLACK);
 
     if (pos < CHANNELSW_NUM_PER_PAGE)//Í¨µÀ
     {
@@ -156,13 +156,13 @@ static void channelsw_menu_paint(u_int8 isClear)
 {
     if (isClear)
     {
-       gmenu_content_list_clear(&gSearchoptionsetupList, 1, CHANNELSW_LIST_NUM-1, 0);
+       gmenu_content_list_clear_all(&gSearchoptionsetupList,  0);
     }
     gmenu_content_list_draw(&gSearchoptionsetupList, CHANNELSW_LIST_NUM, 0);
 }
 
 static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
-static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
+static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
 static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next);
 
 DEFINE_SM_NODE_MAP(gMenuChSwitch,
@@ -201,24 +201,40 @@ static void chnelsw_menu_tips(void)
     SCREEN_ZONE_INIT(&rect, 70, 1, 128, 12);
     Screen_PrintString(&rect, UICOM_STR_TONGDAOXUANZETISHI1, TEXT_SMALL_BLACK);
 }
-static void menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
+static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 {
     ui_mmi_debug_handle(THIS_MENU_NAME, me, e);
-     if (MSG_IS_ENTRY(e->sig))
-     {
-         Screen_PrintClear(NULL);
-         chnelsw_menu_tips();
-         channelsw_menu_paint(0);
-     }
-     switch (e->sig)
-     {
-         case EVENT_KEY_NUM_0:
-             channelsw_menu_paint(1);
-             break;
-         default:
-             break;
-         
-     }
+    
+    if (MSG_IS_ENTRY(e->sig))
+    {
+        Screen_PrintClear(NULL);
+        chnelsw_menu_tips();
+        channelsw_menu_paint(0);
+    }
+    else 
+    {
+        u_int8 focus;
+        
+        switch (e->sig)
+        {
+            case EVENT_KEY_NUM_0:
+            channelsw_menu_paint(1);
+            break;
+            case EVENT_KEY_RIGHT:
+            case EVENT_KEY_DOWN:
+            gmenu_content_list_movefocus(&gSearchoptionsetupList, 1, 1);
+            break;
+            case EVENT_KEY_UP:
+                case EVENT_KEY_LEFT:
+            gmenu_content_list_movefocus(&gSearchoptionsetupList, -1, 1);
+            break;
+            default:
+            break;
+        }
+    }
+
+
+    return SM_PROC_RET_DFT;
 }
 
 static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next)
