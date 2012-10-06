@@ -144,7 +144,10 @@ static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
     }
     switch (e->sig)
     {
-        case EVENT_KEY_SUB:
+        case EVENT_KEY_LEFT:
+        case EVENT_KEY_RIGHT:
+        case EVENT_KEY_UP:
+        case EVENT_KEY_DOWN:
             yesno_menu_paint(1);
             break;
         default:

@@ -180,10 +180,13 @@ static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
         case EVENT_KEY_OK:
         ui_mmi_return(1);
         return UI_PROC_RET_FINISH;
-        case EVENT_KEY_SUB:
-            gWarnInfoSearchCtrl.tstVal += (WARNINFO_TAB_ROW_NUM-1);
-            warninfomenu_paint(1);
-            break;
+        case EVENT_KEY_LEFT:
+        case EVENT_KEY_RIGHT:
+        case EVENT_KEY_UP:
+        case EVENT_KEY_DOWN:
+        gWarnInfoSearchCtrl.tstVal += (WARNINFO_TAB_ROW_NUM-1);
+        warninfomenu_paint(1);
+        break;
         default:
             break;
         

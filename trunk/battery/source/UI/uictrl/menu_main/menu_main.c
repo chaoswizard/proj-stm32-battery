@@ -211,7 +211,10 @@ static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
     else
     switch (e->sig)
     {
-        case EVENT_KEY_SUB:
+        case EVENT_KEY_LEFT:
+        case EVENT_KEY_RIGHT:
+        case EVENT_KEY_UP:
+        case EVENT_KEY_DOWN:
             gMainInterfaceCtrl.tstVal += (MAINMENU_TAB_ROW_NUM-1);
             menu_main_paint(1);
             break;
