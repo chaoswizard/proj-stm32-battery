@@ -363,7 +363,9 @@ static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
     {
         case EVENT_KEY_DOWN:
         case EVENT_KEY_UP:
-        gmenu_content_list_movefocus(&THIS_MENU_UI_CONTAINER, (EVENT_KEY_DOWN == e->sig)?1:-1, 1);
+        case EVENT_KEY_RIGHT:
+        case EVENT_KEY_LEFT:
+        gmenu_content_list_movefocus(&THIS_MENU_UI_CONTAINER, (LIST_EVENT_IS_NEXT(e->sig))?1:-1, 1);
         curfocus = gmenu_content_list_getfocus(&THIS_MENU_UI_CONTAINER);
         if ((curfocus == IDX_CKMODE_TIME_VAL) || (curfocus == IDX_CKMODE_VOL_VAL) )
         {

@@ -60,6 +60,7 @@ struct GMENU_CONTENT_LIST list = \
     static DEF_MENU_CONTENT_LIST(list, initzone, inititem)
 
 
+#define LIST_EVENT_IS_NEXT(_msg_) ((EVENT_KEY_DOWN == (_msg_)) || (EVENT_KEY_RIGHT == (_msg_)))
 void gmenu_content_list_draw(struct GMENU_CONTENT_LIST *list, u_int8 len, u_int8 focus);
 void gmenu_content_list_clear(struct GMENU_CONTENT_LIST *list, u_int8 pos1, u_int8 pos2, u_int8 isClearBorder);
 void gmenu_content_list_clear_all(struct GMENU_CONTENT_LIST *list, u_int8 isClearBorder);

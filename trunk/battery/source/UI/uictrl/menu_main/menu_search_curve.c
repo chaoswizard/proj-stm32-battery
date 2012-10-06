@@ -294,7 +294,9 @@ static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
             return UI_PROC_RET_FINISH;
         case EVENT_KEY_DOWN:
         case EVENT_KEY_UP:
-        gmenu_content_list_movefocus(&THIS_MENU_UI_CONTAINER, (EVENT_KEY_DOWN == e->sig)?1:-1, 1);
+        case EVENT_KEY_RIGHT:
+        case EVENT_KEY_LEFT:
+        gmenu_content_list_movefocus(&THIS_MENU_UI_CONTAINER, (LIST_EVENT_IS_NEXT(e->sig))?1:-1, 1);
         searchoptsetup_menu_inputbox_open(gmenu_content_list_getfocus(&THIS_MENU_UI_CONTAINER), FALSE);
         gmenu_content_list_movefocus(&THIS_MENU_UI_CONTAINER, 0, 0);
         break;
