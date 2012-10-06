@@ -12,6 +12,7 @@ extern "C" {
 
 void ui_menu_init(void);
 void ui_menu_deinit(void);
+void ui_menu_reset(void);
 u_int8 ui_menu_bypass_proc(struct EVENT_NODE_ITEM *e);
 u_int8 ui_menu_shotcut_proc(struct EVENT_NODE_ITEM *e);
 

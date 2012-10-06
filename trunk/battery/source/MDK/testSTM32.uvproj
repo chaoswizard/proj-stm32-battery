@@ -586,16 +586,6 @@
           <GroupName>mmi_menu</GroupName>
           <Files>
             <File>
-              <FileName>menu_poweron.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\UI\uictrl\menu_poweron\menu_poweron.c</FilePath>
-            </File>
-            <File>
-              <FileName>menu_stop.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\UI\uictrl\menu_poweron\menu_stop.c</FilePath>
-            </File>
-            <File>
               <FileName>menu_welcome.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\UI\uictrl\menu_poweron\menu_welcome.c</FilePath>
@@ -636,14 +626,24 @@
               <FilePath>..\UI\uictrl\menu_poweron\menu_pop_yesno.c</FilePath>
             </File>
             <File>
-              <FileName>menu_store_option.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\UI\uictrl\menu_main\menu_store_option.c</FilePath>
-            </File>
-            <File>
               <FileName>menu_showcurve.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\UI\uictrl\menu_poweron\menu_showcurve.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu_search_paramset.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\UI\uictrl\menu_main\menu_search_paramset.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu_searchwarn.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\UI\uictrl\menu_main\menu_searchwarn.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu_search_curve.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\UI\uictrl\menu_main\menu_search_curve.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -4,10 +4,18 @@
 
 #define THIS_MENU_NAME   "œ‘ æ«˙œﬂ"
 //"ShowCurve"
-#define SHOW_CURVE_X  12
-#define SHOW_CURVE_Y  2
-#define SHOW_CURVE_H             56
-#define SHOW_CURVE_W             SHOW_CURVE_H*2
+#define THIS_MENU_SM_HANDLE      (gMenuShowCurveSm)
+#define THIS_MENU_UI_CONTAINER   (gCurveGoupMenu)
+
+#define SHOW_GROUP_CURVE_NUM    (4)
+
+
+
+
+#define SHOW_CURVE_X             8
+#define SHOW_CURVE_Y             10
+#define SHOW_CURVE_H             43
+#define SHOW_CURVE_W             88
 //---------------------------------------------------------------------
 #define UNIT_MAX_X()             SHOW_CURVE_W
 #define UNIT_MAX_Y()             SHOW_CURVE_H
@@ -15,103 +23,192 @@
 #define POS_MIN_X                SHOW_CURVE_X
 #define POS_MAX_X                (SHOW_CURVE_X + SHOW_CURVE_W-1)
 #define POS_MIN_Y                SHOW_CURVE_Y
-#define POS_MAX_Y                (POS_MIN_Y + SHOW_CURVE_H-1)
-#define UNIT_FACTOR_Y             1
-#define UNIT_FACTOR_X             (SHOW_CURVE_W/SHOW_CURVE_H)
+#define POS_MAX_Y                (POS_MIN_Y + SHOW_CURVE_H)
+#define UNIT_FACTOR_Y(y)         (y)
+#define UNIT_FACTOR_X(x)         (x)/*((((x)*SHOW_CURVE_W)/SHOW_CURVE_H))*/
 //----------------------------------------------------------------------
-#define UNIT_TO_POS_X(pixel)    (SHOW_CURVE_X + ((pixel)*UNIT_FACTOR_X))
-#define UNIT_TO_POS_Y(pixel)    (POS_MAX_Y -    ((pixel)*UNIT_FACTOR_Y))
+#define UNIT_TO_POS_X(pixel)    (SHOW_CURVE_X + (UNIT_FACTOR_X(pixel)))
+#define UNIT_TO_POS_Y(pixel)    (POS_MAX_Y -    (UNIT_FACTOR_Y(pixel)))
 #define UNIT_TO_VALUE_X(pixel)  ((pixel)*1)
-#define VALUE_TO_UNIT_Y(val)    ((val)/UNIT_FACTOR_Y)
+#define VALUE_TO_UNIT_Y(val)    ((val)/UNIT_FACTOR_Y(1))
 //---------------------------------------------------------------------
-#define SHOW_CURVE_Y_RULE        UNIT_FACTOR_Y*8
-#define SHOW_CURVE_X_RULE        UNIT_FACTOR_X*8
+#define SHOW_CURVE_Y_RULE        UNIT_FACTOR_Y(10)
+#define SHOW_CURVE_X_RULE        UNIT_FACTOR_X(10)
 //---------------------------------------------------------------------
+
+#define SHOW_GROUP_CURVE_X       99
+#define SHOW_CURVE_X_NAME_X      (POS_MAX_X + 4)
+#define SHOW_CURVE_X_NAME_Y      (POS_MAX_Y - 4)
+
+#define SHOW_CURVE_Y_NAME_X      1
+#define SHOW_CURVE_Y_NAME_Y      1
+
+
+
+
 static struct {
-    u_int8 test;
-    u_int8 mode;
-    struct gmenu_curve_param getName;
+    u_int16 bitmapItemStatus;
+    u_int8 chCount;
+    u_int8 groupstart;
+    u_int32 keybase;
+    struct gmenu_curve_config cfg;
 }gShowCurveCtrl = {0};
 
-static T_UICOM_PAINT_FLAG  menu_showcurve_datainit(T_UICOM_COUNT group, T_UICOM_COUNT *key,T_UICOM_COUNT *y);
+
+#define CURVEGRP_ITEM_SET_STATUS(idx)  (gShowCurveCtrl.bitmapItemStatus = UTIL_BIT_SET(gShowCurveCtrl.bitmapItemStatus, (idx)))
+#define CURVEGRP_ITEM_CLR_STATUS(idx)  (gShowCurveCtrl.bitmapItemStatus = UTIL_BIT_CLR(gShowCurveCtrl.bitmapItemStatus, (idx)))
+#define CURVEGRP_ITEM_CPL_STATUS(idx)  (gShowCurveCtrl.bitmapItemStatus = UTIL_BIT_CPL(gShowCurveCtrl.bitmapItemStatus, (idx)))
+#define CURVEGRP_ITEM_TST_STATUS(idx)  UTIL_BIT_TST(gShowCurveCtrl.bitmapItemStatus, (idx))
+#define CURVEGRP_ITEM_SET_STATUS_RANGE(idxStart, idxEnd)  (gShowCurveCtrl.bitmapItemStatus = UTIL_BIT_SET_RANGE(gShowCurveCtrl.bitmapItemStatus, idxStart, idxEnd))
+#define CURVEGRP_ITEM_CLR_STATUS_RANGE(idxStart, idxEnd)  (gShowCurveCtrl.bitmapItemStatus = UTIL_BIT_CLR_RANGE(gShowCurveCtrl.bitmapItemStatus, idxStart, idxEnd))
+#define CURVEGRP_ITEM_TST_STATUS_RANGE(idxStart, idxEnd)   UTIL_BIT_TST_RANGE(gShowCurveCtrl.bitmapItemStatus, idxStart, idxEnd)
 
 
-void gmenu_show_curve(struct gmenu_curve_param *param)
+static void curvegroup_menu_paint(u_int8 isClear);
+static void curvemap_paint(u_int8 count);
+
+void gmenu_show_curve(struct gmenu_curve_config *param, bool_t pop)
 {
-
+   if (pop)
+   {
+        ui_mmi_enter(UI_NODE_SHOWCURVE, 0);
+   }
+   else
+   {
+        curvemap_paint(4);
+        curvegroup_menu_paint(TRUE);
+   }
 }
 
-LDEF_MENU_VALUE_MAP(gMapShowCurve, menu_showcurve_datainit);
 
-static u_int32  menu_curve_map(u_int32 x)
+static T_UICOM_DRAW_MODE  curve_menu_datainit(T_UICOM_COUNT group, T_UICOM_COUNT *key,T_UICOM_COUNT *y);
+
+LDEF_MENU_VALUE_MAP(gMapShowCurveMap, curve_menu_datainit);
+
+static u_int32  curve_menu_test_map(T_UICOM_COUNT group, u_int32 x, u_int32 grpbase, u_int32 x_start)
 {
-    u_int8 mode = gShowCurveCtrl.mode%23;
+    return (group + grpbase)*(x + x_start);
+}
 
-    if (mode < 4)
+static T_UICOM_DRAW_MODE  curve_menu_datainit(T_UICOM_COUNT group, T_UICOM_COUNT *key,T_UICOM_COUNT *y)
+{
+    u_int32 val, pos;
+    
+    if (gShowCurveCtrl.cfg.fun)
     {
-        return ((x+mode)%8)*((x+mode)%8) + mode;
+        val = gShowCurveCtrl.cfg.fun(group, UNIT_TO_VALUE_X(*key), gShowCurveCtrl.groupstart, gShowCurveCtrl.keybase);
     }
-    else if (mode < 7)
+    else 
     {
-        if (x%mode == 0)
-        {
-            if (32 == gShowCurveCtrl.test)
-            {
-                gShowCurveCtrl.test = mode;
-            }
-            else
-            {
-                gShowCurveCtrl.test = 32;
-            }
-        }
-        
-        return gShowCurveCtrl.test;//
+        val = curve_menu_test_map(group, UNIT_TO_VALUE_X(*key), gShowCurveCtrl.groupstart, gShowCurveCtrl.keybase);
     }
-    else if (mode <= 18)
+
+    val = UNIT_TO_POS_Y(VALUE_TO_UNIT_Y(val)); 
+    pos = UNIT_TO_POS_X(*key);
+    if (((pos > POS_MAX_X) || (pos < POS_MIN_X))\
+       || ((val > POS_MAX_Y) || (val < POS_MIN_Y)))
     {
-        return (x*x*(18-mode))%(SHOW_CURVE_H-4);
+        (*y)   = 0;
+        (*key) = 0;
+        return DRAW_MODE_SKIP;
+    }
+    
+    (*y)   = val;
+    (*key) = pos;
+    return DRAW_MODE_MAP_LINE;
+}
+
+static void curve_menu_setname(void)
+    {
+    struct SCREEN_ZONE zone;
+    struct UICOM_DATA tmpdata = {0};
+    u_int8 tmpbuf[64] = {0};
+
+    SCREEN_ZONE_INIT(&zone, SHOW_CURVE_X_NAME_X, SHOW_CURVE_X_NAME_Y, 32, 14);
+    UICOM_DATA_TEXT_ATTR_RST(&tmpdata, TEXT_STYLE_SMALL_SOLID);
+    UICOM_DATA_FILL(&tmpdata, tmpbuf);
+    if (gShowCurveCtrl.cfg.curveXname)
+    {
+       gShowCurveCtrl.cfg.curveXname(&tmpdata);
     }
     else
     {
-        return x*(mode-12);
+        sprintf(UICOM_DATA_BUF(&tmpdata), "x");
     }
-    
-}
+    gui_osd_data_draw(&tmpdata, &zone);
 
-
-
-static T_UICOM_PAINT_FLAG  menu_showcurve_datainit(T_UICOM_COUNT group, T_UICOM_COUNT *key,T_UICOM_COUNT *y)
-{
-    T_UICOM_COUNT unit;
-    u_int32 val;
-
-    val    = menu_curve_map(UNIT_TO_VALUE_X(*key));
-    unit   = VALUE_TO_UNIT_Y(val);
-    (*y)   = UNIT_TO_POS_Y(unit); 
-    (*key) = UNIT_TO_POS_X(*key);
-    if ((((*key) > POS_MAX_X) || ((*key) < POS_MIN_X))\
-       || (((*y) > POS_MAX_Y) || ((*y) < POS_MIN_Y)))
+    SCREEN_ZONE_INIT(&zone, SHOW_CURVE_Y_NAME_X, SHOW_CURVE_Y_NAME_Y, SHOW_CURVE_W, 14);
+    UICOM_DATA_TEXT_ATTR_RST(&tmpdata, TEXT_STYLE_SMALL_SOLID);
+    UICOM_DATA_FILL(&tmpdata, tmpbuf);
+    if (gShowCurveCtrl.cfg.curveYname)
     {
-        return PAINT_MAP_NULL;
+       gShowCurveCtrl.cfg.curveYname(&tmpdata);
     }
-    
-    return PAINT_MAP_NORAML;
+    else
+    {
+       sprintf(UICOM_DATA_BUF(&tmpdata), "y=(A+%d)(x+%d)", gShowCurveCtrl.groupstart,gShowCurveCtrl.keybase);
+         //sprintf(UICOM_DATA_BUF(&tmpdata), "y=(AB%d)C%dxtG", gShowCurveCtrl.groupstart,gShowCurveCtrl.keybase);
+    }
+    gui_osd_data_draw(&tmpdata, &zone);
 }
 
+static T_UICOM_DRAW_MODE curvemap_ruler_name(T_UICOM_ORDER order, u_int16 num, struct OSD_ZONE *cellzone, PUICOM_DATA item)
+{
+    u_int8 ofs;
+    UICOM_DATA_TEXT_ATTR_RST(item, TEXT_STYLE_SMALL_SOLID);
 
-static void  menu_show_curve_paint(bool_t isClear);
+    if (LINE_DIR_IS_X(order))
+    {
+        cellzone->border.t += 3;
+        
+        sprintf(UICOM_DATA_BUF(item), "%d", num + gShowCurveCtrl.keybase);
+        ofs = util_strsize(UICOM_DATA_BUF(item));
+        if (ofs)
+        {
+            ofs = (ofs*8);
+            ofs = (ofs+SHOW_CURVE_X_RULE)/SHOW_CURVE_X_RULE;
+        }
+        if (0 == ofs) ofs = 1;
 
-static void  menu_show_curve_paint(bool_t isClear)
+        //MY_DEBUG("RULER[%d] %X %d\n", num, order, LINE_DIR_IS_END(order));
+        
+        if (LINE_DIR_IS_END(order) || (0==num) || ((ofs < 5)&&(0 == (num % ofs))))
+        {
+            UTIL_VAL_SUB(cellzone->zone.x, 2, u_int8);
+        }
+        else
+        {
+            return DRAW_MODE_SKIP;
+        }
+    }
+    else
+    {
+        if (0 == num)
+        {
+            return DRAW_MODE_SKIP;
+        }
+        cellzone->zone.x = 0;
+        UTIL_VAL_SUB(cellzone->zone.y, 3, u_int8);
+        sprintf(UICOM_DATA_BUF(item), "%d", num);
+    }
+    
+    return DRAW_MODE_TEXT_ONLY;
+}
+
+static void  curvemap_paint(u_int8 count)
 {
    struct OSD_ZONE osdZone;
 
-   SCREEN_ZONE_INIT(&osdZone.zone, SHOW_CURVE_X, SHOW_CURVE_Y, SHOW_CURVE_W, SHOW_CURVE_H);
+   gShowCurveCtrl.chCount = count;
+   Screen_PrintClear(NULL);
+   curve_menu_setname();
    SCREEN_BORDER_INIT(&osdZone.border, SHOW_CURVE_Y_RULE, 0, 0, SHOW_CURVE_X_RULE);
-   if (isClear)
-   {
-       Screen_PrintClear(&osdZone.zone);
-   }
-   gmenu_value_map_draw(&gMapShowCurve, &osdZone, UNIT_MAX_X(), 1, 1); 
+   SCREEN_ZONE_INIT(&osdZone.zone, SHOW_CURVE_X?(SHOW_CURVE_X-1):0, 
+                SHOW_CURVE_Y?(SHOW_CURVE_Y-1):0, SHOW_CURVE_W+1, SHOW_CURVE_H+2);
+   gmenu_ruler_draw(&osdZone, PIXEL_MODE_SET, curvemap_ruler_name);
+   
+   gmenu_value_map_draw(&gMapShowCurveMap, UNIT_MAX_X(), count, gShowCurveCtrl.bitmapItemStatus);
+   //--------------------------------------------------------------------
 }
 
 
@@ -120,7 +217,7 @@ static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
 static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e);
 static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next);
 
-DEFINE_SM_NODE_MAP(gMenuShowCurve,
+DEFINE_SM_NODE_MAP(THIS_MENU_SM_HANDLE,
                                   menu_pub_enter,
                                   menu_pub_handle,
                                   menu_pub_exit);
@@ -130,52 +227,203 @@ DEFINE_SM_NODE_MAP(gMenuShowCurve,
 
 static void menu_pub_suspend(SM_NODE_HANDLE me, SM_NODE_HANDLE child)
 {
-    ui_mmi_debug_suspend(THIS_MENU_NAME, me, child);
+    UIMMI_DEBUGSM_SUSPEND(THIS_MENU_NAME, me, child);
 }
 
 static void menu_pub_resume(SM_NODE_HANDLE me, SM_NODE_HANDLE child)
 {
-    ui_mmi_debug_resume(THIS_MENU_NAME, child, me);
+    UIMMI_DEBUGSM_RESUME(THIS_MENU_NAME, child, me);
 }
 
 
 static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
 {
-    ui_mmi_debug_enter(THIS_MENU_NAME, parent, me);
+    UIMMI_DEBUGSM_ENTER(THIS_MENU_NAME, parent, me);
     ui_mmi_reg_suspend(menu_pub_suspend);
     ui_mmi_reg_resume(menu_pub_resume);
+    if (0 == gShowCurveCtrl.cfg.maxKeybase)
+    {
+        gShowCurveCtrl.cfg.maxKeybase = 1985;
+    }
+    
+    if (0 == gShowCurveCtrl.cfg.maxGrpbase)
+    {
+        gShowCurveCtrl.cfg.maxGrpbase = 99;
+    }
+}
+
+static void curve_menu_update(void)
+{
+    curvemap_paint(SHOW_GROUP_CURVE_NUM);
+    curvegroup_menu_paint(TRUE);
 }
 
 static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 {
-    ui_mmi_debug_handle(THIS_MENU_NAME, me, e);
+    UIMMI_DEBUGSM_HANDLE(THIS_MENU_NAME, me, e);
 
     if (MSG_IS_ENTRY(e->sig))
     {
         Screen_PrintClear(NULL);
-        menu_show_curve_paint(1);
+        CURVEGRP_ITEM_SET_STATUS_RANGE(0, 7);
+        curve_menu_update();
+        return UI_PROC_RET_FINISH;
+    }
+    
+    if (MSG_IS_CHAR(e->sig) && KEY_EVENT_IS_DIGIT(e->param))
+    {
+        u_int8 keynum  = KEY_EVENT_DIGIT(e->param);
+        if ((keynum > 0) && (keynum <= SHOW_GROUP_CURVE_NUM))
+        {
+            keynum -= 1;
+            CURVEGRP_ITEM_CPL_STATUS(keynum);
+            if (keynum < gShowCurveCtrl.chCount)
+            {
+                curvemap_paint(gShowCurveCtrl.chCount);
+            }
+            curvegroup_menu_paint(TRUE);
+        }
     }
     else
     switch (e->sig)
     {
-        case EVENT_KEY_NUM_0:
-            gShowCurveCtrl.mode++;
-            MY_DEBUG("Mode %d\n", gShowCurveCtrl.mode%15);
-            menu_show_curve_paint(1);
+        case EVENT_KEY_OK:
+            ui_mmi_return(1);
+            return UI_PROC_RET_FINISH;
+        case EVENT_KEY_DOWN:
+            if (gShowCurveCtrl.groupstart < gShowCurveCtrl.cfg.maxGrpbase)
+            {
+                gShowCurveCtrl.groupstart++;
+                curve_menu_update();
+            }
+            break;
+        case EVENT_KEY_UP:
+            if (gShowCurveCtrl.groupstart > 0)
+            {
+                gShowCurveCtrl.groupstart--;
+                curve_menu_update();
+            }
+            break;
+        case EVENT_KEY_RIGHT:
+            if (gShowCurveCtrl.keybase < gShowCurveCtrl.cfg.maxKeybase)
+            {
+                gShowCurveCtrl.keybase++;
+                curve_menu_update();
+            }
+            break;
+        case EVENT_KEY_LEFT:
+            if (gShowCurveCtrl.keybase > 0)
+            {
+                gShowCurveCtrl.keybase--;
+                curve_menu_update();
+            }
             break;
         default:
             break;
         
     }
     
-    return SM_PROC_RET_DFT;
+    return UI_PROC_RET_DFT;
 }
 
 static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next)
 {
-    ui_mmi_debug_exit(THIS_MENU_NAME, next, me);
+    UIMMI_DEBUGSM_EXIT(THIS_MENU_NAME, next, me);
+    memset(&gShowCurveCtrl, 0, sizeof(gShowCurveCtrl));
 }
 
 
+//=========================================================
+#define IDX_CURVE_GROUP_01   (0)
+#define IDX_CURVE_GROUP_02   (1)
+#define IDX_CURVE_GROUP_03   (2)
+#define IDX_CURVE_GROUP_04   (3)
+
+
+#define CURVE_GROUP_LIST_NUM  (SHOW_GROUP_CURVE_NUM)
+
+#define CURVE_GROUP_LIST_CELL_H  (10)
+#define CURVE_GROUP_LIST_CELL_W  (28)
+#define CURVE_GROUP_LIST_X(x)    ((x))
+#define CURVE_GROUP_LIST_Y(y)    (((y)*(CURVE_GROUP_LIST_CELL_H+2))+1)
+
+static u_int8 curvegroup_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_COUNT pos);
+static T_UICOM_DRAW_MODE curvegroup_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_COUNT pos, T_UICOM_COUNT childIdx, T_UICOM_EVENT *p_type);
+
+LDEF_MENU_CONTENT_LIST(THIS_MENU_UI_CONTAINER, curvegroup_cell_zone_int, curvegroup_cell_data_int);
+
+static u_int8 curvegroup_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_COUNT pos)
+{
+    struct SCREEN_ZONE cellPosTable[CURVE_GROUP_LIST_NUM] = {
+        {CURVE_GROUP_LIST_X(SHOW_GROUP_CURVE_X), CURVE_GROUP_LIST_Y(0), CURVE_GROUP_LIST_CELL_W, CURVE_GROUP_LIST_CELL_H},
+        {CURVE_GROUP_LIST_X(SHOW_GROUP_CURVE_X), CURVE_GROUP_LIST_Y(1), CURVE_GROUP_LIST_CELL_W, CURVE_GROUP_LIST_CELL_H},
+        {CURVE_GROUP_LIST_X(SHOW_GROUP_CURVE_X),CURVE_GROUP_LIST_Y(2), CURVE_GROUP_LIST_CELL_W, CURVE_GROUP_LIST_CELL_H},
+        {CURVE_GROUP_LIST_X(SHOW_GROUP_CURVE_X),CURVE_GROUP_LIST_Y(3), CURVE_GROUP_LIST_CELL_W, CURVE_GROUP_LIST_CELL_H},
+    };
+    zone->border.l = 0;
+    zone->border.t = 0;
+    zone->border.b = 0;
+    zone->border.r = 0;
+    memcpy(&zone->zone, &cellPosTable[pos], sizeof(struct SCREEN_ZONE));
+
+    return 1;
+}
+
+#define CURVE_GROUP_LIST_BOX_W  36
+#define CURVE_GROUP_LIST_BOX_H  10
+
+static T_UICOM_DRAW_MODE curvegroup_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_COUNT pos, T_UICOM_COUNT childIdx, T_UICOM_EVENT *p_type)
+{
+    u_int8 colPosIdx = 0;
+    T_UICOM_EVENT type = (*p_type);
+    struct SCREEN_ZONE colPosTable[1] = {
+        {0,   0,  CURVE_GROUP_LIST_BOX_W,CURVE_GROUP_LIST_BOX_H},
+    };
+    
+    SCREEN_BORDER_INIT(&zone->border, 1, 0, 0, 0);
+
+    colPosIdx = 0;
+
+    memcpy(&zone->zone, &colPosTable[colPosIdx], sizeof(struct SCREEN_ZONE));
+
+    UICOM_CLR_SLECTED((*p_type));
+    UICOM_DATA_TEXT_ATTR_RST(item, TEXT_STYLE_DEFAULT);
+    if (CURVEGRP_ITEM_TST_STATUS(pos))
+    {
+        UICOM_SET_SLECTED((*p_type));
+    }
+    if (0 == childIdx)
+    {
+        if (pos< gShowCurveCtrl.chCount)
+        {
+            if (gShowCurveCtrl.cfg.curvetitle)
+            {
+                gShowCurveCtrl.cfg.curvetitle(pos, item);
+            }
+            else
+            {
+                sprintf(UICOM_DATA_BUF(item), "CH%02d", 1+pos);
+            }
+        }
+        else
+        {
+            UICOM_DATA_FILL(item, NULL);
+        }
+    }
+
+    
+    return DRAW_MODE_TEXT_ONLY;
+
+}
+
+static void curvegroup_menu_paint(u_int8 isClear)
+{
+    if (isClear)
+    {
+       gmenu_content_list_clear_all(&THIS_MENU_UI_CONTAINER, 0);
+    }
+    
+    gmenu_content_list_draw(&THIS_MENU_UI_CONTAINER,CURVE_GROUP_LIST_NUM, 0);
+}
 
 

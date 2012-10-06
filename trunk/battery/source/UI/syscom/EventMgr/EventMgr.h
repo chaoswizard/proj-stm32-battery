@@ -11,41 +11,75 @@ typedef u_int8 EVENT_NODE_COUNT;
 
 #define MSG_IS_VALID(msg)      (((msg) > EVENT_INVALID) && ((msg) < EVENT_END))
 
-#define MSG_IS_KEY(msg)        (((msg) >= EVENT_KEY_NUM_0) && ((msg) <= EVENT_KEY_COMBIN))
 #define MSG_IS_SM(msg)         (((msg) >= EVENT_SM_INIT) && ((msg) <= EVENT_SM_EXIT))
 #define MSG_IS_SYS(msg)        (((msg) >= EVENT_SYS_INIT) && ((msg) <= EVENT_SYS_EXIT))
+#define MSG_IS_USR(msg)        ((msg) == EVENT_USR_MMI)
+#define MSG_IS_CHAR(msg)       ((msg) == EVENT_KEY_CHAR)
 #define MSG_IS_CANCLE(msg)     ((msg) == EVENT_KEY_ESC)
 #define MSG_IS_ENTER(msg)      ((msg) == EVENT_KEY_OK)
 #define MSG_IS_STOP(msg)       ((msg) == EVENT_KEY_STOP)
 #define MSG_IS_START(msg)      ((msg) == EVENT_KEY_RUN)
 #define MSG_IS_ENTRY(msg)      ((msg) == EVENT_SM_ENTRY)
-
-#define MSG_IS_DIGIT_KEY(msg)  (((msg) >= EVENT_KEY_NUM_0) && ((msg) <= EVENT_KEY_NUM_9))
-
 //----------------------------------------------------------------------
-union SM_EVENT_PARAM {
-    /* if msg == EVENT_SM_INIT */
-    //struct {SM_NODE_HANDLE me;} init;
-    /* if msg == EVENT_SM_TRANS */
-    struct {SM_NODE_HANDLE target; u_int8 quitCurrent;} trans;
-    /* if msg == EVENT_SM_RETURN */
-    struct {SM_NODE_COUNT retLvl;} ret;
-    /* if msg == EVENT_SM_EXIT */
-    //struct {SM_NODE_HANDLE me;} exit;
+#define SM_EVENT_TRANS_INIT(p, t, m)     {(p).sm.cfg.trans.target = (t);(p).sm.cfg.trans.mode = (m);}
+#define SM_EVENT_RETUEN_INIT(p, l)       ((p).sm.cfg.ret.retLvl = (l))
+
+#define SM_EVENT_TRANS_TARGET(p)         ((p).sm.cfg.trans.target)
+#define SM_EVENT_TRANS_MODE(p)           ((p).sm.cfg.trans.mode)
+#define SM_EVENT_RETURN_LVL(p)           ((p).sm.cfg.ret.retLvl)
+
+
+
+struct SM_EVENT_PARAM {
+    union {
+        /* if msg == EVENT_SM_INIT */
+        //struct {SM_NODE_HANDLE me;} init;
+        /* if msg == EVENT_SM_TRANS */
+        struct {SM_NODE_HANDLE target; u_int8 mode;} trans;
+        /* if msg == EVENT_SM_RETURN */
+        struct {SM_NODE_COUNT retLvl;} ret;
+        /* if msg == EVENT_SM_EXIT */
+        //struct {SM_NODE_HANDLE me;} exit;
+    } cfg;
 };
 //----------------------------------------------------------------------
-union KEY_EVENT_PARAM {
-    /* if msg == EVENT_KEY_NUM_X */
-    struct {u_int8 val;} digit;
-    /* if msg == EVENT_KEY_COMBIN */
-    struct {u_int8 keyNum; EVENT_NODE_HANDLE keySeq[2];} combin;
+#define KEYMODE_DIGIT_CHAR    0x1
+#define KEYMODE_NORMAL_CHAR   0x2
+
+#define KEY_EVENT_DIGIT_INIT(p, val) {\
+    (p).key.mode =KEYMODE_DIGIT_CHAR;(p).key.cfg.ch = (val);}
+
+#define KEY_EVENT_IS_DIGIT(p)   ((p).key.mode == KEYMODE_DIGIT_CHAR)
+#define KEY_EVENT_CHAR(p)       ((p).key.cfg.ch)
+#define KEY_EVENT_DIGIT(p)      (KEY_EVENT_CHAR(p) - '0')
+
+
+struct KEY_EVENT_PARAM {
+    u_int8 mode;
+    union {
+        /* if msg == EVENT_KEY_NUM_X */
+        u_int16 ch;
+        /* if msg == EVENT_KEY_COMBIN */
+        struct {u_int8 keyNum; EVENT_NODE_HANDLE keySeq[2];} combin;
+    }cfg;
+};
+//----------------------------------------------------------------------
+#define USR_EVENT_MMI_INIT(p, val)        ((p).usr.cfg.mmi.param = (u_int16)(val))
+#define USR_EVENT_MMI(p)                  ((p).usr.cfg.mmi.param)
+
+struct USR_EVENT_PARAM {
+    union {
+        struct {u_int16 param;} mmi;
+    }cfg;
 };
 //----------------------------------------------------------------------
 
 union EVENT_PARAM {
-    union SM_EVENT_PARAM  sm;
-    union KEY_EVENT_PARAM key;
+    struct SM_EVENT_PARAM  sm;
+    struct KEY_EVENT_PARAM key;
+    struct USR_EVENT_PARAM usr;
 };
+
 
 struct EVENT_NODE_ITEM {
     EVENT_NODE_HANDLE  sig;
@@ -70,16 +104,7 @@ enum {
     EVENT_SM_EXIT,
 
     // key
-    EVENT_KEY_NUM_0,
-    EVENT_KEY_NUM_1,
-    EVENT_KEY_NUM_2,
-    EVENT_KEY_NUM_3,
-    EVENT_KEY_NUM_4,
-    EVENT_KEY_NUM_5,
-    EVENT_KEY_NUM_6,
-    EVENT_KEY_NUM_7,
-    EVENT_KEY_NUM_8,
-    EVENT_KEY_NUM_9,
+    EVENT_KEY_CHAR,
     EVENT_KEY_ADD,
     EVENT_KEY_SUB,
     EVENT_KEY_UP,
@@ -92,6 +117,9 @@ enum {
     EVENT_KEY_STOP,
     EVENT_KEY_RESET,
     EVENT_KEY_COMBIN,
+    
+    // USR
+    EVENT_USR_MMI,
     
     EVENT_END,
 };

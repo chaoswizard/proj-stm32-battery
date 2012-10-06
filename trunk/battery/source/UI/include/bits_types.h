@@ -15,7 +15,28 @@ typedef unsigned __int64 		u_int64;		/* unsigned 64 bit integer */
 typedef	signed short			s_int16;		/* signed 16 bit integer */
 typedef	signed int 			    s_int32;		/* signed 32 bit integer */
 typedef u_int8                  bool_t;
-typedef void                    void_t;
-typedef u_int32                 handle_t;
+
+#ifndef TRUE
+#define TRUE	                (1)
 #endif
+
+#ifndef FALSE
+#define FALSE	                (0)
+#endif
+
+typedef void                    void_t;
+typedef void*                   handle_t;
+typedef void*                   p_void;
+
+#ifndef NULL
+#define NULL	((void *)0)
+#endif
+
+
+
+typedef	unsigned   char*		p_str;		
+typedef	const unsigned   char*  p_cstr;		
+
+#endif
+
 

@@ -189,7 +189,7 @@ void  SmMgr_Close(handle_t handle)
     memset(pCtrl, 0, sizeof(struct SM_MGR_CTRL));
 }
 
-SM_NODE_HANDLE SmMgr_Proc(handle_t handle, void *param)
+u_int8 SmMgr_Proc(handle_t handle, void *param)
 {
     struct SM_NODE_PROC_TAB *tab;
     struct SM_MGR_CTRL *pCtrl = (struct SM_MGR_CTRL *)handle;
@@ -197,20 +197,17 @@ SM_NODE_HANDLE SmMgr_Proc(handle_t handle, void *param)
     
     if (SMNODE_IS_INVALID(curNode))
     {
-        return SM_INVALID_NODE;
+        return SM_SET_PUBLIC_ERROR(SM_PROC_ERR_EMPTY);
     }
 
     tab = SmMgr_GetFuncTab(pCtrl, curNode);
 
     if (tab && tab->handle)
     {
-        if (SM_PROC_RET_STAY != (tab->handle)(curNode, param))
-        {
-            return SM_INVALID_NODE;
-        }
+        return (tab->handle)(curNode, param);
     }
 
-    return curNode;
+    return SM_SET_PUBLIC_ERROR(SM_PROC_ERR_DRYRUN);
 }
 
 void SmMgr_RegSuspend(handle_t handle, void (*suspend)(SM_NODE_HANDLE me, SM_NODE_HANDLE child))

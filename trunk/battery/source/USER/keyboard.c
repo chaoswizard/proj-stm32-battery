@@ -595,6 +595,18 @@ struct KEYBOARD_KEY_VAL_MAP {
     EVENT_NODE_HANDLE  sig;
 };
 
+static const unsigned int gUiDigitKeyMapTbl[] = {
+    0x40000,  
+    0x80000,  
+    0x100000, 
+    0x200000, 
+    0x800,    
+    0x1000,   
+    0x2000,   
+    0x8,      
+    0x10,     
+    0x20,     
+};
 
 static const struct KEYBOARD_KEY_VAL_MAP gUiKeyNodeMapTabl[] = {
     {0x10000,  EVENT_KEY_ADD},
@@ -606,37 +618,46 @@ static const struct KEYBOARD_KEY_VAL_MAP gUiKeyNodeMapTabl[] = {
     {0x2,      EVENT_KEY_OK},
     {0x1,      EVENT_KEY_ESC},
     {0x400000, EVENT_KEY_RUN},
-    {0x40000,  EVENT_KEY_NUM_0},
-    {0x80000,  EVENT_KEY_NUM_1},
-    {0x100000, EVENT_KEY_NUM_2},
-    {0x200000, EVENT_KEY_NUM_3},
-    {0x800,    EVENT_KEY_NUM_4},
-    {0x1000,   EVENT_KEY_NUM_5},
-    {0x2000,   EVENT_KEY_NUM_6},
-    {0x8,      EVENT_KEY_NUM_7},
-    {0x10,     EVENT_KEY_NUM_8},
-    {0x20,     EVENT_KEY_NUM_9},
 };
+
+static u_int8 console_keyboard_map(unsigned int keyHdl, struct EVENT_NODE_ITEM *e)
+{
+    s_int32 i;
+
+    for (i=0; i< ARRAY_SIZE(gUiKeyNodeMapTabl); i++)
+    {
+        if (keyHdl == gUiKeyNodeMapTabl[i].hdl)
+        {
+            e->sig = gUiKeyNodeMapTabl[i].sig;
+            return 1;
+        }
+    }
+    
+    for (i=0; i< ARRAY_SIZE(gUiDigitKeyMapTbl); i++)
+    {
+        if (keyHdl == gUiDigitKeyMapTbl[i])
+        {
+            e->sig = EVENT_KEY_CHAR;
+            KEY_EVENT_DIGIT_INIT(e->param, ('0' + i));
+            return 1;
+        }
+    }
+    
+    return 0;
+}
+
 
 
 u_int8 keyboard_scan(struct EVENT_NODE_ITEM *e)
 {
     u_int8 ret = 0;
+    
     //check whether any key press
     if(Flag_keyPressed)
     {
-        if(curKey!=0) 
+        if(curKey !=0) 
         {
-            s_int32 i;
-            for (i=0; i< ARRAY_SIZE(gUiKeyNodeMapTabl); i++)
-            {
-                if (curKey == gUiKeyNodeMapTabl[i].hdl)
-                {
-                    e->sig = gUiKeyNodeMapTabl[i].sig;
-                    ret = 1;
-                    break;
-                }
-            }
+            ret = console_keyboard_map(curKey, e);
             curKey=0;  
         }
         Flag_keyPressed=0; 

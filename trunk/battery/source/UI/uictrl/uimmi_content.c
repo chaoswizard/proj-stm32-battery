@@ -1,60 +1,48 @@
 
 #include "ui_com_obj.h"
 
-DEF_UICOM_CONTENT_TEXT(AnShiJian,       "By Time");//按时间
-DEF_UICOM_CONTENT_TEXT(AnDianYa,        "By Vol");//按电压
-DEF_UICOM_CONTENT_TEXT(BaoCunChengGong, "Save Ok");//保存成功
-DEF_UICOM_CONTENT_TEXT(ChaXunXuanXiang, "Search");//查询选项
-DEF_UICOM_CONTENT_TEXT(ChuanKouShuChu,  "COM SHOW");//串口输出结果
-DEF_UICOM_CONTENT_TEXT(CunChuJieZhi,    "Media");//存储介质
-DEF_UICOM_CONTENT_TEXT(CunChuXUanXiang, "Storage");//存储选项
+DEF_UICOM_CONTENT_TEXT(AnShiJian,       "按时间");//按时间
+DEF_UICOM_CONTENT_TEXT(AnDianYa,        "按电压");//按电压
+DEF_UICOM_CONTENT_TEXT(ChaXunJingGao,   "警告查询");
+DEF_UICOM_CONTENT_TEXT(ChaXunQuXian ,   "曲线查询");
+DEF_UICOM_CONTENT_TEXT(CanShuShiZhi,    "参数设置");
 DEF_UICOM_CONTENT_TEXT(DanWeiFenZhong,  "min");
+DEF_UICOM_CONTENT_TEXT(DanWeiDianYaFu,  "V");
 DEF_UICOM_CONTENT_TEXT(DanWeiDianYa,    "mV");
-DEF_UICOM_CONTENT_TEXT(DanWeiGe,        "pcs");//个
-DEF_UICOM_CONTENT_TEXT(DanWeiZu,        "Group");//组
-DEF_UICOM_CONTENT_TEXT(DanWeiTiao,      "s");//条
-DEF_UICOM_CONTENT_TEXT(FangDianJieShu,  "END");//放完结束
-DEF_UICOM_CONTENT_TEXT(FangDianZhong,   "ING");//放电中
-DEF_UICOM_CONTENT_TEXT(FuGaiMa,         "OverLay?");//覆盖否
-DEF_UICOM_CONTENT_TEXT(GongSiChanPinMing,"电池自动化检测台");
-DEF_UICOM_CONTENT_TEXT(GongSiDianHua,   "电话:0757-23330686");
-DEF_UICOM_CONTENT_TEXT(GongSiMing0,     "佛山市惠龙自动化");
-DEF_UICOM_CONTENT_TEXT(GongSiMing1,     "设备有限公司");
-DEF_UICOM_CONTENT_TEXT(GongZuoZhuangTai,"STATE");//工作状态
-DEF_UICOM_CONTENT_TEXT(HeGeShu,         "PASS No");//合格数
-DEF_UICOM_CONTENT_TEXT(HeGeLv,          "Rate");//合格率
-DEF_UICOM_CONTENT_TEXT(HunHeMoShi,      "Mixed");//混合模式
-DEF_UICOM_CONTENT_TEXT(HuanYuanChuChang,"Factory");//还原出厂设置
-
-DEF_UICOM_CONTENT_TEXT(JianCeMoShiXuan, "CheckModeSetup");//检测模式设置选项
-DEF_UICOM_CONTENT_TEXT(JiShuZhiQingLing,"Clear");//计数值清零
-DEF_UICOM_CONTENT_TEXT(MoShiXuanXiang,  "Mode");//模式选项
-DEF_UICOM_CONTENT_TEXT(QiTaXuanXiang,   "Other");//其他选项
-DEF_UICOM_CONTENT_TEXT(QueRen,          "OK");//确认
-DEF_UICOM_CONTENT_TEXT(QuXiao,          "ESC");//取消
+DEF_UICOM_CONTENT_TEXT(DanWeiGe,        "个");//个
+DEF_UICOM_CONTENT_TEXT(DanWeiZu,        "组");//组
+DEF_UICOM_CONTENT_TEXT(DanWeiTiao,      "条");//条
+DEF_UICOM_CONTENT_TEXT(FanXiangDianYa,  "反向电压值");
+DEF_UICOM_CONTENT_TEXT(FangDianJieShu,  "放电结束");//放完结束
+DEF_UICOM_CONTENT_TEXT(FangDianZhong,   "放电中");//放电中
+DEF_UICOM_CONTENT_TEXT(GongZuoZhuangTai,"工作状态");//工作状态
+DEF_UICOM_CONTENT_TEXT(GongZuoMoShi,    "工作模式");
+DEF_UICOM_CONTENT_TEXT(HunHeMoShi,      "混合模式");//混合模式
+DEF_UICOM_CONTENT_TEXT(JianCeMoShiXuan,  "CheckModeSetup");//检测模式设置选项
+DEF_UICOM_CONTENT_TEXT(JiXianZhiXianXian,"极限值(下限)");
+DEF_UICOM_CONTENT_TEXT(JingGaoNeiRong,   "警告内容");
+DEF_UICOM_CONTENT_TEXT(JingGaoFanXiang,  "反向");
+DEF_UICOM_CONTENT_TEXT(JingGaoXuanKong,  "悬空");
+DEF_UICOM_CONTENT_TEXT(QueRen,          "确认");//确认
+DEF_UICOM_CONTENT_TEXT(QuanXuan,        "全选");
+DEF_UICOM_CONTENT_TEXT(QuanBuXuan,      "全清");//全不选
+DEF_UICOM_CONTENT_TEXT(QuXiao,          "取消");//取消
 DEF_UICOM_CONTENT_TEXT(QueDing,          "YES");//是的
 DEF_UICOM_CONTENT_TEXT(QueFou,           "NO");//不是
-DEF_UICOM_CONTENT_TEXT(QiYong,          "ON");//启用
-DEF_UICOM_CONTENT_TEXT(MediaSPI,        "SPI");//spi
-DEF_UICOM_CONTENT_TEXT(TiaoQiFangDian,  "Curve");//条起放电曲线
-DEF_UICOM_CONTENT_TEXT(TingYong,        "OFF");//停用
-DEF_UICOM_CONTENT_TEXT(TongDao,         "CH");//通道
-DEF_UICOM_CONTENT_TEXT(TongDaoQieHuan,  "CHSW");//通道切换
-DEF_UICOM_CONTENT_TEXT(TongDaoXuanZe,   "Switch Select");//通道切换选择
-DEF_UICOM_CONTENT_TEXT(TongDaoXuanZeTip,"Select:+");//请选择可用通道，按下+，为选中，按-，为去选中
-DEF_UICOM_CONTENT_TEXT(TongDaoXuanZeTip1,"Cancle:-");//请选择可用通道，按下+，为选中，按-，为去选中
-DEF_UICOM_CONTENT_TEXT(XianShiDi,       "Show No.");//显示第
-DEF_UICOM_CONTENT_TEXT(XuHao,           "NO.");//序号
-DEF_UICOM_CONTENT_TEXT(XuanXiangSheZhi, "Setup");//选项设置
-DEF_UICOM_CONTENT_TEXT(YiCiXianQuXian,  "CurveNum");//一次显示曲线数
-DEF_UICOM_CONTENT_TEXT(YiJianCeShuLiang,"Check");//已检测产品数量
-DEF_UICOM_CONTENT_TEXT(YuanQuanQuan,    "O");//圆圈
+DEF_UICOM_CONTENT_TEXT(QiYong,          "启用");//启用
+DEF_UICOM_CONTENT_TEXT(TingYong,        "停用");//停用
+DEF_UICOM_CONTENT_TEXT(ShiJianSheZhi,   "设置工作时间:");
+DEF_UICOM_CONTENT_TEXT(ShiJianXiTong,   "当前时间:");
+DEF_UICOM_CONTENT_TEXT(ShiJianYiYong,   "已用时:");
+DEF_UICOM_CONTENT_TEXT(TongDao,         "通道");//通道
+DEF_UICOM_CONTENT_TEXT(TiaoZhuanDao,    "跳转到:");//通道
+DEF_UICOM_CONTENT_TEXT(TongDaoQieHuan,  "通道切换");//通道切换
+DEF_UICOM_CONTENT_TEXT(TongDaoXuanZe,   "通道切换选择");//通道切换选择
+DEF_UICOM_CONTENT_TEXT(XuHao,           "序号");//序号
+DEF_UICOM_CONTENT_TEXT(YuanQuanQuan,    "牛");//圆圈
 DEF_UICOM_CONTENT_TEXT(YuanQuanQuan1,   "*");//圆圈
-DEF_UICOM_CONTENT_TEXT(ZaiYong,         "Useing");//在用
-DEF_UICOM_CONTENT_TEXT(ZhuJieMian,      "MainFace");//主界面
-DEF_UICOM_CONTENT_TEXT(ZhiDangQian,     "CURV");//当前值
-DEF_UICOM_CONTENT_TEXT(ZhiSheDing,      "SETV");//设定值
-DEF_UICOM_CONTENT_TEXT(ZuiDaCunChuLiang,"Storage");//最大存储量为
+DEF_UICOM_CONTENT_TEXT(ZaiYong,         "在用");//在用
+DEF_UICOM_CONTENT_TEXT(ZhiDangQian,     "当前值+V");//当前值
 
 
 const u_int8 gMyPictureData[32] = {

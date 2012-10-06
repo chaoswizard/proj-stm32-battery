@@ -138,7 +138,6 @@ void gui_osd_obj_clear(POSD_OBJ_HEAD obj);
 void gui_osd_rect_draw(struct OSD_OBJ_RECT_INFO *rect, enum T_UICOM_STATUS drawType);
 void gui_osd_content_draw(struct OSD_OBJ_CONTENT_INFO *content, enum T_UICOM_STATUS drawType);
 void gui_osd_button_draw(struct OSD_OBJ_BUTTON_INFO *button, enum T_UICOM_STATUS drawType);
-void gui_osd_msel_draw(struct OSD_OBJ_BUTTON_INFO *button, enum T_UICOM_STATUS drawType);
 void gui_osd_data_draw(struct UICOM_DATA *data, struct SCREEN_ZONE *zone);
 
 //==========================================================

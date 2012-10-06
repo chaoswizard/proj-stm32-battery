@@ -251,11 +251,17 @@ void displaycursor(unsigned char x,unsigned char y,unsigned char w,unsigned char
 void putpixel(unsigned char x, unsigned char y, unsigned char pixel_mode)
 {
 	T_SCREEN_PIXEL tmp;
+    
+    if (pixel_mode == PIXEL_MODE_TRANS)
+    {
+        return;
+    }
 
     if (LCD_POS_IS_INVALID(x, y))
     {
         return;
     }
+    
 
     DEV_LCD_CS(x);
     DEV_LCD_GET_DATA(X_PIXLE_TO_COL(x), Y_PIXLE_TO_ROW(y), tmp);

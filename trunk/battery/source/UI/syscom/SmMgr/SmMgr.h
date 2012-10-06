@@ -27,23 +27,35 @@ extern "C" {
 //if new node exist ,MUST exit old node 
 #define SM_EXIT_NEW      (0x02)
 //New Node MUST exit  when Trans Next 
-#define SM_HOLD_NEW      (0x04)
+#define SM_DO_MODAL      (0x04)
 
 typedef u_int8  SM_NODE_HANDLE;
 typedef u_int8  SM_NODE_COUNT;
 
-#define SM_PROC_RET_DFT     SM_PROC_RET_STAY
-#define SM_PROC_RET_FINISH  SM_PROC_RET_BYPASS
-
-enum SM_PROC_RET {
-    SM_PROC_RET_STAY = 0,
-    SM_PROC_RET_BYPASS,
+//Bit[7:6]: ACCESS BIT
+//----------------------------------------------------------------------
+//private act, other routiue cannot joinin
+#define SM_PORC_PRIVATE_STATUS  ((0x1)<<6)
+//public act, any routiue can access
+#define SM_PORC_PUBLIC_STATUS   ((0x2)<<6)
+//----------------------------------------------------------------------
+//Bit[5:0]: ERROR BIT
+enum {
+    SM_PROC_ERR_NULL   =0,
+    SM_PROC_ERR_EMPTY  =(1<<0),
+    SM_PROC_ERR_DRYRUN =(1<<1),
 };
+
+//----------------------------------------------------------------------
+#define SM_SET_PUBLIC_ERROR(err)  (SM_PORC_PUBLIC_STATUS | (err&(0xF)))
+#define SM_SET_PRIVATE_ERROR(err) (SM_PORC_PRIVATE_STATUS | (err&(0xF)))
+#define SM_TST_ACCESS(err)        ((err)&SM_PORC_PUBLIC_STATUS)
+//----------------------------------------------------------------------
 
 // node func map
 struct SM_NODE_PROC_TAB {
     void (*enter)(SM_NODE_HANDLE parent, SM_NODE_HANDLE me);
-    enum SM_PROC_RET (*handle)(SM_NODE_HANDLE me, void *param);
+    u_int8 (*handle)(SM_NODE_HANDLE me, void *param);
     void (*exit)(SM_NODE_HANDLE me, SM_NODE_HANDLE next);
 };
 
@@ -71,7 +83,7 @@ struct SMMGR_INIT_PARAM {
 
 handle_t SmMgr_Open(struct SMMGR_INIT_PARAM *initParam);
 void SmMgr_Close(handle_t handle);
-SM_NODE_HANDLE SmMgr_Proc(handle_t handle, void *param);
+u_int8 SmMgr_Proc(handle_t handle, void *param);
 SM_NODE_HANDLE SmMgr_Return(handle_t handle, SM_NODE_COUNT retLvl);
 u_int8 SmMgr_Trans(handle_t handle, SM_NODE_HANDLE newNode, u_int8 quitIfSameCur);
 SM_NODE_HANDLE SmMgr_GetCurrent(handle_t handle);

@@ -8,7 +8,7 @@
 */
 void uicom_obj_list(T_UICOM_COUNT len, void *param, 
                           void (*paint)(T_UICOM_COUNT pos, void *param), 
-                          T_UICOM_ORDER_FLAG paintOrder)
+                          T_UICOM_ORDER paintOrder)
 {
     T_UICOM_COUNT idx;
     
@@ -25,7 +25,7 @@ void uicom_obj_list(T_UICOM_COUNT len, void *param,
 */
 void uicom_obj_tab(T_UICOM_COUNT row, T_UICOM_COUNT col, T_UICOM_HANDL param, 
                           void (*paint)(T_UICOM_COUNT, T_UICOM_COUNT, T_UICOM_HANDL), 
-                          T_UICOM_ORDER_FLAG paintOrder)
+                          T_UICOM_ORDER paintOrder)
 {
     T_UICOM_COUNT rowIdx, colIdx;
     
@@ -45,7 +45,7 @@ void uicom_obj_tab(T_UICOM_COUNT row, T_UICOM_COUNT col, T_UICOM_HANDL param,
 void uicom_obj_map(T_UICOM_COUNT start, T_UICOM_HANDL param, 
                             T_UICOM_COUNT (*getNext)(T_UICOM_COUNT *idx, T_UICOM_HANDL param), 
                             void (*paint)(T_UICOM_COUNT idx, T_UICOM_HANDL param),
-                            T_UICOM_ORDER_FLAG paintOrder)
+                            T_UICOM_ORDER paintOrder)
 {
     T_UICOM_COUNT  key;
 
@@ -59,32 +59,75 @@ void uicom_obj_map(T_UICOM_COUNT start, T_UICOM_HANDL param,
 
 //==========================================================
 
-u_int8 uicom_inputbox_proc(enum INPUTBOX_PROC_TYPE evt, u_int8 *data, u_int8 focus, void *param)
+u_int16 uicom_obj_input(T_INPUT_EVENT evt, u_int8 *data, u_int8 *pfocus,u_int8 maxnum, void *param)
 {
-    u_int8 tmp;
+    u_int16 charcnt;
 
-    //MY_DEBUG("char = %d, %s, %d, %x\n", evt, data, focus, param);
-    switch (evt)
+    //MY_DEBUG("EVT %d: Str=%s,%d\n", evt, data, pfocus);
+    if ((0 == maxnum) || (NULL == pfocus))
+        return 0;
+
+    switch (INPUT_PROC_TYPE(evt))
     {
-        case INPUTBOX_PROC_NEWCHAR_RMODE:
-        case INPUTBOX_PROC_NEWCHAR_IMODE:
-            if (param)
-            return (u_int8)util_str_insert_char(data, focus, param);
+        case INPUT_PROC_NEW:
+            charcnt = util_str_addchar(data, maxnum, (u_int16*)pfocus, param, INPUT_PROC_SUBTYPE(evt));
             break;
-        case INPUTBOX_PROC_MOVE_BACK:
-            tmp = util_strlen(data);
-            if (tmp)
-            return (u_int8)util_value_inc(0, tmp-1, focus, 1);
+        case INPUT_PROC_UPDATE:
+            charcnt = util_strsize(data);
+            if (0 == charcnt)
+            {
+                (*pfocus) = 0;
+            }
+            else if ((*pfocus) >= charcnt)
+            {
+                (*pfocus) = (charcnt-1);
+            }
             break;
-        case INPUTBOX_PROC_MOVE_FRONT:
-            tmp = util_strlen(data);
-            if (tmp)
-            return (u_int8)util_value_inc(0, tmp-1, focus, 0);
-        case INPUTBOX_PROC_DEL_BACK:
-        case INPUTBOX_PROC_DEL_FRONT:
+        case INPUT_PROC_MOVE:
+            charcnt = util_strsize(data);
+            if (charcnt)
+            {
+            switch (INPUT_PROC_SUBTYPE(evt))
+            {
+                case 0://back
+                    (*pfocus) = (u_int8)util_value_inc(0, charcnt-1, (*pfocus), 1);
+                    break;
+                case 1://front:
+                    (*pfocus) =  util_value_inc(0, charcnt-1, (*pfocus), 0);
+                    break;
+                case 2://head:
+                    (*pfocus) = 0;
+                    break;
+                case 3://tail
+                    (*pfocus) = charcnt - 1;
+                    break;
+                default:
+                    break;
+            }
+            }
+            else
+            {
+                (*pfocus) = 0;
+            }
+            break;
+        case INPUT_PROC_DEL:
+            switch (INPUT_PROC_SUBTYPE(evt))
+            {
+                case 0://back
+                    charcnt = util_str_delchar(data, maxnum, (u_int16*)pfocus, 0);
+                    break;
+                case 1://front:
+                    charcnt = util_str_delchar(data, maxnum, (u_int16*)pfocus, 1);
+                    break;
+                default:
+                    charcnt = util_strsize(data);
+                    break;
+            }
+            break;
+        default:
         break;
     }
 
-    return 0;
+    return charcnt;
 }
 

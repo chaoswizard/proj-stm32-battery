@@ -41,7 +41,7 @@ struct SCREEN_ZONE {
 /*
 * (x,y)......................
 *  |............W...........|
-*  |..........................Y
+*  |..........................H
 *  |..........................|
 */
     T_SCREEN_PIXEL x;
@@ -51,11 +51,11 @@ struct SCREEN_ZONE {
 };
 
 #define SCREEN_ZONE_INIT(zone, xx, yy, ww, hh) {\
-    (zone)->x = xx;(zone)->y = yy;(zone)->w = ww;(zone)->h = hh;\
+    (zone)->x = (xx);(zone)->y = (yy);(zone)->w = (ww);(zone)->h = (hh);\
 }
 
 #define SCREEN_BORDER_INIT(border, ll, tt, rr, bb) {\
-    (border)->l = ll;(border)->t = tt;(border)->r = rr;(border)->b = bb;\
+    (border)->l = (ll);(border)->t = (tt);(border)->r = (rr);(border)->b = (bb);\
 }
 
 struct RECT_BORDER {
@@ -71,19 +71,46 @@ struct OSD_ZONE {
 };
 
 //==========================================================
-typedef u_int8 T_UICOM_PAINT_FLAG;
+typedef u_int8 T_UICOM_ORDER;
+//0:H  1:V
+#define UICOM_DIR_BIT_H_V          (0x1<<0)
+//0:L->R/T->B  1:R->L/B->T
+#define UICOM_DIR_BIT_ORDER        (0x1<<1)
 
-#define PAINT_STATUS_NULL         0
-#define PAINT_FLAG_BORDER         0x1
-#define PAINT_FLAG_DATA           0x2
-#define PAINT_FLAG_NORMAL         (PAINT_FLAG_DATA | PAINT_FLAG_BORDER)
+// external  flag for endian pos.
+#define UICOM_DIR_BIT_START        (0x1<<2) 
+#define UICOM_DIR_BIT_END          (0x1<<3) 
+
+// line dir use 2 bit
+#define LINE_DIR_X_LR               (0 | 0)
+#define LINE_DIR_X_RL               (0 | UICOM_DIR_BIT_ORDER)
+#define LINE_DIR_Y_TB               (UICOM_DIR_BIT_H_V | 0 )
+#define LINE_DIR_Y_BT               (UICOM_DIR_BIT_H_V | UICOM_DIR_BIT_ORDER)
+#define LINE_DIR_BIT_ENDIAN         (0 | UICOM_DIR_BIT_END) 
+
+#define LINE_DIR_IS_X(dir)            (0 == ((dir)&UICOM_DIR_BIT_H_V))
+#define LINE_DIR_IS_Y(dir)            (0 != ((dir)&UICOM_DIR_BIT_H_V))
+#define LINE_DIR_IS_END(dir)          (0 != ((dir)&LINE_DIR_BIT_ENDIAN)) 
+
+// rect dir use 4 bit
+#define RECT_DIR_X_LR_Y_TB          (LINE_DIR_X_LR | (LINE_DIR_Y_TB<<2))
+#define RECT_DIR_X_LR_Y_BT          (LINE_DIR_X_LR | (LINE_DIR_Y_BT<<2))
+#define RECT_DIR_X_RL_Y_TB          (LINE_DIR_X_RL | (LINE_DIR_Y_TB<<2))
+#define RECT_DIR_X_RL_Y_BT          (LINE_DIR_X_RL | (LINE_DIR_Y_BT<<2))
+
+
+
+//==========================================================
+typedef u_int8 T_UICOM_DRAW_MODE;
+#define PAINT_FLAG_EMPTY                0
+#define PAINT_FLAG_BORDER             0x1
+#define PAINT_FLAG_DATA               0x2
 //----------------------------------------------------------------------
-#define  PAINT_MAP_NULL           0
-#define  PAINT_MAP_PIXEL          0x1
-#define  PAINT_MAP_LINE           0x2
-#define  PAINT_MAP_BAR            0x4
-#define  PAINT_MAP_PIE            0x8
-#define  PAINT_MAP_STACKED_LINE   0x16
+#define PAINT_FLAG_MAP_PIXEL          0x1
+#define PAINT_FLAG_MAP_LINE           0x2
+#define PAINT_FLAG_MAP_BAR            0x4
+#define PAINT_FLAG_MAP_PIE            0x8
+#define PAINT_FLAG_MAP_STACKED_LINE   0x16
 //==========================================================
 
 enum T_UICOM_STATUS {
@@ -92,13 +119,21 @@ enum T_UICOM_STATUS {
     UICOM_STATUS_DISABLE,
 };
 
-#define UICOM_IS_FOCUS(type)  (UICOM_STATUS_SELECTED == type)
-//==========================================================
-typedef u_int8 T_UICOM_ORDER_FLAG;
+enum T_UICOM_ACTION {
+    UICOM_ACTION_NULL,
+    UICOM_ACTION_FOCUS,
+    UICOM_ACTION_ENTER,
+};
+//----------------------------------------------------------------------
+typedef u_int16 T_UICOM_EVENT;
 
-#define UICOM_ORDER_DEFAULT       0
-#define UICOM_ORDER_LEFT_RIGHT    0x1
-#define UICOM_ORDER_TOP_BOTTOM    0x2
+#define UICOM_PROC_EVENT(act, status) (((act)<<8) | ((status)&0xFF))
+#define UICOM_STATUS(evt)             ((evt)&0xFF)
+#define UICOM_ACTION(evt)             (((evt)>>8)&0xFF)
+//==========================================================
+#define UICOM_TST_SLECTED(evt)        (UICOM_STATUS_SELECTED == UICOM_STATUS(evt))
+#define UICOM_CLR_SLECTED(evt)        ((evt) = UICOM_PROC_EVENT(UICOM_ACTION(evt), UICOM_STATUS_NORMAL))
+#define UICOM_SET_SLECTED(evt)        ((evt) = UICOM_PROC_EVENT(UICOM_ACTION(evt), UICOM_STATUS_SELECTED))
 //==========================================================
 typedef enum  {
     FONT_SIZE_SMALL,
@@ -122,16 +157,22 @@ enum  UICOM_DATA_TYPE {
 //----------------------------------------------------------------------
 typedef u_int32  T_UICOM_DATA_ATTR;
 //startfocus[>0]|endfocus[>0]|color | width | pixelMode
-#define TEXT_ATTR(size, bgColor, fgColor)     (((size)&0x3) | (((bgColor)&0x7)<<2) | (((fgColor)&0x7)<<5))
-#define TEXT_ATTR_FOCUS_RANGE(startFocus, endFocus)  (util_bit_set_range(startFocus, endFocus) << 8)
-#define TEXT_ATTR_FOCUS(focus)                       (1<<(focus+8))
-#define TEXT_ATTR_GET_SIZE(attr)                ((attr)& 0x3)
-#define TEXT_ATTR_GET_COLOR_BG(attr)            (((attr)>>2)&0x7)
-#define TEXT_ATTR_GET_COLOR_FG(attr)            (((attr)>>5)&0x7)
-#define TEXT_ATTR_GET_FOCUS(attr)               (((attr)>>8)&0xFFFFFF)
+#define TEXT_ATTR(size, bgColor, fgColor)            (((size)&0x3) | (((bgColor)&0x7)<<2) | (((fgColor)&0x7)<<5))
+// bit[1:0]
+#define TEXT_ATTR_GET_SIZE(attr)                     ((attr)& 0x3)
+// bit[4:2]
+#define TEXT_ATTR_GET_COLOR_BG(attr)                 (((attr)>>2)&0x7)
+// bit[7:5]
+#define TEXT_ATTR_GET_COLOR_FG(attr)                 (((attr)>>5)&0x7)
+//---------------
+// bit[27:8]  (Only Suport Focus 20 Chars, If focus more, div long string to short string please)
+#define TEXT_ATTR_GET_FOCUS(attr)                    (((attr)>>8)&0xFFFFF)
+#define TEXT_ATTR_FOCUS_RANGE(startFocus, endFocus)  ((util_bit32_set_range(startFocus, endFocus)& 0xFFFFF) << 8)
+#define TEXT_ATTR_FOCUS(focus)                       ((util_bit32_set_range(focus, focus)& 0xFFFFF) << 8)
+// bit[31:28]
+#define TEXT_ATTR_GET_ORDER(attr)                    (((attr)>>28)&0xF)
+#define TEXT_ATTR_STR_LAYOUT(attr)                   (((attr)&0xF)<<28)
 //----------------------------------------------------------------------
-#define TEXT_SMALL_BLACK              TEXT_ATTR(FONT_SIZE_SMALL, PIXEL_MODE_TRANS,  PIXEL_MODE_TURN)
-#define TEXT_BIG_BLACK                TEXT_ATTR(FONT_SIZE_NORMAL, PIXEL_MODE_TRANS, PIXEL_MODE_TURN)
 //¢PIXEL_MODE_CLEAR, PIXEL_MODE_SET
 struct UICOM_DATA {
     enum UICOM_DATA_TYPE    type;
@@ -173,50 +214,55 @@ typedef struct UICOM_DATA *PUICOM_DATA;
 }
 
 //==========================================================
-#define UICOM_TEXT_STR_REF(text)  ((u_int8 *)(guicom_str##text))
-#define UICOM_TEXT_DECLAER(text)  extern const u_int8 *guicom_str##text
+#define UICOM_TEXT_STR_REF(text)  ((p_str)(guicom_str##text))
+#define UICOM_TEXT_DECLAER(text)  extern p_cstr guicom_str##text
 #define DEF_UICOM_CONTENT_TEXT(text, str)   \
 const u_int8 *guicom_str##text = str
 
-#define UICOM_PIC_DATA_REF(bmp)   ((u_int8 *)(guicom_bmp##bmp))
-#define UICOM_PIC_DECLAER(bmp)    extern const u_int8 *guicom_bmp##bmp
+#define UICOM_PIC_DATA_REF(bmp)   ((p_str)(guicom_bmp##bmp))
+#define UICOM_PIC_DECLAER(bmp)    extern p_cstr guicom_bmp##bmp
 #define DEF_UICOM_CONTENT_PIC(bmp, data)   \
-const u_int8 * guicom_bmp##bmp = data
+p_cstr guicom_bmp##bmp = data
 //==========================================================
-struct UICOM_1PP_BMP_INFO {
+struct UICOM_1PP_FONT_INFO {
     u_int8 *data;
-    u_int8 size;
+    u_int8 right;
+    u_int8 left;
+    u_int8 bottom;
     u_int8 width;
     u_int8 height;
 };
 
 //==========================================================
-enum INPUTBOX_PROC_TYPE{
-    INPUTBOX_PROC_NEWCHAR_RMODE,//replace mode
-    INPUTBOX_PROC_NEWCHAR_IMODE,//insert mode
-    INPUTBOX_PROC_MOVE_BACK,//
-    INPUTBOX_PROC_MOVE_FRONT,
-    INPUTBOX_PROC_DEL_BACK,
-    INPUTBOX_PROC_DEL_FRONT,
+enum {
+    INPUT_PROC_NULL,
+    INPUT_PROC_NEW,
+    INPUT_PROC_DEL,
+    INPUT_PROC_MOVE,
+    INPUT_PROC_UPDATE,
 };
+typedef u_int16 T_INPUT_EVENT;
+#define INPUT_PROC_SET(type, subtype)  ((type)&0xFF | ((subtype)<<8))
+#define INPUT_PROC_TYPE(type)          ((type)&0xFF)
+#define INPUT_PROC_SUBTYPE(type)       ((type)>>8)
 //==========================================================
 // 1D array, list / vector
 void uicom_obj_list(T_UICOM_COUNT len, T_UICOM_HANDL param, 
                           void (*paint)(T_UICOM_COUNT pos, T_UICOM_HANDL param), 
-                          T_UICOM_ORDER_FLAG paintOrder);
+                          T_UICOM_ORDER paintOrder);
 // 2D array, table /picture
 void uicom_obj_tab(T_UICOM_COUNT row, T_UICOM_COUNT col, T_UICOM_HANDL param, 
                           void (*paint)(T_UICOM_COUNT row, T_UICOM_COUNT col, T_UICOM_HANDL param), 
-                          T_UICOM_ORDER_FLAG paintOrder);
+                          T_UICOM_ORDER paintOrder);
 
 // dymatic map
 void uicom_obj_map(T_UICOM_COUNT start, T_UICOM_HANDL param, 
                             T_UICOM_COUNT (*getNext)(T_UICOM_COUNT *idx, T_UICOM_HANDL param), 
                             void (*paint)(T_UICOM_COUNT idx, T_UICOM_HANDL param),
-                            T_UICOM_ORDER_FLAG paintOrder);
+                            T_UICOM_ORDER paintOrder);
 
-u_int8 uicom_font_getdata(u_int8 *ch, u_int8 chlen ,struct UICOM_1PP_BMP_INFO *info, T_UICOM_FONT_SIZE fontsize);
-u_int8 uicom_inputbox_proc(enum INPUTBOX_PROC_TYPE evt, u_int8 *data, u_int8 focus, void *param);
+u_int16 uicom_obj_input(T_INPUT_EVENT evt, u_int8 *data, u_int8 *pfocus,u_int8 maxnum, void *param);
+u_int8 uicom_font_getdata(u_int8 *ch, u_int8 chlen ,struct UICOM_1PP_FONT_INFO *info, T_UICOM_FONT_SIZE fontsize);
 
 #ifdef __cplusplus
 }
