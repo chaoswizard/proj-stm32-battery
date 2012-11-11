@@ -21,7 +21,7 @@ void spi_delay(uint16_t cnt)
 {
     while(cnt--)
     {
-        delay_us(10);
+        delay_us(20);
     }
 }
 

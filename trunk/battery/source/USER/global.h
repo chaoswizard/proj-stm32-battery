@@ -1,6 +1,7 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
+#define VESION  100  //V1.0版本
 #ifdef GLOBAL
 	#define EXT_GLOBAL 
 #else
@@ -14,16 +15,30 @@
 
 #define  SYS_BASE_TICK                (10)              // 10ms
 #define  SYS_AD_CH_MAX             (100)            //AD的通路
-#define SYS_AD_PERIOD               (5 )                  //5s为一轮采样周期
+#define SYS_AD_PERIOD               (9 )                  //5s为一轮采样周期
 #define SYS_BKP_TABLE_NUM               2
+#define FULL_QUANTIFIER             5000            //mv满量程
+#define DIGIT_16_BITS                  65536            //16bit满量程为    
 
 EXT_GLOBAL struct rtc_time systmtime;       //系统时间信息变量
 
-#define   CFG_DEFAULT_MODE_MIN    (20)
-#define   CFG_DEFAULT_MODE_VOL    (2300)
-#define   CFG_DEFAULT_MODE_SEL    (0)
-#define   CFG_DEFAULT_PARAM_LIMIT         (200)
-#define   CFG_DEFAULT_PARAM_REVERSE    (4800)
+#define   CFG_DEFAULT_MODE_MIN    (10)                          //最大时间限制为10min，设置值为0~20        
+#define  CFG_MODE_MIN_MIN  0
+#define CFG_MODE_MIN_MAX  10
+
+#define   CFG_DEFAULT_MODE_VOL   2800                  
+#define CFG_MODE_VOL_MIN  0
+#define CFG_MODE_VOL_MAX  5000
+
+#define   CFG_DEFAULT_MODE_SEL    (1)                               //改为默认按电压
+
+#define   CFG_DEFAULT_PARAM_LIMIT         2     //mv
+#define CFG_PARAM_LIMIT_MIN  0
+#define CFG_PARAM_LIMIT_MAX 10
+
+#define   CFG_DEFAULT_PARAM_REVERSE   2        //mv
+#define CFG_PARAM_REVERSE_MIN 0
+#define CFG_PARAM_REVERSE_MAX 10
 
 // 对应于spi flash中的系统配置
  struct  tag_SAMP_CONFIG{
@@ -39,19 +54,20 @@ EXT_GLOBAL struct rtc_time systmtime;       //系统时间信息变量
 } ;
 EXT_GLOBAL struct  tag_SAMP_CONFIG  gAdSampConfig;
 
-
+EXT_GLOBAL u_int16 g_mode_vol_ad_val,g_param_limit_ad_val,g_param_rervse_ad_val;
 
 #define NO_U_PAN            0
 #define HAVE_U_PAN      1
+
 union tag_SysResAndStatus
 {
     uint8_t led_buf; //led显示buff，
     struct
     {
         uint8_t sys_end:1;
-        uint8_t read_cfg_fail:1;
-        uint8_t writed_protected:1;
-        uint8_t no_u_pan:1;
+        uint8_t auto_n_manual:1;             //自动、手动
+        uint8_t not_discharged:1;                   // 1表示u盘，0表示spi
+        uint8_t no_u_pan:1;                         // 1表示没有u盘，1，表示使用u盘
         uint8_t sys_working:1;
         uint8_t reversed:1;
         uint8_t impend:1;
@@ -68,17 +84,24 @@ struct tag_BAK_DATA
     uint8_t group_idx;              //组号
     uint16_t last_line_in_group; //组内已经保存完成的行号，存成功后自增该数,作为下一行保存位置依据
     uint8_t ch_work_status[(SYS_AD_CH_MAX+7)>>3 ]; //0:放电结束；1:放电中，这在主界面是显示，对于停用，则显示为高亮放电结束
-    uint8_t ch_warn_status[(SYS_AD_CH_MAX+7)>>3 ]; //警告，0:悬空,1:反向
     uint16_t had_used_time;  //已用时间，可用作结束条件判断，在重新开始后清零
     union tag_SysResAndStatus sysResAndStatus; //系统资源和状态
-}; //这里共38个字节
+}; 
 enum{
     TABLE_BKP = 0,
     TABLE_BAK_BKP,
     TABLE_INVALID,
 };
-//EXT_GLOBAL uint8_t g_usingBkpIdx ;   //TABLE_BKP,TABLE_BAK_BKP
 EXT_GLOBAL struct  tag_BAK_DATA g_bkpData; //备份数据区数据结构
+
+enum{
+    CH_STATUS_NORMAL=0,           //正常
+    CH_STATUS_IMPEND,                   //悬空
+    CH_STATUS_REVERSED,            //反向
+    CH_STATUS_NO_DISCHARGED,//不能放电
+};
+EXT_GLOBAL uint8_t ch_warn_status[SYS_AD_CH_MAX]; //警告状态，只需要一个临时变量，不需要入备份区，它不还原
+
 #define SET_SYS_RUN_STATUS_START() do{\
     g_bkpData.sysResAndStatus.sys.sys_start = 1;\
     g_bkpData.sysResAndStatus.sys.sys_end = 0;\
@@ -98,10 +121,24 @@ EXT_GLOBAL struct  tag_BAK_DATA g_bkpData; //备份数据区数据结构
     g_bkpData.sysResAndStatus.sys.sys_working = 0;\
     syncResAndStatusShow();\
     }while(0)
+
+#define CLR_SYS_WARN_STATUS() do{\
+    g_bkpData.sysResAndStatus.sys.not_discharged=0;\
+    g_bkpData.sysResAndStatus.sys.reversed=0;\
+    g_bkpData.sysResAndStatus.sys.impend=0;\
+    syncResAndStatusShow();\
+    }while(0)
 void syncResAndStatusShow(void);   
 #define IS_SYS_WORKING()   g_bkpData.sysResAndStatus.sys.sys_working  //工作中，不允许配置
+#define IS_SYS_START()   g_bkpData.sysResAndStatus.sys.sys_start  //工作开始，允许配置，准备装入新电池
+#define IS_SYS_END()   g_bkpData.sysResAndStatus.sys.sys_end  //工作中，允许配置，检测完成，未换新电池
+
 #define IS_SYS_NO_U_PAN()     g_bkpData.sysResAndStatus.sys.no_u_pan
+#define IS_SYS_MANUAL()     g_bkpData.sysResAndStatus.sys.auto_n_manual
 #define SET_SYS_NO_U_PAN() g_bkpData.sysResAndStatus.sys.no_u_pan = 1
+#define SET_SYS_MANUAL() g_bkpData.sysResAndStatus.sys.auto_n_manual = 1
+#define SET_SYS_AUTO() g_bkpData.sysResAndStatus.sys.auto_n_manual = 0
+
 
 EXT_GLOBAL unsigned char g_curAdCh ;    //当前ad采样的通路号，1~ 100
 EXT_GLOBAL unsigned char g_LastAdCh;    //最后的采样通路号，这个可以不使用,可由last_line_in_group代替
@@ -176,15 +213,6 @@ EXT_GLOBAL uint32_t IntDeviceSerial[3];
 
 #define  TST_CH_WORK_STATE_SEL_CHK()            util_array_check((g_bkpData.ch_work_status),  SYS_AD_CH_MAX)
 
-///////////通路的警告状态，显示为0:悬空，1:反向
-#define  TST_CH_WARN_STATE_TST(num)  UTIL_LBIT_TST((g_bkpData.ch_warn_status),  num)
-#define  TST_CH_WARN_STATE_SET(num)    UTIL_LBIT_VAL((g_bkpData.ch_warn_status),  num) = UTIL_LBIT_SET((g_bkpData.ch_warn_status),  num)
-#define  TST_CH_WARN_STATE_CLR(num)    UTIL_LBIT_VAL((g_bkpData.ch_warn_status),  num) = UTIL_LBIT_CLR((g_bkpData.ch_warn_status),  num)
-#define  TST_CH_WARN_STATE_CPL(num)    UTIL_LBIT_VAL((g_bkpData.ch_warn_status),  num) = UTIL_LBIT_CPL((g_bkpData.ch_warn_status),  num)
-#define  TST_CH_WARN_STATE_ALL_CLR()  memset(g_bkpData.ch_warn_status, 0, sizeof(g_bkpData.ch_warn_status))
-#define  TST_CH_WARN_STATE_ALL_SET()   memset(g_bkpData.ch_warn_status, 0xFF, sizeof(g_bkpData.ch_warn_status))
-
-#define  TST_CH_WARN_STATE_SEL_CHK()            util_array_check((g_bkpData.ch_warn_status),  SYS_AD_CH_MAX)
 void SpiSysDefCfgInit(void);  //放在spi_flash中实现，因为其存放在spi flash中。
 
 //5D6FF31,-36335933-43014257

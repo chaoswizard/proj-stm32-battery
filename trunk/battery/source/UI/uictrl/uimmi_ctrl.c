@@ -8,6 +8,12 @@
 #include "usbh_usr.h"
 #include "ff.h"
 
+#if 1
+#define UIMMI_CTRL_DEBUG  xprintf
+#else
+#define UIMMI_CTRL_DEBUG
+#endif
+
 #define UI_MMI_TRACE(f, v)   MY_DEBUG(f, v)
 
 
@@ -41,9 +47,7 @@ DECLARE_SM_NODE_MAP(gMenuShowCurveSm);
 DECLARE_SM_NODE_MAP(gMenuParamSetupSm);
 DECLARE_SM_NODE_MAP(gMenuSearchInfoSm);
 DECLARE_SM_NODE_MAP(gSearchWarnSm);
-
-
-
+DECLARE_SM_NODE_MAP(gBenchSm);
 
 
 
@@ -60,6 +64,7 @@ static const struct SM_NODE_MAP  gFuncMapTab[] = {
     UI_NODE_PARAMSETUP, &gMenuParamSetupSm,
     UI_NODE_SEARCHINFO, &gMenuSearchInfoSm,
     UI_NODE_WARNINFO, &gSearchWarnSm,
+    UI_NODE_BENCH, &gBenchSm,
 };
 
 
@@ -97,6 +102,12 @@ void ui_mmi_init(void)
         gUiMmiCtrl->tmrHandle = SwTmrMgr_Open(&tmrParm);
     }
     ui_keypad_init();
+    #if 0
+    if(!IS_SYS_WORKING() )
+    {
+        AD7705_start(); //非还原过程，在此处便打开采样，但这时不会保存
+    }
+    #endif
     ui_menu_init();
     }
 
@@ -184,11 +195,11 @@ void ui_mmi_reg_resume(void (*resume)(SM_NODE_HANDLE child, SM_NODE_HANDLE me))
     SmMgr_RegResume(gUiMmiCtrl->smHandle, resume);
 }
 
-#define SAMPLE_PERIOD_TEST  0
+#define SAMPLE_PERIOD_TEST  1
 static u_int8 ui_mmi_bypass_proc(struct EVENT_NODE_ITEM *e)
 {
     u_int8 ret = 0;
-    uint32_t tmp;
+
    #if SAMPLE_PERIOD_TEST
     static u_int16 a,b,c,x=0;
    #endif
@@ -204,76 +215,91 @@ static u_int8 ui_mmi_bypass_proc(struct EVENT_NODE_ITEM *e)
                 
              case EVENT_SYS_HW_SQ_START: /***************收到SQ开始信号，也可能由还原过程发出******/
                 ret = 1;
-                if(!IS_SYS_NO_U_PAN() )          //若有u盘，则建立文件
-                {
-                    if(IS_SYS_WORKING())  //还原状态，而不需要重新扫描,但需要先挂载u pan.
-                    {
-                        //根据g_bkpData.start_group_time 查找文件，若不存在，则新建一个
-                        
-                    }
-                    else                                    //否则，获取系统时间，重建一个文件
-                    {
-                        tmp = RTC_GetCounter();
-                        systime_update(tmp);
-                        g_bkpData.start_group_time = tmp;
-                        sprintf(filenameString,"0:%2d-%2d-%2d-%2d-%2d.dat",systmtime.tm_mon,systmtime.tm_mday,systmtime.tm_hour,systmtime.tm_min,systmtime.tm_sec);
-                        if(f_open(&file, filenameString,FA_CREATE_ALWAYS | FA_WRITE) == FR_OK)	
-                        {
-                               xprintf("fopen sucess\n");
-                        }
-                        else
-                        {
-                               xprintf("fopen error\n");
-                        }   
-
-                    }        
-                }  
-                else                /******************没有u盘时的处理过程************/
                 { 
-                    delay_ms(30);                           //消抖
-                    if(GetSqLevel())                        //确认本次是上升沿，而非抖动或其它意外
-                    {
-                        xprintf("SQ_Start\n");
-                        scanAndSetChStatus();          //当收到SQ信号，开始扫描各在用通路状态
+                    delay_ms(30);                                                   //消抖
+                    if(GetSqLevel())                                                //确认本次是上升沿，而非抖动或其它意外
+                    {      
+                        UIMMI_CTRL_DEBUG("SQ_Start\n");
+
+                        if(!IS_SYS_NO_U_PAN())//若有u盘
+                        {                           
+                            MoveToNextGroup(); //移动到新组，尽管这对于u盘的存储意义只在于行
+                            UIMMI_CTRL_DEBUG("u-pan create new file\n");
+                            Set_USBH_USR_MSC_App_Step(USH_USR_FS_CREATE); //新建文件
+                        }
+                        else            //无u盘
+                        {
+                            UIMMI_CTRL_DEBUG("spi_flash move to next group\n");
+                            MoveToNextGroup();
+                        }        
+
+                        scanAndSetChStatus();                                 //当收到SQ信号，开始扫描各在用通路状态
+   
                         SET_SYS_RUN_STATUS_WORKING();  //置系统运行状态为"工作中"
                         SaveBkpData(TABLE_BKP);
-                        SaveBkpData(TABLE_BAK_BKP); //这时被设置为"工作中"，此时才开始可以和需要还原
+                        SaveBkpData(TABLE_BAK_BKP);         //这时被设置为"工作中"，此时才开始可以和需要还原
+                        AD7705_start();                                         //正式启动采样过程
                     }
-                    else                                              //若为低电平，则什么也不做，这只是一次抖动
+                    else                                                                //若为低电平，则什么也不做，这只是一次抖动
                     {
-                        ;
+                       UIMMI_CTRL_DEBUG("up twitter\n") ;
                     }
-                    AD7705_start();                        //正式启动采样过程
                 }
                 break;
                 
              case EVENT_SYS_HW_SQ_END:    /***************收到SQ结束信号*****************/
                 ret = 1;
-                delay_ms(30);                           //消抖
+                delay_ms(30);                               //消抖
                  if(!GetSqLevel())                        //确认本次是上升沿，而非抖动或其它意外
                  {
-                    xprintf("SQ_END\n");
-                    RelayAllDown();
+                    UIMMI_CTRL_DEBUG("SQ_END\n");
+                    
                     AD7705_stop();              //结束采样过程，不再继续采样
-
-                    if(!IS_SYS_NO_U_PAN() )  //有u 盘时，增加一个关闭文件的过程
+                     //有u 盘且正使用时，增加一个关闭文件的过程，这里是异常结束
+                    if(!IS_SYS_NO_U_PAN())
                     {
-                          /*close file and filesystem*/
-                          f_close(&file);
-                          f_mount(0, NULL);           //使0 lun 指向空，防止误操作。
+                        UIMMI_CTRL_DEBUG("sq_end, f_close\n");
+                        f_close(&file);            //未完成检测条件，强制结束了放电过程
                     }
-                    TST_CH_WORK_STATE_ALL_CLR(); //置放电状态全为放电结束
-                    g_bkpData.had_used_time = 0;                   //放电已经用时为零
-                    SET_SYS_RUN_STATUS_START();     //设置状态为"开始"，即此时可以继续放入下一组电池
+                                      
+                   TST_CH_WORK_STATE_ALL_CLR(); //置放电状态全为放电结束  
+                   RelayAllDown();                                          //断开继电器
 
+                   SET_SYS_RUN_STATUS_START();      //设置状态为"开始"，即此时可以继续放入下一组电池
+                                                                                        //但这时的警告信息，用时情况及led状态仍可查询
                    SaveBkpData(TABLE_BKP);
                    SaveBkpData(TABLE_BAK_BKP);      //这时被设置为"工作中"，此时才开始可以和需要还原
                }
+               else
+               {
+                       UIMMI_CTRL_DEBUG("down twitter\n") ;
+               }
+                break;
+                
+             case EVENT_SYS_HW_SQ_RECOVER:
+                UIMMI_CTRL_DEBUG("SQ_RECOVER\n"); 
+                //查找文件，若找到，则打开，若未找到，则新建并打开//移文件写位置到最后的有效位置处
+                if(!IS_SYS_NO_U_PAN())
+                {
+                    UIMMI_CTRL_DEBUG("find file or create new ,and seed to line\n");
+                    MoveToNextGroup();
+                    Set_USBH_USR_MSC_App_Step(USH_USR_FS_CREATE);  //为简单起见，新建文件保存之
+                 }
+                else
+                {
+                    UIMMI_CTRL_DEBUG("using spi_flash,seed to line\n");//此时相应的行已经到位，因为我们使用bkp中保存的全局变量
+                    
+                }
+                //启动采样
+                scanAndSetChStatus();          //当收到SQ信号，开始扫描各在用通路状态或者说是恢复之
+
+                 //SaveBkpData(TABLE_BKP);              //这时，尚未改变bkp中的数据，而只是读取了它们，用于恢复环境
+                 //SaveBkpData(TABLE_BAK_BKP);      //这时被设置为"工作中"，此时才开始可以和需要还原
+                   AD7705_start();                                      //正式启动采样过程
                 break;
              
              case EVENT_SYS_HW_AD :          /***************完成一行采样******************/
                //发出完成一行数据采样的事件消息，供刷新实时曲线时用
-               //保存数据到U盘(若无u盘，保存到spi)
                 ad7705_dump(SYS_EVENT_AD((e->param)));
 
                 #if SAMPLE_PERIOD_TEST
@@ -285,13 +311,13 @@ static u_int8 ui_mmi_bypass_proc(struct EVENT_NODE_ITEM *e)
                  else
                  {
                     c++;
-                    xprintf("--c= %d\n",c);
+                    UIMMI_CTRL_DEBUG("--c= %d\n",c);
                     b=g_sysTimeTickCount;
                     x=0;
                     if(b>a)
-                        xprintf("b-a=%d\n",b-a);
+                        UIMMI_CTRL_DEBUG("b-a=%d\n",b-a);
                     else
-                        xprintf("b-a=%d\n",a+(65535-b));
+                        UIMMI_CTRL_DEBUG("b-a=%d\n",a+(65535-b));
                    }
                     #endif
                break;

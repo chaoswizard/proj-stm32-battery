@@ -1,6 +1,8 @@
 #include "uimmi_ctrl.h"
 #include "gui_menu_item.h"
 
+#include "global.h"
+
 #define THIS_MENU_NAME   "ÉèÖÃÑ¡Ïî"
 
 #define THIS_MENU_UI_CONTAINER   (gSetupOptMenuUi)
@@ -9,7 +11,7 @@
 #define IDX_SETUPOPT_WORK_MODE   (0)
 #define IDX_SETUPOPT_PARAM_SET   (1)
 #define IDX_SETUPOPT_CH_SWITCH   (2)
-#define IDX_SETUPOPT_OK          (3)
+#define IDX_SETUPOPT_SW_MODE          (3)
 
 
 #define SETUPOPTION_LIST_NUM  (4)
@@ -19,6 +21,11 @@
 #define SETUPOPTION_LIST_Y(y)    (((y)*(SETUPOPTION_LIST_CELL_H+6))+8)
 #define SETUPOPTION_LIST_YY(y)   (SETUPOPTION_LIST_Y(y)+1)
 
+struct SETUP_MENU_CTRL {
+    bool_t switch_mode;
+};
+
+static struct SETUP_MENU_CTRL   gSetupMenuCtrl = {0};
 static u_int8 setupoptmenu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_COUNT pos);
 static T_UICOM_DRAW_MODE setupoptmenu_cell_data_int(struct OSD_ZONE *zone, PUICOM_DATA item, T_UICOM_COUNT pos, T_UICOM_COUNT childIdx, T_UICOM_EVENT *p_type);
 
@@ -98,12 +105,19 @@ static T_UICOM_DRAW_MODE setupoptmenu_cell_data_int(struct OSD_ZONE *zone, PUICO
                 break;
         }
     }
-    else if (IDX_SETUPOPT_OK == pos)
+    else if (IDX_SETUPOPT_SW_MODE == pos)
     {
         switch (childIdx)
         {
             case 0:
-                UICOM_DATA_FILL(item, UICOM_STR_QUEREN);
+                if (gSetupMenuCtrl.switch_mode)
+                {
+                UICOM_DATA_FILL(item, UICOM_STR_SHOUDONG);
+                }
+                else
+                {
+                UICOM_DATA_FILL(item, UICOM_STR_ZIDONG);
+                }
                 zone->zone.x += 2;
                 zone->border.t = 1;
                 break;
@@ -155,6 +169,7 @@ static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
     UIMMI_DEBUGSM_ENTER(THIS_MENU_NAME, parent, me);
     ui_mmi_reg_suspend(menu_pub_suspend);
     ui_mmi_reg_resume(menu_pub_resume);
+    gSetupMenuCtrl.switch_mode = 0;
 }
 
 static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
@@ -187,9 +202,11 @@ static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
         {
             ui_mmi_enter(UI_NODE_CHECKSEUP, 0);
         }
-        else if (curfocus == IDX_SETUPOPT_OK)
+        else if (curfocus == IDX_SETUPOPT_SW_MODE)
         {
-            ui_mmi_enter(UI_NODE_MAINMENU, 1);
+            gSetupMenuCtrl.switch_mode =  !gSetupMenuCtrl.switch_mode;
+            SET_SYS_MANUAL();
+            syncResAndStatusShow();
         }
         else if (curfocus == IDX_SETUPOPT_CH_SWITCH)
         {

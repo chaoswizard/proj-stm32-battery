@@ -15,7 +15,7 @@ void SaveSetCfg(void);
 uint8_t GetSetCfg(void); //返回是否取得正确的配置
 
 void SaveAdData(uint8_t* pdata);  //自动按全局变量的变化保存数据，紧跟着更新一下备份数据区
-void  GetAdData(uint8_t  groupIdx, uint8_t  lineIdx);
+void GetAdData(uint8_t groupIdx,uint8_t lineIdx,uint16_t* buf);
 void MoveToNextGroup(void);
 
 #endif //SPI_FLASH_H

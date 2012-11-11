@@ -42,7 +42,7 @@ void uicom_obj_tab(T_UICOM_COUNT row, T_UICOM_COUNT col, T_UICOM_HANDL param,
 /*
 * AN OBJ  SET WHICH ALL IS A  TREE 1Lvl MAP STRUCT
 */
-void uicom_obj_map(T_UICOM_COUNT start, T_UICOM_HANDL param,  T_UICOM_COUNT cntLimit,
+void uicom_obj_map(T_UICOM_COUNT start, T_UICOM_HANDL param, 
                             T_UICOM_COUNT (*getNext)(T_UICOM_COUNT *idx, T_UICOM_HANDL param), 
                             void (*paint)(T_UICOM_COUNT idx, T_UICOM_HANDL param),
                             T_UICOM_ORDER paintOrder)
@@ -51,20 +51,11 @@ void uicom_obj_map(T_UICOM_COUNT start, T_UICOM_HANDL param,  T_UICOM_COUNT cntL
 
     key=start;
 
-    while ((getNext)(&key,  param) )
+    do
     {
-            if (cntLimit)
-            {
-               (paint)(key,  param);
-               cntLimit--;
-            }
-            else
-            {
-                break;
-            }
-    };
+      (paint)(key,  param);
+    } while((getNext)(&key,  param));
 }
-
 
 //==========================================================
 

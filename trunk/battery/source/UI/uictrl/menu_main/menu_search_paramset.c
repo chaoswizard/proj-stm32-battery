@@ -81,11 +81,25 @@ u_int16 paramsetup_val_apply(u_int8 checktype, p_void inputdata, u_int8 len, p_v
         //MY_DEBUG("SET_VAL:%d, %d, %d\n", inputdata, id , param);
         if (IDX_PARAMSETUP_LOWER_LIMIT == id)
         {
-            gMenuParamSetupCtrl.upVal = (u_int16)inputdata;
+            if((u_int16)inputdata ==CFG_PARAM_LIMIT_MIN|| (u_int16)inputdata > CFG_PARAM_LIMIT_MAX)
+            {
+                gMenuParamSetupCtrl.upVal = gAdSampConfig.param_limit;
+            }
+            else
+            {
+                gMenuParamSetupCtrl.upVal = (u_int16)inputdata;
+            }
         }
         else if (IDX_PARAMSETUP_REVERSE_VOL == id)
         {
-            gMenuParamSetupCtrl.reverseVal = (u_int16)inputdata;
+             if((u_int16)inputdata ==CFG_PARAM_REVERSE_MIN|| (u_int16)inputdata > CFG_PARAM_REVERSE_MAX)
+            {
+                 gMenuParamSetupCtrl.reverseVal = gAdSampConfig.param_rervse;
+            }
+            else
+            {
+                gMenuParamSetupCtrl.reverseVal = (u_int16)inputdata;
+            }
         }
     }
 
@@ -255,11 +269,13 @@ static void menu_pub_resume(SM_NODE_HANDLE me, SM_NODE_HANDLE child)
 
 static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
 {
+
     UIMMI_DEBUGSM_ENTER(THIS_MENU_NAME, parent, me);
     ui_mmi_reg_suspend(menu_pub_suspend);
     ui_mmi_reg_resume(menu_pub_resume);
-    gMenuParamSetupCtrl.upVal = gMenuParamSetupCtrl.upVal;
-    gMenuParamSetupCtrl.reverseVal  = gMenuParamSetupCtrl.reverseVal;
+
+    gMenuParamSetupCtrl.upVal =  gAdSampConfig.param_limit;
+    gMenuParamSetupCtrl.reverseVal  = gAdSampConfig.param_rervse;
 
     if (0 == gMenuParamSetupCtrl.upVal)
     {
@@ -303,7 +319,7 @@ static void paramsetup_menu_inputbox_open(u_int8 curfocus, bool_t focusTail)
 static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 {
     u_int8 curfocus;
-
+    u_int32 tmp;
     if (MSG_IS_ENTRY(e->sig))
     {
         Screen_PrintClear(NULL);
@@ -341,7 +357,9 @@ static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
         if (curfocus == IDX_PARAMSETUP_OK)
         {
                 gAdSampConfig.param_limit =  gMenuParamSetupCtrl.upVal;
-                gAdSampConfig.param_rervse =  gMenuParamSetupCtrl.reverseVal;
+                gAdSampConfig.param_rervse = gMenuParamSetupCtrl.reverseVal ;
+                //xprintf("gMenuParamSetupCtrl.reverseVal = %d\n",gMenuParamSetupCtrl.reverseVal);
+                SaveSetCfg();
                 ui_mmi_return(1);
         }
         return UI_PROC_RET_FINISH;

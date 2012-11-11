@@ -35,7 +35,14 @@
 
 #include "global.h"
 #include "input_output.h"
+#include "rtc_time.h"
 
+
+#if 1
+#define Usbh_usr_DEBUG   xprintf
+#else
+#define Usbh_usr_DEBUG(x) 
+#endif
 
 /** @addtogroup USBH_USER
 * @{
@@ -80,6 +87,8 @@ extern USB_OTG_CORE_HANDLE          USB_OTG_Core;
 */ 
 uint8_t USBH_USR_ApplicationState = USH_USR_FS_INIT;
 uint8_t filenameString[25]  = {0};    //文件名字符串
+uint8_t writeTextBuff[] = {0,};
+
 
 FATFS fatfs;
 FIL file;
@@ -168,14 +177,13 @@ void USBH_USR_Init(void)
   if(startup == 0 )
   {
     startup = 1;
-    xprintf("\n ==> USB HOST test<==\n");  
 #ifdef USE_USB_OTG_HS 
-    xprintf(" USB OTG HS MSC Host\n");
+    Usbh_usr_DEBUG(" USB OTG HS MSC Host\n");
 #else
-    xprintf(" USB OTG FS MSC Host\n");
+    Usbh_usr_DEBUG(" USB OTG FS MSC Host\n");
 #endif
 
-    xprintf("> USB Host library  v2.1.0 started.\n"); 
+    Usbh_usr_DEBUG("> USB Host library  v2.1.0 started.\n"); 
   }
 }
 
@@ -187,7 +195,7 @@ void USBH_USR_Init(void)
 */
 void USBH_USR_DeviceAttached(void)
 {
-  xprintf("%s\n",MSG_DEV_ATTACHED);
+  Usbh_usr_DEBUG("%s\n",MSG_DEV_ATTACHED);
 }
 
 
@@ -198,9 +206,8 @@ void USBH_USR_DeviceAttached(void)
 */
 void USBH_USR_UnrecoveredError (void)
 {
-  
   /* Set default screen color*/ 
-  xprintf("%s\n",MSG_UNREC_ERROR); 
+  Usbh_usr_DEBUG("%s\n",MSG_UNREC_ERROR); 
 }
 
 
@@ -213,7 +220,8 @@ void USBH_USR_UnrecoveredError (void)
 void USBH_USR_DeviceDisconnected (void)
 {
   /* Set default screen color*/
-  xprintf("%s\n",MSG_DEV_DISCONNECTED);
+  Usbh_usr_DEBUG("%s\n",MSG_DEV_DISCONNECTED);
+  
   ShowAndSetSysStatus(LED_NO_U_PAN,LED_ON);
 }
 /**
@@ -225,7 +233,7 @@ void USBH_USR_ResetDevice(void)
 {
    static unsigned char rst_cnt = 0;
   /* callback for USB-Reset */
-  xprintf("Reset usb host %d time\n",rst_cnt++);
+  Usbh_usr_DEBUG("Reset usb host %d time\n",rst_cnt++);
 }
 
 
@@ -239,19 +247,19 @@ void USBH_USR_DeviceSpeedDetected(uint8_t DeviceSpeed)
 {
   if(DeviceSpeed == HPRT0_PRTSPD_HIGH_SPEED)
   {
-   xprintf("%s\n",MSG_DEV_HIGHSPEED);
+   Usbh_usr_DEBUG("%s\n",MSG_DEV_HIGHSPEED);
   }  
   else if(DeviceSpeed == HPRT0_PRTSPD_FULL_SPEED)
   {
-    xprintf("%s\n",MSG_DEV_FULLSPEED);
+    Usbh_usr_DEBUG("%s\n",MSG_DEV_FULLSPEED);
   }
   else if(DeviceSpeed == HPRT0_PRTSPD_LOW_SPEED)
   {
-    xprintf("%s\n",MSG_DEV_LOWSPEED);
+    Usbh_usr_DEBUG("%s\n",MSG_DEV_LOWSPEED);
   }
   else
   {
-    xprintf("%s\n",MSG_DEV_ERROR);
+    Usbh_usr_DEBUG("%s\n",MSG_DEV_ERROR);
   }
 }
 
@@ -266,8 +274,8 @@ void USBH_USR_Device_DescAvailable(void *DeviceDesc)
   USBH_DevDesc_TypeDef *hs;
   hs = DeviceDesc;  
   
-  xprintf("VID : %04Xh\n" , (uint32_t)(*hs).idVendor); 
-  xprintf("PID : %04Xh\n" , (uint32_t)(*hs).idProduct); 
+  Usbh_usr_DEBUG("VID : %04Xh\n" , (uint32_t)(*hs).idVendor); 
+  Usbh_usr_DEBUG("PID : %04Xh\n" , (uint32_t)(*hs).idProduct); 
 }
 
 /**
@@ -298,11 +306,11 @@ void USBH_USR_Configuration_DescAvailable(USBH_CfgDesc_TypeDef * cfgDesc,
   
   if((*id).bInterfaceClass  == 0x08)
   {
-    xprintf("%s\n",MSG_MSC_CLASS);
+    Usbh_usr_DEBUG("%s\n",MSG_MSC_CLASS);
   }
   else if((*id).bInterfaceClass  == 0x03)
   {
-    xprintf("%s\n",MSG_HID_CLASS);
+    Usbh_usr_DEBUG("%s\n",MSG_HID_CLASS);
   }    
 }
 
@@ -314,7 +322,7 @@ void USBH_USR_Configuration_DescAvailable(USBH_CfgDesc_TypeDef * cfgDesc,
 */
 void USBH_USR_Manufacturer_String(void *ManufacturerString)
 {
-  xprintf("Manufacturer : %s\n", (char *)ManufacturerString);
+  Usbh_usr_DEBUG("Manufacturer : %s\n", (char *)ManufacturerString);
 }
 
 /**
@@ -325,7 +333,7 @@ void USBH_USR_Manufacturer_String(void *ManufacturerString)
 */
 void USBH_USR_Product_String(void *ProductString)
 {
-  xprintf("Product : %s\n", (char *)ProductString);  
+  Usbh_usr_DEBUG("Product : %s\n", (char *)ProductString);  
 }
 
 /**
@@ -336,7 +344,7 @@ void USBH_USR_Product_String(void *ProductString)
 */
 void USBH_USR_SerialNum_String(void *SerialNumString)
 {
-  xprintf( "Serial Number : %s\n", (char *)SerialNumString);    
+  Usbh_usr_DEBUG( "Serial Number : %s\n", (char *)SerialNumString);    
 } 
 
 
@@ -351,10 +359,8 @@ void USBH_USR_EnumerationDone(void)
 {
   
   /* Enumeration complete */
-  xprintf("%s\n",MSG_DEV_ENUMERATED);
+  Usbh_usr_DEBUG("%s\n",MSG_DEV_ENUMERATED);
   
-  //xprintf( "To see the root content of the disk : \n" );
-
 } 
 
 
@@ -366,7 +372,7 @@ void USBH_USR_EnumerationDone(void)
 */
 void USBH_USR_DeviceNotSupported(void)
 {
-  xprintf("> Device not supported.\n"); 
+  Usbh_usr_DEBUG("> Device not supported.\n"); 
 }  
 
 
@@ -404,7 +410,7 @@ USBH_USR_Status USBH_USR_UserInput(void)
 */
 void USBH_USR_OverCurrentDetected (void)
 {
-  xprintf("Overcurrent detected.\n");
+  Usbh_usr_DEBUG("Overcurrent detected.\n");
 }
 
 
@@ -417,90 +423,108 @@ void USBH_USR_OverCurrentDetected (void)
 int USBH_USR_MSC_Application(void) //做成消息响应，响应100路采样完的消息，将其保存
 {
   FRESULT res;
-  //uint8_t writeTextBuff[] = "  hello i am here...  ";
+  uint32_t tmp;
   uint16_t bytesWritten, bytesToWrite;
   
   switch(USBH_USR_ApplicationState)
   {
-      case USH_USR_FS_INIT:   /* Initialises the File System*/
+     /* Initialises the File System*/
+      case USH_USR_FS_INIT:                             ////////////挂载u pan.
+        Usbh_usr_DEBUG("fmount...\n");
         if ( f_mount( 0, &fatfs ) != FR_OK ) 
         {
               /* efs initialisation fails*/
-              xprintf("> Cannot initialize File System.\n");
+              Usbh_usr_DEBUG("> Cannot initialize File System.\n");
               return(-1);
         }
-        xprintf("> Disk capacity : %d M Bytes\n", USBH_MSC_Param.MSCapacity * \
+        Usbh_usr_DEBUG("> Disk capacity : %d M Bytes\n", USBH_MSC_Param.MSCapacity * \
         USBH_MSC_Param.MSPageLength/1024/1024); 
-
+#if 1
         if(USBH_MSC_Param.MSWriteProtect == DISK_WRITE_PROTECTED)
         {
-            xprintf("%s\n",MSG_WR_PROTECT);
+            Usbh_usr_DEBUG("%s\n",MSG_WR_PROTECT);
         }
-        ShowAndSetSysStatus(LED_NO_U_PAN,LED_OFF);//这时，u pan挂载成功
-     
-        USBH_USR_ApplicationState = USH_USR_FS_WRITEFILE;//USH_USR_FS_READLIST;//USH_USR_FS_WRITEFILE;
-        break;
-         
-      case USH_USR_FS_READLIST:        //列出文件列表
-        Explore_Disk("0:/", 1);                     
-        line_idx = 0;   
-        USBH_USR_ApplicationState = USH_USR_FS_WRITEFILE;    
-        break;
+#endif
+        ShowAndSetSysStatus(LED_NO_U_PAN,LED_OFF);     //////////这时，u pan挂载成功
+        USBH_USR_ApplicationState = USH_USR_FS_SKIP;  
+        break;        
 
-      case USH_USR_FS_WRITEFILE:        ////////////////写文件,即文件保存
-        //USB_OTG_BSP_mDelay(100);   //100 ms延时，由于我们一次保存间隔较长，这里可不用延时
-#if 0
+    case USH_USR_FS_FIND:                   ///////////////查找文件
+        break;
+        
+     case USH_USR_FS_CREATE:            ///////////////创建文件
+        #if 1                                 
         if(USBH_MSC_Param.MSWriteProtect == DISK_WRITE_PROTECTED)
         {
-              xprintf( "> write protected \n");                   ////////加上一个判断，显示在Led上。
-              ShowAndSetSysStatus(LED_WRITE_PROTECTED,LED_ON);
+              Usbh_usr_DEBUG( "> write protected \n");                   ////////加上一个判断，显示在Led上。
               break;
         }   
-#endif //不判断写保护
-
- #if 1       
-        //创建及打开文件
-        
-#else
-        if(f_open(&file, "0:2012-11.txt",FA_CREATE_ALWAYS | FA_WRITE) == FR_OK)	   //0:STM32.TXT
-        { 
-          /* Write buffer to file */
-          xprintf("write content to file\n");
-          bytesToWrite = sizeof(writeTextBuff); 
-          
-          res= f_write (&file, writeTextBuff, bytesToWrite, (void *)&bytesWritten);   
-          
-          if((bytesWritten == 0) || (res != FR_OK)) /*EOF or Error*/
-          {
-            xprintf("> file CANNOT be writen.\n");
-          }
-          else
-          {
-            xprintf("> file created\n");   //文件已经存在
-          }
-          
-          /*close file and filesystem*/
-          f_close(&file);
-          
-          f_mount(0, NULL);           //使0 lun 指向空，防止误操作。
+        #endif 
+        tmp = RTC_GetCounter();
+        systime_update(tmp);
+        g_bkpData.start_group_time = tmp;
+        sprintf(filenameString,"0:%d-%d-%d.txt",systmtime.tm_hour,systmtime.tm_min,systmtime.tm_sec);
+        Usbh_usr_DEBUG("%s\n",filenameString);
+        if(f_open(&file, filenameString,FA_CREATE_ALWAYS | FA_WRITE) == FR_OK)	
+        {
+            Usbh_usr_DEBUG("fopen sucess\n");
         }
-        
         else
         {
-          xprintf ("> file Had created in the disk\n");
-        }
-    	
-        
-#endif
-        USBH_USR_ApplicationState = 5;//USH_USR_FS_WRITEFILE;//只写文件一件事
+            Usbh_usr_DEBUG("fopen error\n");
+        }   
+        USBH_USR_ApplicationState = USH_USR_FS_SKIP;    
+        break;
+
+      case USH_USR_FS_WRITEFILE:        ////////////////写文件内容
+        //USB_OTG_BSP_mDelay(100);   //100 ms延时，由于我们一次保存间隔较长，这里可不用延时
+          if(1)
+          {
+              bytesToWrite = sizeof(writeTextBuff); 
+              
+              res= f_write (&file, writeTextBuff, bytesToWrite, (void *)&bytesWritten);   
+              
+              if((bytesWritten == 0) || (res != FR_OK))             /*EOF or Error*/
+              {
+                Usbh_usr_DEBUG("> file cannot be writen.\n");//出现了异常，比如说u pan脱落。
+                
+                f_close(&file);          //尝试关闭文件
+                
+                //置u盘已经不存在，不再将数据保存到u盘中
+                ShowAndSetSysStatus(LED_NO_U_PAN,LED_ON);
+                //将文件名置为需更新，复位或开始新组前忽略掉前一个文件
+             
+              }
+              else
+              {
+                Usbh_usr_DEBUG("> writed\n");   //已经正确写入
+              }
+          }
+          USBH_USR_ApplicationState = USH_USR_FS_SKIP;    
         break;
         
+     case USH_USR_FS_CLOSE:              ////////////////关闭文件
+          Usbh_usr_DEBUG("fclose\n");/*close file */
+          f_close(&file);
+          Usbh_usr_DEBUG("fclosed\n");
+          //f_mount(0, NULL);           ///*close filesystem*******/使0 lun 指向空，防止误操作,这里永不卸载。
+          USBH_USR_ApplicationState = USH_USR_FS_READLIST;   
+        break;  
+        
+     case USH_USR_FS_READLIST:        //////////////列出文件列表
+        Explore_Disk("0:/", 1);                     
+        line_idx = 0;   
+        USBH_USR_ApplicationState = USH_USR_FS_SKIP;    
+        break;
       default: 
       	break;
   }
   return(0);
 }
-
+void Set_USBH_USR_MSC_App_Step(int step)
+{
+    USBH_USR_ApplicationState = step;
+}
 /**
 * @brief  Explore_Disk 
 *         Displays disk content
@@ -544,7 +568,6 @@ static uint8_t Explore_Disk (char* path , uint8_t recu_level)
         while((HCD_IsDeviceConnected(&USB_OTG_Core))&& \
           (xUSART1_getchar())) 
         {
-          xprintf("##");
           Toggle_Leds();          
         }
         */
@@ -601,6 +624,11 @@ static void Toggle_Leds(void)
 */
 void USBH_USR_DeInit(void)
 {
+  xprintf("usbh_usr_deinit\n");
+    f_close(&file);
+    xprintf("fclosed\n");
+    f_mount(0, NULL);           ///*close filesystem*******/使0 lun 指向空，防止误操作,这里永不卸载。
+
   USBH_USR_ApplicationState = USH_USR_FS_INIT;
 }
 

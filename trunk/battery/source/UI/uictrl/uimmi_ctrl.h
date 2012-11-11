@@ -32,6 +32,7 @@ enum UI_NODE_NAME {
    UI_NODE_PARAMSETUP,/*参数设置*/
    UI_NODE_SEARCHINFO,/*查询界面*/
    UI_NODE_WARNINFO,/*警告查询*/
+   UI_NODE_BENCH,   /*硬件验证*/
 } ;
 
 void ui_mmi_open(void);

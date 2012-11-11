@@ -53,11 +53,7 @@ __ALIGN_BEGIN USBH_HOST                USB_Host __ALIGN_END;
 */ 
 
 
-#if SAD_SIMPLE_TEST
 extern void sad_test(void);// 简单SAD测试过程
-#else
-extern void sad_proc(void);//仿真主流程的一段测试代码。
-#endif
 extern void spi_RW_test(void);
 extern void RelayTest(void);
 extern void SqTest(void);
@@ -65,9 +61,8 @@ extern void bkp_test(void);
 int main(void)
 { 	
 	int i;		
-	static int ch = 0;
         BSP_Init();                                             //初始化大部分的硬件环境，除了usb 在主过程里初始化
-       	xprintf("start system\n");
+       	xprintf("\n\n^v^start system^v^\n\n");
 	CHECK_VER_RIGHT(); 
  #if 0  
          bkp_test();
@@ -101,36 +96,43 @@ int main(void)
     }      
   }
 #endif
-#endif      
-#define BKP_PROTECT_WORD  0xAABB
+#endif        
+        if(IS_SYS_MANUAL())
+        {
+            SET_SYS_AUTO();
+        }
+        if(!GetSetCfg())                 //读取配置，若配置有效，则使用这些配置初始化全局变量    
+        {
+                xprintf("\nloading default cfg !!\n");
+                SpiSysDefCfgInit();                 //初始化放在spi里的全局变量，设置默认配置，并写回spi flash中。
+        }
+        else                                                    //若已经有效，则同步bkp中的部分内容到ad配置中
+        {
+            xprintf("\nget cfg from spi_flash!!\n");
+        }
+
+ #define BKP_PROTECT_WORD  0xAABB
+ 
          if (BKP_ReadBackupRegister(BKP_DR22) != BKP_PROTECT_WORD)
          {
             xprintf("loading default bkp !!\n");
             bkpSysDefBakInit();
-            BKP_WriteBackupRegister(BKP_DR22, 0xAAAA);
+            BKP_WriteBackupRegister(BKP_DR22, BKP_PROTECT_WORD);
          }
          else
         {
             if(TABLE_BAK_BKP ==  checkBkp())//判断并选定当前的bkp idx.只要配置过，不会无效
             {
+                xprintf("\nnow table bak bkp valid !!\n");
                 SaveBkpData(TABLE_BKP);
             }
             else
             {
+                xprintf("\nnow table bkp valid !!\n");
                 SaveBkpData(TABLE_BAK_BKP);    
             }
         }
-        
-        if(!GetSetCfg())                 //读取配置，若配置有效，则使用这些配置初始化全局变量    
-        {
-                xprintf("loading default cfg !!\n");
-                SpiSysDefCfgInit();                 //初始化放在spi里的全局变量，设置默认配置，并写回spi flash中。
-        }
-        else                                                    //若已经有效，则同步bkp中的部分内容到ad配置中
-        {
-            gAdSampConfig.data_group_valid_line_idx[g_bkpData.group_idx] = g_bkpData.last_line_in_group; //其实一般，左边不用到
-        }
-
+        SET_SYS_NO_U_PAN();  //刚上电时，尚未进行枚举，统统认为是没有u盘
         syncResAndStatusShow();
         
         USBH_Init(&USB_OTG_Core,                //usbHost init.提供u盘读写服务
@@ -143,37 +145,54 @@ int main(void)
             &USBH_MSC_cb, 
             &USR_cb);
 
-////////////////MMI///////////////////////////
+        //挂载u pan.建议使用时，我们先将u pan接入系统中
+        for(i = 0;i<40000;i++)    
+        {
+          USBH_Process(&USB_OTG_Core, &USB_Host);                       /* Host Task handler */
+          if(!IS_SYS_NO_U_PAN())
+          {
+            xprintf("have a u pan \n");                             //挂载u pan成功
+            break;
+           }
+        }
+        ////////////////MMI///////////////////////////
 	ui_mmi_open();
 	ui_mmi_start();
-        StartSqDetect();            //使能SQ信号外部中断，由于该动作将调用mmi的消息处理，故在ui_mmi_open后才能调用
-        
-        if(IS_SYS_WORKING() && GetSqLevel())//已经连接上，为高电平，且状态为工作中，则主动发送SQ开始信号
-        {
-            struct EVENT_NODE_ITEM e;
-             e.sig = EVENT_SYS_HW_SQ_START;  //自动还原运行
-             ui_mmi_send_msg(&e);
 
-             //若显示掉电前有u盘，则尝试挂载之
-             if(!IS_SYS_NO_U_PAN())
-             {
-                SET_SYS_NO_U_PAN();
-                for(i = 0;i<30000;i++)    //看下能否挂载成功,若这个循环下来，还未能挂载成功，则说明u盘不存在
-                {
-                  USBH_Process(&USB_OTG_Core, &USB_Host);/* Host Task handler *///进行u pan挂载
-                  if(!IS_SYS_NO_U_PAN())
-                  {
-                    xprintf("have u pan\n");
-                    break;
-                   }
-                }
-            }
+        //只有在工作时，才需要还原继续。
+        if(IS_SYS_WORKING() && GetSqLevel())        
+        {	
+             struct EVENT_NODE_ITEM e;
+             xprintf("\nrecover: sys_working && sq_level_h\n" );
+             e.sig = EVENT_SYS_HW_SQ_RECOVER;               //发出SQ_RECOVER消息
+             ui_mmi_send_msg(&e);
         }
+        else if(IS_SYS_END() && GetSqLevel())               //这时的状态是系统已经按条件测试并保存完毕，尚未取出电池时掉电
+        {
+            xprintf("\n sys_end && sq_level_h,wait sq_start\n");
+            ;//这时，不动作，等待将电池取出，或等待运行收到SQ_END部分的过程.
+        }
+        else if(IS_SYS_START()&&GetSqLevel())//这时的状态是系统正在取出电池时掉电，这时电平本为低，但现在检测为高说明在停电后，已经换好了新电池
+        {
+             struct EVENT_NODE_ITEM e;
+             xprintf("\n sys_start && sq_level_h,send sq_start\n");
+             e.sig = EVENT_SYS_HW_SQ_START;                     //发出SQ_START//切换到新组，自动开始
+             ui_mmi_send_msg(&e);
+        }
+        else                                                                            //低电平，自然开始即可
+        {
+             xprintf("\n sq_level_l,do nothing\n");
+            ;//这时，不动作，等待将电池装入，然后开始
+        }
+        
+       syncResAndStatusShow();
+       
+       StartSqDetect();            //使能SQ信号外部中断，由于该动作将调用mmi的消息处理，故在ui_mmi_open后才能调用
 	while (1)
 	{
 		ui_mmi_proc();
-                USBH_Process(&USB_OTG_Core, &USB_Host);/* Host Task handler */
-		IWDG_ReloadCounter();  	// Reload IWDG counter
+                USBH_Process(&USB_OTG_Core, &USB_Host);   /* Host Task handler */
+		IWDG_ReloadCounter();  	                                    // Reload IWDG counter
 	}
 	ui_mmi_close();
 }

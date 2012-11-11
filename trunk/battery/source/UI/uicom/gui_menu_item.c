@@ -353,10 +353,9 @@ static T_UICOM_COUNT map_cell_value_next(T_UICOM_COUNT *key,  struct GMENU_VALUE
 
     next ++;
 
-    if (next <=  map->mapcount)
+    if (next < map->mapcount)
     {
         (*key) = next;
-        map->curMap = next;
         return 1;
     }
     
@@ -524,50 +523,20 @@ void gmenu_value_map_draw(struct GMENU_VALUE_MAP *map,
 {
     if (map && (penCount > 0) && (penCount<=8))
     {
+        T_UICOM_COUNT grp;
+        
         //--------------------------------------------------------------
         map->penCount  = penCount;
         map->mapcount  = count;
         map->penTbl  = gValueMapPenTab;
         map->penSwitchBitmap = penswitch;
-        gmenu_value_map_reset(map);
-        uicom_obj_map(0, map, map->mapcount, map_cell_value_next, map_cell_value_proc, 0);
-    }
-}
-
-T_UICOM_COUNT   gmenu_value_get_curkey(struct GMENU_VALUE_MAP *map)
-{
-        if (map)
-            return   map->curMap;
-         else
-         return  0;
-}
-
-void    gmenu_value_map_reset(struct GMENU_VALUE_MAP *map)
-{
-            T_UICOM_COUNT grp;
-
-            map->curMap = 0;
-            for (grp=0; grp<map->penCount; grp++)
-            {
-                map->penTbl[grp].paintflg = PAINT_FLAG_EMPTY;
-                map->penTbl[grp].pre_x = 0;
-                map->penTbl[grp].pre_y = 0;
-            }
-}
-
-void gmenu_value_map_draw_next(struct GMENU_VALUE_MAP *map,
-                                  T_UICOM_COUNT count,  T_UICOM_COUNT penCount, u_int8 penSwitch) 
-{
-    if  (map )
-    {
-        map->penCount             = penCount;
-        map->penSwitchBitmap = penSwitch;
-        map->penTbl  = gValueMapPenTab;
-        map->mapcount += count;
-
-        xprintf("DNext:%d+%d,%d\n", map->curMap, count, map->mapcount);
-        
-        uicom_obj_map(map->curMap, map, count,  map_cell_value_next, map_cell_value_proc, 0);
+        for (grp=0; grp<map->penCount; grp++)
+        {
+            map->penTbl[grp].paintflg = PAINT_FLAG_EMPTY;
+            map->penTbl[grp].pre_x = 0;
+            map->penTbl[grp].pre_y = 0;
+        }
+        uicom_obj_map(0, map, map_cell_value_next, map_cell_value_proc, 0);
     }
 }
 

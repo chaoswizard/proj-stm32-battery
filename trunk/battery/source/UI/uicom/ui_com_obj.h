@@ -257,7 +257,7 @@ void uicom_obj_tab(T_UICOM_COUNT row, T_UICOM_COUNT col, T_UICOM_HANDL param,
                           T_UICOM_ORDER paintOrder);
 
 // dymatic map
-void uicom_obj_map (T_UICOM_COUNT start, T_UICOM_HANDL param,  T_UICOM_COUNT cntLimit,
+void uicom_obj_map(T_UICOM_COUNT start, T_UICOM_HANDL param, 
                             T_UICOM_COUNT (*getNext)(T_UICOM_COUNT *idx, T_UICOM_HANDL param), 
                             void (*paint)(T_UICOM_COUNT idx, T_UICOM_HANDL param),
                             T_UICOM_ORDER paintOrder);

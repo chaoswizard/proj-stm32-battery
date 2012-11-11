@@ -186,6 +186,18 @@ UICOM_TEXT_DECLAER(JingGaoFanXiang);
 #define   UICOM_STR_FANXIANG                      UICOM_TEXT_STR_REF(JingGaoFanXiang)
 
 
+UICOM_TEXT_DECLAER(ZhengChang);
+#define   UICOM_STR_ZHEANGCHANG           UICOM_TEXT_STR_REF(ZhengChang)
+
+UICOM_TEXT_DECLAER(Zidong);
+#define   UICOM_STR_ZIDONG                          UICOM_TEXT_STR_REF(Zidong)
+
+UICOM_TEXT_DECLAER(Shoudong);
+#define   UICOM_STR_SHOUDONG                   UICOM_TEXT_STR_REF(Shoudong)
+
+
+
+
 //=========================================================
 //≤‚ ‘Õº∆¨
 UICOM_PIC_DECLAER(smile);

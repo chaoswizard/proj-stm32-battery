@@ -655,6 +655,11 @@
               <FileType>1</FileType>
               <FilePath>..\UI\uictrl\menu_main\menu_search_curve.c</FilePath>
             </File>
+            <File>
+              <FileName>menu_bench.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\UI\uictrl\menu_main\menu_bench.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

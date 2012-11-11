@@ -43,6 +43,9 @@ DEF_UICOM_CONTENT_TEXT(YuanQuanQuan,    "牛");//圆圈
 DEF_UICOM_CONTENT_TEXT(YuanQuanQuan1,   "*");//圆圈
 DEF_UICOM_CONTENT_TEXT(ZaiYong,         "在用");//在用
 DEF_UICOM_CONTENT_TEXT(ZhiDangQian,     "当前值+V");//当前值
+DEF_UICOM_CONTENT_TEXT(ZhengChang,      "正常");
+DEF_UICOM_CONTENT_TEXT(Zidong,           "自动");
+DEF_UICOM_CONTENT_TEXT(Shoudong,        "手动");
 
 
 const u_int8 gMyPictureData[32] = {

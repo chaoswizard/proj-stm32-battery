@@ -104,7 +104,6 @@ struct GMENU_MAP_PEN {
 struct GMENU_VALUE_MAP {
     T_UICOM_DRAW_MODE (*mapinit)(T_UICOM_COUNT group, T_UICOM_COUNT *key, T_UICOM_COUNT *y);      
     T_UICOM_COUNT mapcount;
-    T_UICOM_COUNT curMap;
     struct GMENU_MAP_PEN *penTbl;
     T_UICOM_COUNT penCount;
     u_int32 penSwitchBitmap;
@@ -114,27 +113,22 @@ struct GMENU_VALUE_MAP {
 #define DEF_MENU_VALUE_MAP(map, inititem)   \
 struct GMENU_VALUE_MAP map = \
 {  \
-    inititem, 0,  0, NULL, 0, 0\
+    inititem, 0, NULL, 0, 0\
 }
 #define LDEF_MENU_VALUE_MAP(map, inititem)  \
     static DEF_MENU_VALUE_MAP(map, inititem)
 
 void gmenu_value_map_draw(struct GMENU_VALUE_MAP *map,
                         T_UICOM_COUNT count, T_UICOM_COUNT penCount, u_int8 penswitch);
-                        
-void gmenu_value_map_draw_next(struct GMENU_VALUE_MAP *map,
-                                  T_UICOM_COUNT count,  T_UICOM_COUNT penCount, u_int8 penswitch);
-void    gmenu_value_map_reset(struct GMENU_VALUE_MAP *map);
-T_UICOM_COUNT   gmenu_value_get_curkey(struct GMENU_VALUE_MAP *map);
+
 
 void gmenu_ruler_draw(struct OSD_ZONE *zone, enum PIXEL_COLOR pixel_mode, T_UICOM_DRAW_MODE (*initname_cbf)(T_UICOM_ORDER, u_int16, struct OSD_ZONE *, PUICOM_DATA));
 //----------------------------------------------------------------------
 struct gmenu_curve_config {
-    u_int16 maxKey;
-    u_int16 maxVal;
-    u_int16 maxGrpbase;
-    u_int16 initKeyCount;
-    u_int32 (*fun)(T_UICOM_COUNT group, u_int32 x, u_int32 grpbase, u_int32 x_start);
+    u_int32 maxKey;
+    u_int32 maxVal;
+    u_int8 initCount;
+    u_int8 (*fun)(T_UICOM_COUNT group, u_int32 x, u_int8 maxY, u_int8 rulerY);
     void (*curvetitle)(T_UICOM_COUNT grp, PUICOM_DATA item);
     void (*curveXname)(PUICOM_DATA item);
     void (*curveYname)(PUICOM_DATA item);

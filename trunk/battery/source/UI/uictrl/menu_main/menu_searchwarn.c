@@ -3,6 +3,7 @@
 
 #define THIS_MENU_NAME  "警告查询"
 
+#define  MAX_WARN_ROW_NUM                100   
 
 #define THIS_MENU_SM_HANDLE      (gSearchWarnSm)
 #define THIS_MENU_UI_CONTAINER   (gSearchWarnTable)
@@ -23,7 +24,8 @@
 
 struct WARNINFO_MENU_CTRL {
     bool_t ui_init;
-    u_int8 tstVal;
+    bool_t page_rst;
+    u_int8 curBase;
 };
 
 static  struct WARNINFO_MENU_CTRL gWarnInfoSearchCtrl;
@@ -94,6 +96,8 @@ static void warninfomenu_cell_zone_init(struct OSD_ZONE *zone, T_UICOM_COUNT row
 
 static T_UICOM_DRAW_MODE warninfomenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM_DATA item, T_UICOM_COUNT row, T_UICOM_COUNT col, T_UICOM_EVENT *p_type)
 {
+    u_int16  ch;
+    
     if (gWarnInfoSearchCtrl.ui_init && (0 == row))
     {
         return DRAW_MODE_SKIP;
@@ -120,23 +124,48 @@ static T_UICOM_DRAW_MODE warninfomenu_cell_data_init(struct SCREEN_ZONE *zone,PU
         return DRAW_MODE_TEXT_BOX; 
     }
 
+    if ( gWarnInfoSearchCtrl.page_rst)
+    {
+        return  DRAW_MODE_SKIP;
+    }
+    ch = gWarnInfoSearchCtrl.curBase+row - 1;
     //===========非首行============
     if (0 == col)
     {
-        sprintf(UICOM_DATA_BUF(item), "%04d", gWarnInfoSearchCtrl.tstVal+row);
+        sprintf(UICOM_DATA_BUF(item), "%04d",  ch + 1);
     }
     else if (1 == col)
     {
-        if (((((row)% ((gWarnInfoSearchCtrl.tstVal%WARNINFO_TAB_ROW_NUM) + 1)))&&(gWarnInfoSearchCtrl.tstVal%WARNINFO_TAB_ROW_NUM)))
+        if(CH_STATUS_REVERSED == ch_warn_status[ch] )
+        //if (((((row)% ((gWarnInfoSearchCtrl.tstVal%WARNINFO_TAB_ROW_NUM) + 1)))&&(gWarnInfoSearchCtrl.tstVal%WARNINFO_TAB_ROW_NUM)))
         {
             UICOM_DATA_FILL(item, UICOM_STR_FANXIANG);
         }
-        else
+        else  if(CH_STATUS_IMPEND == ch_warn_status[ch] )
         {
             UICOM_SET_SLECTED((*p_type));
             UICOM_DATA_FILL(item, UICOM_STR_XUANKONG);
         }
+        else  if(CH_STATUS_NO_DISCHARGED == ch_warn_status[ch] )
+        {
+            UICOM_SET_SLECTED((*p_type));
+            UICOM_DATA_FILL(item, "不放电");
+        }
+        else  if(CH_STATUS_NORMAL == ch_warn_status[ch] )
+        {
+            UICOM_SET_SLECTED((*p_type));
+            UICOM_DATA_FILL(item, "正常");
+        }
+        
+            if (ch >= ( MAX_WARN_ROW_NUM-1))
+            {
+                gWarnInfoSearchCtrl.page_rst = 1;
+            }
     }
+
+
+    
+    
     return DRAW_MODE_TEXT_BOX; 
 }
 
@@ -160,7 +189,8 @@ static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
     ui_mmi_reg_resume(menu_pub_resume);
     gWarnInfoSearchCtrl.ui_init = 0;
     
-    gWarnInfoSearchCtrl.tstVal = 0;
+    gWarnInfoSearchCtrl.curBase = 0;
+    gWarnInfoSearchCtrl.page_rst = 0;
 }
 
 static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
@@ -184,8 +214,16 @@ static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
         case EVENT_KEY_RIGHT:
         case EVENT_KEY_UP:
         case EVENT_KEY_DOWN:
-        gWarnInfoSearchCtrl.tstVal += (WARNINFO_TAB_ROW_NUM-1);
-        warninfomenu_paint(1);
+            if ( gWarnInfoSearchCtrl.page_rst)
+           {
+                  gWarnInfoSearchCtrl.curBase = 0;
+                  gWarnInfoSearchCtrl.page_rst = 0;
+           }
+           else
+           {
+                gWarnInfoSearchCtrl.curBase += (WARNINFO_TAB_ROW_NUM-1);
+           }
+            warninfomenu_paint(1);
         break;
         default:
             break;

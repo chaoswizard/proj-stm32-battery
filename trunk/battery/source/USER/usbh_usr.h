@@ -36,6 +36,8 @@
 #include <stdio.h>
 #include "usbh_msc_core.h"
 
+#include "global.h"
+
 /** @addtogroup USBH_USER
   * @{
   */
@@ -71,7 +73,12 @@ extern  USBH_Usr_cb_TypeDef USR_cb;
 /* State Machine for the USBH_USR_ApplicationState */
 #define USH_USR_FS_INIT       0
 #define USH_USR_FS_READLIST   1
-#define USH_USR_FS_WRITEFILE  2
+#define USH_USR_FS_CREATE  2
+#define USH_USR_FS_FIND        3
+#define USH_USR_FS_WRITEFILE  4
+#define USH_USR_FS_CLOSE    5
+#define USH_USR_FS_SKIP     6
+
 
 /**
   * @}
@@ -92,6 +99,7 @@ extern  uint8_t USBH_USR_ApplicationState ;
   * @}
   */ 
 extern uint8_t filenameString[25]  ;    //ÎÄ¼þÃû×Ö·û´®
+extern uint8_t writeTextBuff[SYS_AD_CH_MAX] ;
 
 extern FATFS fatfs;
 extern FIL file;
@@ -120,6 +128,8 @@ void USBH_USR_DeInit(void);
 void USBH_USR_DeviceNotSupported(void);
 void USBH_USR_UnrecoveredError(void);
 int USBH_USR_MSC_Application(void);
+
+void Set_USBH_USR_MSC_App_Step(int step);
 
 /**
   * @}

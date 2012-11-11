@@ -110,6 +110,7 @@ enum {
     EVENT_SYS_HW_AD,
     EVENT_SYS_HW_SQ_START,
     EVENT_SYS_HW_SQ_END,
+    EVENT_SYS_HW_SQ_RECOVER,
     EVENT_SYS_EXIT,
     
     // sm

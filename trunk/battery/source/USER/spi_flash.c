@@ -6,15 +6,37 @@
 
 void SaveSetCfg(void)
 {
-    gAdSampConfig.checkcode = calc_checkcode(((unsigned  char*)(&gAdSampConfig )+2), sizeof(gAdSampConfig) - 2);
-    write_flash((unsigned char*)(&gAdSampConfig),sizeof(gAdSampConfig), SYS_SET_CFG_ADDRESS);    
+    uint32_t tmp;
+    if(IS_SYS_WORKING())
+    {
+        xprintf("working, not modify ad cfg!!\n");
+    }
+    else
+    {
+        tmp =gAdSampConfig.mode_vol*DIGIT_16_BITS/FULL_QUANTIFIER;
+        g_mode_vol_ad_val = tmp;
+        tmp = gAdSampConfig.param_limit*DIGIT_16_BITS/FULL_QUANTIFIER;
+        g_param_limit_ad_val = tmp;
+        tmp = gAdSampConfig.param_rervse*DIGIT_16_BITS/FULL_QUANTIFIER;
+        g_param_rervse_ad_val = tmp;           
+        gAdSampConfig.checkcode = calc_checkcode(((unsigned  char*)(&gAdSampConfig )+2), sizeof(gAdSampConfig) - 2);
+        write_flash((unsigned char*)(&gAdSampConfig),sizeof(gAdSampConfig), SYS_SET_CFG_ADDRESS);    
+    }
 }
 uint8_t GetSetCfg(void)
 {
+    uint32_t tmp;
    read_flash((unsigned char*)(&gAdSampConfig),sizeof(gAdSampConfig), SYS_SET_CFG_ADDRESS);
    gAdSampConfig.checkcode = calc_checkcode(((unsigned  char*)(&gAdSampConfig) ), sizeof(gAdSampConfig) );
    if(0 == gAdSampConfig.checkcode)
    {
+        tmp =gAdSampConfig.mode_vol*DIGIT_16_BITS/FULL_QUANTIFIER;
+        g_mode_vol_ad_val = tmp;
+        tmp = gAdSampConfig.param_limit*DIGIT_16_BITS/FULL_QUANTIFIER;
+        g_param_limit_ad_val = tmp;
+        tmp = gAdSampConfig.param_rervse*DIGIT_16_BITS/FULL_QUANTIFIER;
+        g_param_rervse_ad_val = tmp;       
+        xprintf("%d\n%d\n",g_param_limit_ad_val,g_param_rervse_ad_val);
         return TRUE;
    }
    else
@@ -31,16 +53,7 @@ void MoveToNextGroup(void)
     {
         g_bkpData.group_idx = AD_DATA_GROUP_NUM_MIN;
     }
-    
-    gAdSampConfig.data_group_valid_line_idx[(g_bkpData.group_idx-1)] =  g_bkpData.last_line_in_group;      //从第一行起
-
-    //保存并备份掉电保护区
-    SaveBkpData(TABLE_BKP);
-    SaveBkpData(TABLE_BAK_BKP);
-
-    SaveSetCfg();    //将最后一个有效行信息写入配置，以便取数据时通过配置头取得相应的组有效行数信息
-    
-   g_bkpData.last_line_in_group = 0;
+    g_bkpData.last_line_in_group = 0;
 
 }
 void MoveToNextLine(void)
@@ -51,18 +64,18 @@ void SaveAdData(uint8_t* pdata)
 {
     unsigned long L_addr;
     uint16_t lineIdx ;    
-    lineIdx = gAdSampConfig.data_group_valid_line_idx[(g_bkpData.group_idx-1)];//取组中的有效行位置
+    lineIdx = g_bkpData.last_line_in_group;                                                 //取组中的有效行位置
     L_addr = DATA_GROUP1_BASE_ADDR + (g_bkpData.group_idx-1)*DATA_GROUP_SIZE + (lineIdx)*SYS_AD_CH_MAX*2;
     write_flash(pdata, SYS_AD_CH_MAX*2, L_addr);
-    g_bkpData.last_line_in_group++;
+    //g_bkpData.last_line_in_group++;
 }
 
 //取spi flash中的历史数据，在这里不校验其是否有效。
-void GetAdData(uint8_t groupIdx,uint8_t lineIdx)
+void GetAdData(uint8_t groupIdx,uint8_t lineIdx,uint16_t* buf)
 {
     unsigned long L_addr;
     L_addr = DATA_GROUP1_BASE_ADDR + (groupIdx-1)*DATA_GROUP_SIZE + lineIdx*SYS_AD_CH_MAX*2;
-    read_flash((uint8_t *)batteryVolAdArray, SYS_AD_CH_MAX*2, L_addr);
+    read_flash((uint8_t *)buf, SYS_AD_CH_MAX*2, L_addr);
 }
 
 void SpiSysDefCfgInit(void)

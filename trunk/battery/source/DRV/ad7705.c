@@ -8,13 +8,22 @@
 #include "uimmi_ctrl.h"
 #include "input_output.h"
 
+#include "usbh_usr.h"
+#include "ff.h"
+
+
+#if 1
+#define AD7705_DEBUG  xprintf
+#else
+#define AD7705_DEBUG
+#endif
+
 #define WAIT_DRDY_TMR_DELAY  20
 static SWTMR_NODE_HANDLE gAdSampTmr;
 static volatile uint8_t gAdCurSampStatus = 0;
 
 #define SAMP_END_LINE        100//s100       //采样结束行+1的位置
 #define SAMP_START_LINE        0//采样开始行
-#define SET_VOL   36700             // 2.8v
 
 enum {
        AD_SAMP_STEP_STOP,
@@ -101,23 +110,13 @@ void AD7705_init(void)
 	//作为有效通道，将下一操作设为对时钟寄存器进行写操作
 	SEND_CMD(0x21);
 	// 2对时钟寄存器写操作，设置CLKDIV位，将外部时钟除二，
-	//假定外部时钟频率 4.9512MHZ,更新率选为100hz
-	write_ad7705reg(0x0c);
+	//假定外部时钟频率 4.9512MHZ,更新率选为500hz
+	/*ZERO (0) ZERO (0) ZERO (0) CLKDIS (0) CLKDIV (0) CLK (1) FS1 (0) FS0 (1)*/
+	write_ad7705reg(0xc);//(0xe); //0xf
 	
 	// 3 向通信寄存器写数据，选择通道2作为有效通道。将下一
 	//操作设为对设置寄存器的写操作。10b---- 100HZ; 11b---200Hz
 	SEND_CMD(0x11);  //0x12 ---100hz,0x13---200hz,目前只有这个配置稳定性高
-	/*ZERO (0) ZERO (0) ZERO (0) CLKDIS (0) CLKDIV (0) CLK (1) FS1 (0) FS0 (1)*/
-	//SEND_CMD(0x1D);  //抽空测一下这个  ,60HZ,若改为此，则可以30ms完成一路
-	//那么3s将可以完成一路的采样，否则，则需要将近3.5s才能完成采样
-	//其它如spi flash,usb,bkp等的修改时间只剩下500ms了，这个可能并不足以存下
-	//一轮的数据xxxx。
-	//SEND_CMD(0x17);  //这个也需要4s左右稳定性好像比0x11要高
-        //SEND_CMD(0x16);  //这个也需要4s左右,稳定性好像比0x11要高
-        //SEND_CMD(0x15);  //这个也需要4s左右稳定性好像比0x11要高-->最高
-        //SEND_CMD(0x14);  //这个也需要4s左右，稳定性好像比0x11要高
-        //SEND_CMD(0x13);  //这个也需要4s左右，稳定性好像比0x11要高
-        //SEND_CMD(0x19);  //这个也需要4s左右，xxxxx不行
                 
 	// 4向设置寄存器写数据，将增益设为1，设置为单极性、非缓冲模式
 	// 清除滤波器同步，开始自校准
@@ -140,50 +139,146 @@ static void  Read_ad7705_end(void)
         SYS_EVENT_AD_INIT(e.param,  g_LastAdCh);
         ui_mmi_send_msg(&e);
 }
+uint8_t isDetectEnd(void)
+{
+    static uint16_t tmCnt = 0;
+    uint8_t ret = 1;
+    uint8_t i = 0;
+    //return 0;
+    tmCnt++;
+    g_bkpData.had_used_time = SYS_AD_PERIOD*tmCnt;
+    
+    if(0 == gAdSampConfig.mode_sel)                                     //按时间
+    {
+           if(gAdSampConfig.mode_min*60 <= g_bkpData.had_used_time )
+           {
+                tmCnt = 0;
+                g_bkpData.had_used_time = 0;
 
+                ret = 1;
+                AD7705_DEBUG("\n!!end by time!!\n");
+           }
+           else
+           {
+                ret = 0;
+           }
+    }
+    else if(1 == gAdSampConfig.mode_sel) //按电压
+    {
+        //在用的通路且并非不放电的通路，电压都在设置值以下
+        for(i=0;i<(SYS_AD_CH_MAX+7)>>3;i++)//全部放电结束,初始时，悬空，反向，不放电，均置为放电结束
+        {
+            if(g_bkpData.ch_work_status[i])   //只要有一个不为零，则未结束
+            {
+                ret = 0;
+                break;
+            }
+        }
+        if(ret)
+        {
+                AD7705_DEBUG("\n!!end by vol!!\n");
+         }
+    }
+    else   //混合模式
+    {
+        for(i=0;i<(SYS_AD_CH_MAX+7)>>3;i++)//全部放电结束,初始时，悬空，反向，不放电，均置为放电结束
+        {
+            if(g_bkpData.ch_work_status[i])
+            {
+                ret = 0;
+                break;
+            }
+        }
+        if(ret)
+        {   
+               AD7705_DEBUG("\n!!end by mis vol!!\n");
+        }
+       else   if(gAdSampConfig.mode_min*60 <= g_bkpData.had_used_time )
+       {
+            tmCnt = 0;
+            g_bkpData.had_used_time = 0;
+
+            ret = 1;
+            AD7705_DEBUG("\n!!end by mis time!!\n");
+       }
+    }
+    return ret;
+}
 //完成一行数据采样后调用该函数，很多状态更新的工作在此进行
 //该函数为完成一行数据采样后的数据处理过程，这里的内容稍多
+static u_int16 batteryVolAdArray_src[SYS_AD_CH_MAX] ; 
+#define CMP_SRC_LINE  1  //取第一组数据
+#define CMP_DST_LINE  5  //用第五组与第一组相比
 void ad7705_dump(uint16_t grp)
 {
-    int i;
-    //xprintf("\n\n=========================\n");
-    //     while(g_curAdCh--)
-    //    xprintf("--%d: %d-%d-\n",g_curAdCh ,batteryVolAdArray[g_curAdCh], grp);
-    if(IS_SYS_NO_U_PAN() )
-    {
-        //保存到spi flash 中
-        SaveAdData((uint8_t*)batteryVolAdArray);
-
-    }
-    else
-    {
-        //保存数据到u pan.
-        
-        xprintf("save data to u-pan\n");
-    }
-
-     if(0)                //gAdSampConfig.mode_sel结束条件达到，置系统运行状态为"结束"，则不需要再启动ad采样   等待SQ_END.
+    uint8_t i;
+     if(isDetectEnd())               
      {
-        SET_SYS_RUN_STATUS_END();
-        
+        RelayAllDown();   //关闭所有继电器，时间到的结束，未必会关闭所有的继电器
         //将u盘或其它外设的数据flush.关闭文件
-        
-        MoveToNextGroup();                          //切到下一组，开始.将它们同步的信息同步到备份数据区
+        if(!IS_SYS_NO_U_PAN()) 
+        {
+            AD7705_DEBUG("group end,using u pan,close file\n");
+            //发送一个指令，表明保存并关闭文件,若直接关闭，则少保存一行数据
+            f_close(&file);            //未完成检测条件，强制结束了放电过程
+        }              
+        else
+        {
+            AD7705_DEBUG("save to spi flash\n");
+            SaveAdData((uint8_t*)batteryVolAdArray);//保存到spi flash 中
+        } 
+        //MoveToNextGroup(); 
+         SET_SYS_RUN_STATUS_END();   //置状态为检测完成，等待换电池
      }
-     else               //  开始下一行的采样
+     
+     else                                                           //  开始下一行的采样
      {
-      
-        MoveToNextLine();
-        AD7705_start();           //启动下一行采样
+        if(IS_SYS_WORKING())                  //还原处理，目前为简单处理，还原时新建文件
+        {
+             if(!IS_SYS_NO_U_PAN() ) 
+            {
+                AD7705_DEBUG("save data to u-pan\n");
+                
+                memcpy(writeTextBuff,(uint8_t*)batteryVolAdArray, SYS_AD_CH_MAX); //复制到usb usr buffer中
+                
+                Set_USBH_USR_MSC_App_Step(USH_USR_FS_WRITEFILE); //保存数据到u pan.
+            }
+            else
+            {
+                AD7705_DEBUG("save data to spi_flash\n");
+                SaveAdData((uint8_t*)batteryVolAdArray);//保存到spi flash 中
+            }
+            
+            if(CMP_SRC_LINE == g_bkpData.last_line_in_group)
+            {
+                memcpy((uint8_t*)batteryVolAdArray_src,(uint8_t*)batteryVolAdArray, SYS_AD_CH_MAX); //复制到usb usr buffer中
+            }
+            else if(CMP_DST_LINE == g_bkpData.last_line_in_group)
+            {
+                AD7705_DEBUG("discharge judge\n");
+                for(i = 0;i< SYS_AD_CH_MAX;i++)
+                {
+                    if(CH_STATUS_NORMAL== ch_warn_status[i] && (batteryVolAdArray_src[i] <= batteryVolAdArray[i]))
+                    {
+                        ch_warn_status[i] = CH_STATUS_NO_DISCHARGED;
+                        TST_CH_WORK_STATE_CLR(i);                         //设置放电结束    
+                         ShowAndSetSysStatus(LED_NOT_DISCHARGED, LED_ON);               
+                    }
+                }
+            }
+            MoveToNextLine();
+            SaveBkpData(TABLE_BKP);
+            SaveBkpData(TABLE_BAK_BKP);        
+            AD7705_start();                                     //启动下一行采样
+        }
+        else
+        {
+            AD7705_DEBUG("not yet working\n");
+        }
      }
-
-     SaveBkpData(TABLE_BKP);
-     SaveBkpData(TABLE_BAK_BKP);
-
 }
 
-
-#define AD_SAMP_STEP_SEL_DELAY_CNT 14
+#define AD_SAMP_STEP_SEL_DELAY_CNT 13
 void Read_ad7705(void *p)
 {
     static uint8_t delay_cnt;
@@ -192,7 +287,7 @@ void Read_ad7705(void *p)
             return;
       }
       
-      if(SAMP_END_LINE == g_curAdCh) //SYS_AD_CH_MAX  //for test
+      if(SAMP_END_LINE == g_curAdCh) 
       {
             AD7705_stop();                         //采满指定的一行，这里在100路为一行，
             Read_ad7705_end();                //发出完成一行的消息，等待处理，处理过后视条件重新打开
@@ -216,7 +311,7 @@ void Read_ad7705(void *p)
             case AD_SAMP_STEP_CMD:
             	//读数据寄存器
             	SEND_CMD (0x39);   
-            	gAdCurSampStatus = AD_SAMP_STEP_DRDY_DELAY;
+            	gAdCurSampStatus = AD_SAMP_STEP_DRDY;//AD_SAMP_STEP_DRDY_DELAY;
                 break;
             case AD_SAMP_STEP_DRDY_DELAY:
                 gAdCurSampStatus = AD_SAMP_STEP_DRDY;
@@ -232,9 +327,9 @@ void Read_ad7705(void *p)
                         batteryVolAdArray[g_curAdCh] = Read_ad7705_data();
 
                         //若之前是正在放电中，则这里设置为放电结束,并断开继电器
-                          if((batteryVolAdArray[g_curAdCh] < gAdSampConfig.mode_vol)&&TST_CH_WORK_STATE_TST(g_curAdCh))
+                          if((batteryVolAdArray[g_curAdCh] < g_mode_vol_ad_val)&&TST_CH_WORK_STATE_TST(g_curAdCh))
                         {
-                            TST_CH_WORK_STATE_CLR(g_curAdCh);
+                            TST_CH_WORK_STATE_CLR(g_curAdCh);    //放完电
                             RelayCtrl(g_curAdCh+1, RELAY_OFF);
                         }
                 	gAdCurSampStatus = AD_SAMP_STEP_START;
@@ -251,7 +346,7 @@ uint16_t PollReadAdByCh(uint8_t ch)
     singleAdChSelect(ch);
 
     //加上cpu延时
-    delay_ms(10);
+    delay_ms(10);   //6
 
     //读数据寄存器
     SEND_CMD (0x39);   
@@ -262,6 +357,44 @@ uint16_t PollReadAdByCh(uint8_t ch)
     return val;
 
 }
+uint16_t Read_ad7705_data_test ( uint8_t ch)
+{
+	uint16_t i;
+	uint16_t read_data;
+	//CS=0;
+	read_data=0x00;
+
+	singleAdChSelect(ch);
+        //加上cpu延时
+        delay_ms(10);    //6
+        
+	//读数据寄存器
+	SEND_CMD (0x39);   
+                       
+	while ( DRDY_read );           //拿示波器测一下，这个值的周期20ms
+
+	for(i=0;i<16;i++)
+	{
+		SCLK_L;             //=0;   //准备通过DOUT输出数据
+		sad_delay(READ_BAND_L);  //此期间将数据输出并维持
+		
+		SCLK_H;         //=1;  // 转变为高电平，保证这时线上的数据不会改变
+
+		if(0 == (DOUT_read)) //将输出并维持的数据保存
+		{
+			read_data=read_data<<1;
+		}
+		else
+		{
+			read_data = read_data<<1;
+			read_data = read_data+0x01;		
+		}
+		
+		sad_delay(READ_BAND_H);//经过这么长时间的延时后，再放开线上的维持状态
+	}
+	//CS=1;	
+	return ( read_data ); 
+}
 
 uint16_t Read_ad7705_data ( void)
 {
@@ -269,12 +402,6 @@ uint16_t Read_ad7705_data ( void)
 	uint16_t read_data;
 	//CS=0;
 	read_data=0x00;
-#if SAD_SIMPLE_TEST
-	//读数据寄存器
-	SEND_CMD (0x39);   
-                       
-	while ( DRDY_read );           //拿示波器测一下，这个值的周期20ms
-#endif 	
 	for(i=0;i<16;i++)
 	{
 		SCLK_L;//=0;   //准备通过DOUT输出数据
@@ -297,7 +424,7 @@ uint16_t Read_ad7705_data ( void)
 	//CS=1;	
 	return ( read_data ); 
 }
-#if SAD_SIMPLE_TEST
+
 void sad_test(void)
 {
     static int flag,tmp,c;
@@ -306,19 +433,15 @@ void sad_test(void)
     {
         for(flag = 0;flag<50;flag++)
         {
-            singleAdChSelect(3);
-            delay_ms(8);
-            Read_ad7705_data();
-             singleAdChSelect(27);
-             delay_ms(8);
-             tmp = Read_ad7705_data();         
+              tmp = Read_ad7705_data_test(3);
+              Read_ad7705_data_test(27);
+
         } 
-        xprintf("27: %d\n", tmp*5000/65535);
+        xprintf("3 : %d\n", tmp*5000/65535);
         xprintf("c = %d\n",c++);
         
      }
 }
-#else
 #if 0
 void sad_proc(void)
 {
@@ -372,7 +495,6 @@ void sad_proc(void)
     }
 }
 #endif
-#endif
 void AD7705_start(void)
 {   
     //gAdSampTmr = ui_mmi_start_timer(WAIT_DRDY_TMR_DELAY,   \
@@ -412,45 +534,61 @@ void scanAndSetChStatus(void)   //只在收到SQ_START中调用一次
     uint8_t i;
     uint16_t tmp = 0;
 
- for(i= SAMP_START_LINE+1;i<=SAMP_END_LINE;i++)
- {
-        if(IS_SYS_WORKING())  //还原状态，而不需要重新扫描
+    if(IS_SYS_WORKING())                              //还原状态，而不需要重新扫描,这时的警告信息将不能还原
+    {
+         for(i= SAMP_START_LINE+1;i<=SAMP_END_LINE;i++)
         {
             if(TST_CH_WORK_STATE_TST(i-1)&&(TST_AD_SAMP_SEL_TST(i-1)))
             {
-                RelayCtrl(i, RELAY_ON);  //根据状态，操作继电器，进行放电
-                xprintf("RL_ON:%d\n",i);
-                delay_ms(20);
+                RelayCtrl(i, RELAY_ON);                         //根据状态，操作继电器，进行放电
+                AD7705_DEBUG("wch[%d]--RL_ON\n",i);
+                delay_ms(10);
             }
         }
-        else        //新一组数据的采集前扫描状态
+    }
+    else                                                        //新一组数据的采集前扫描状态
+    {
+           //在非还原过程中，先将备份数据区状态初始化，然后等待判断
+          g_bkpData.had_used_time = 0;                          //放电已经用时为零                 
+         TST_CH_WORK_STATE_ALL_CLR();       //继电器状态全清为零
+         TST_RELAY_SEL_ALL_CLR();
+         CLR_SYS_WARN_STATUS();                         //清除警告
+         
+         for(i= SAMP_START_LINE+1;i<=SAMP_END_LINE;i++)
         {
-            tmp = PollReadAdByCh(i) ;
-            //对于在用的通路，才需要判断其状态,因为停用的路，都设置为放电结束且高亮
-            if((tmp > gAdSampConfig.mode_vol)&&(TST_AD_SAMP_SEL_TST(i-1)))// 1---100路
-            {
-                TST_CH_WORK_STATE_SET(i-1);//设置放电中                
-                RelayCtrl(i, RELAY_ON);//合上继电器，进行放电
-                xprintf("RL_ON:%d\n",i);
-                delay_ms(20);                       //继电器打开速度不宜过快
-            }
-            else if((tmp < 2) && (REV_YES ==  getRevLevel()))
-            {
-                TST_CH_WARN_STATE_SET(i-1);                                         //设置为反向
-                ShowAndSetSysStatus(LED_REVERSED, LED_ON);                //一般不会有。
-                xprintf("had reversed channel!!\n");
-            }
-            else if((tmp < 2) && (REV_NO ==  getRevLevel()))
-            {
-                TST_CH_WARN_STATE_CLR(i-1);                                         //设置为悬空
-                ShowAndSetSysStatus(LED_IMPEND, LED_ON);                        //一般不会有。
-                xprintf("had impend channel!!\n");
-            }
-            else
-            {
-                TST_CH_WORK_STATE_CLR(i-1);//设置放电结束                
-                RelayCtrl(i, RELAY_OFF);                    //断开继电器
-            }
+                tmp = PollReadAdByCh(i) ;
+                AD7705_DEBUG("ch[%d] = %d \n",i,tmp);
+                
+                //对于在用的通路，才需要判断其状态,因为停用的路，都设置为放电结束且高亮
+                if((tmp > g_mode_vol_ad_val)&&(TST_AD_SAMP_SEL_TST(i-1)))// 1---100路
+                {               
+                    ch_warn_status[i-1] = CH_STATUS_NORMAL;
+                    TST_CH_WORK_STATE_SET(i-1);             //设置放电中          
+                    RelayCtrl(i, RELAY_ON);                                 //合上继电器，进行放电
+                    AD7705_DEBUG("ch[%d]--RL_ON\n",i);
+                    delay_ms(10);                                                   //继电器打开速度不宜过快
+                }
+                else if((tmp < g_param_rervse_ad_val) && (REV_YES ==  getRevLevel()))
+                {
+                    ch_warn_status[i-1] = CH_STATUS_REVERSED;                      //设置为反向
+                    TST_CH_WORK_STATE_CLR(i-1);                                      //设置放电结束
+                    ShowAndSetSysStatus(LED_REVERSED, LED_ON);                  //一般不会有。
+                    AD7705_DEBUG("ch[%d]--reversed!!\n",i);
+                }
+                else if((tmp < g_param_limit_ad_val) && (REV_NO ==  getRevLevel()))
+                {
+                    ch_warn_status[i-1] = CH_STATUS_IMPEND;                             //设置为悬空
+                    TST_CH_WORK_STATE_CLR(i-1);                                             //设置放电结束
+                    ShowAndSetSysStatus(LED_IMPEND, LED_ON);                        //一般不会有。
+                    AD7705_DEBUG("ch[%d]--impend!!\n",i);
+                }
+                else
+                {                
+                    ch_warn_status[i-1] = CH_STATUS_NORMAL;
+                    TST_CH_WORK_STATE_CLR(i-1);                         //设置放电结束    
+                    AD7705_DEBUG("ch[%d]--RL_OFF!!\n",i);
+                    //RelayCtrl(i, RELAY_OFF);                                            //断开继电器
+                }
         }
     }
 }

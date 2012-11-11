@@ -15,8 +15,8 @@
 #define LED_REVERSED                         0x20
 #define LED_WORKING                         0x10
 #define LED_NO_U_PAN                              0x08
-#define LED_WRITE_PROTECTED         0x40
-#define LED_READ_CFG_FAIL               0x02
+#define LED_NOT_DISCHARGED               0x04
+#define LED_AUTO_N_MANUAL              0x02
 #define LED_END                                     0x01
 
 #define LED_ON   0x01
@@ -116,4 +116,5 @@ void SqExtiInit(void);
 void SqCtrlPortInit(void);
 void StartSqDetect(void); //启动上升沿检测
 unsigned char  GetSqLevel(void); //取SQ电平值
+void RelayStatusAllClr(void);
 #endif

@@ -31,6 +31,7 @@
 #define REV_DETECT_PIN  GPIO_Pin_6
 #define REV_YES   0
 #define REV_NO    1
+#define REV_AND_IMPEND_VOL   2
 
 /* Private function prototypes -----------------------------------------------*/
 void AD7705PortInit(void);

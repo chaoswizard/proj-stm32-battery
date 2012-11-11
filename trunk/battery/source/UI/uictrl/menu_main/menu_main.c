@@ -4,7 +4,7 @@
 #define DISPLAY_END_LINE                100   //显示终止行+1
 #define DISPLAY_BASE_LINE               0  //显示基行
 #define DISPLAY_BASE_INIT_LINE   DISPLAY_BASE_LINE //初始化显示基行，目前设置为与DISPLAY_BASE_LINE
-#define DISPLAY_BASE_LINE_STEP   2//步长
+#define DISPLAY_BASE_LINE_STEP   4//步长
 
 #define THIS_MENU_NAME  "主工作界面"
 //"MainFace"
@@ -33,6 +33,7 @@
 struct MAIN_MENU_CTRL {
    SWTMR_NODE_HANDLE  refreshTmr;
     bool_t ui_init;
+    bool_t page_rst;
     u_int8 curChBase;
     u_int32 count;
 };
@@ -152,12 +153,13 @@ static T_UICOM_DRAW_MODE mainmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM
                 return DRAW_MODE_TEXT_BOX; 
             }
 
-           curCh = row + gMainInterfaceCtrl.curChBase - 1;
-            if (curCh >= DISPLAY_END_LINE) 
+            if (gMainInterfaceCtrl.page_rst )
             {
-                gMainInterfaceCtrl.curChBase = DISPLAY_BASE_LINE; 
-                curCh = 0;
+                  return DRAW_MODE_SKIP;
             }
+            
+           curCh = row + gMainInterfaceCtrl.curChBase - 1;
+
          //===========非首行============
             if (0 == col)
             {
@@ -171,7 +173,7 @@ static T_UICOM_DRAW_MODE mainmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM
             }
             else if (2 == col)
             {
-                    if  (TST_CH_WORK_STATE_TST(g_curAdCh))  //>0,放电中
+                    if  (TST_CH_WORK_STATE_TST(curCh))  //>0,放电中
                     {
                         UICOM_DATA_FILL(item, UICOM_STR_FANGDIANZHONG);
                     }
@@ -180,7 +182,13 @@ static T_UICOM_DRAW_MODE mainmenu_cell_data_init(struct SCREEN_ZONE *zone,PUICOM
                         UICOM_SET_SLECTED((*p_type));
                         UICOM_DATA_FILL(item, UICOM_STR_FANGDIANJIESHU);
                     }
+                    
+                    if (curCh >=( DISPLAY_END_LINE-1)) 
+                    {
+                        gMainInterfaceCtrl.page_rst = 1;
+                    }
             }
+
             
             return DRAW_MODE_TEXT_BOX; 
 }
@@ -218,6 +226,7 @@ static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
                        
     gMainInterfaceCtrl.ui_init = 0;
     gMainInterfaceCtrl.curChBase = DISPLAY_BASE_INIT_LINE;
+    gMainInterfaceCtrl.page_rst = 0;
 }
 
 static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
@@ -245,7 +254,15 @@ static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 
             if (MENU_MAIN_REFRESH_MSG == (myevt))
             {
-                    gMainInterfaceCtrl.curChBase +=DISPLAY_BASE_LINE_STEP;//(MAINMENU_TAB_ROW_NUM-1); 
+                    if ( gMainInterfaceCtrl.page_rst)
+                    {
+                        gMainInterfaceCtrl.curChBase = DISPLAY_BASE_INIT_LINE;
+                        gMainInterfaceCtrl.page_rst = 0;
+                    }
+                    else if(IS_SYS_WORKING())
+                    {
+                        gMainInterfaceCtrl.curChBase += DISPLAY_BASE_LINE_STEP;//(MAINMENU_TAB_ROW_NUM-1); 
+                    }
                     menu_main_paint(1);
             }
         }

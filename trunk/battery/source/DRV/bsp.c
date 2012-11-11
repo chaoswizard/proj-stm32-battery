@@ -186,6 +186,7 @@ void BSP_Init(void)
 	//个设备都会需要(1)运行在某一时钟下;(2)可能有的中断配置及响应;(3)与外围
 	//相连的GPIO管脚(有时需重映射，实际上，就是将管脚从默认连接改到与适当
 	//的控制器相连)
+	AD7705_stop(); 
 	OS_SysTick_Config();   // 系统基准时钟10 ms 
 
 	//RTC_Configuration();

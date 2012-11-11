@@ -8,7 +8,7 @@
 #define THIS_MENU_UI_CONTAINER   (gMenuSearchInfoMenu)
 
 
-#define SEARCHINFO_LIST_NUM  (4)
+#define SEARCHINFO_LIST_NUM  (3)
 
 #define MENU_SEARCHINFO_REFRESH_MSG    (0x86)
 
@@ -16,17 +16,16 @@
 
 struct MENU_SEARCHINFO_CTRL {
     SWTMR_NODE_HANDLE  refreshTmr;
-    u_int16 timesetup;
-    u_int16 timeused_m;
-    u_int16 timeused_s;
+    //u_int16 timesetup;
+    //u_int16 timeused_m;
+    //u_int16 timeused_s;
 };
 
 static struct MENU_SEARCHINFO_CTRL gMenuSearchInfoCtrl = {0};
 
 #define IDX_SEARCHINFO_WARN           (0)
 #define IDX_SEARCHINFO_CURSE          (1)
-#define IDX_SEARCHINFO_WORKTIME      (2)
-#define IDX_SEARCHINFO_SYSTIME        (3)
+#define IDX_SEARCHINFO_TIME            (2)
 
 
 #define SEARCHINFO_LIST_CELL_H  12
@@ -44,12 +43,11 @@ static u_int8 searchinfo_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_COUNT
     struct SCREEN_ZONE cellPosTable[SEARCHINFO_LIST_NUM] = {
         {SEARCHINFO_LIST_X(0), SEARCHINFO_LIST_Y(0), 60, SEARCHINFO_LIST_CELL_H},
         {SEARCHINFO_LIST_X(65), SEARCHINFO_LIST_Y(0), 60, SEARCHINFO_LIST_CELL_H},
-        {SEARCHINFO_LIST_X(0), SEARCHINFO_LIST_Y(1), 125, 24},
-        {SEARCHINFO_LIST_X(0), SEARCHINFO_LIST_Y(3)-2, 125, 23},
+        {SEARCHINFO_LIST_X(0), SEARCHINFO_LIST_Y(1), 125, 49},
     };
     
     zone->border.l = 1;
-    //if (IDX_SEARCHINFO_WORKTIME == pos)
+    //if (IDX_SEARCHINFO_TIME == pos)
     //{
     //    zone->border.t = 1;
     //    zone->border.b = 0;
@@ -69,11 +67,9 @@ static u_int8 searchinfo_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_COUNT
         case IDX_SEARCHINFO_CURSE:
             count =  1;
             break;
-        case IDX_SEARCHINFO_WORKTIME:
-            count =  4;
+        case IDX_SEARCHINFO_TIME:
+            count =  7;
             break;
-        case IDX_SEARCHINFO_SYSTIME:
-            count =  3;
         default:
             break;
     }
@@ -102,7 +98,7 @@ static T_UICOM_DRAW_MODE searchinfo_menu_cell_data_int(struct OSD_ZONE *zone, PU
             colPosIdx = 0;
             break;
         case 2:
-            if (IDX_SEARCHINFO_WORKTIME == pos)
+            if (IDX_SEARCHINFO_TIME == pos)
             {
                 colPosIdx = 0;
             }
@@ -146,7 +142,7 @@ static T_UICOM_DRAW_MODE searchinfo_menu_cell_data_int(struct OSD_ZONE *zone, PU
                 break;
         }
     }
-    else if (IDX_SEARCHINFO_WORKTIME == pos)
+    else if (IDX_SEARCHINFO_TIME == pos)
     {
         UICOM_DATA_TEXT_ATTR_RST(item, TEXT_STYLE_LARGE_SOLID);
         UICOM_CLR_SLECTED((*p_type));
@@ -160,7 +156,7 @@ static T_UICOM_DRAW_MODE searchinfo_menu_cell_data_int(struct OSD_ZONE *zone, PU
                 {
                         drawMode = DRAW_MODE_CLEAR;
                 }
-                sprintf(UICOM_DATA_BUF(item), "%d 分", gMenuSearchInfoCtrl.timesetup);
+                sprintf(UICOM_DATA_BUF(item), "%02d 分", gAdSampConfig.mode_min);
                 zone->zone.x   += 38;
                 break;
             case 2:
@@ -174,49 +170,44 @@ static T_UICOM_DRAW_MODE searchinfo_menu_cell_data_int(struct OSD_ZONE *zone, PU
                 }
                 zone->zone.x   += 4;
                 zone->zone.y   += 12;
-                sprintf(UICOM_DATA_BUF(item), "%d 分 %d 秒", 
-                    gMenuSearchInfoCtrl.timeused_m, 
-                    gMenuSearchInfoCtrl.timeused_s);
+                sprintf(UICOM_DATA_BUF(item), "%02d 分 %02d 秒", 
+                        g_bkpData.had_used_time/60,
+                        g_bkpData.had_used_time%60);
                 break;
-            default:
-                break;
-        }
-    }
-    else if (IDX_SEARCHINFO_SYSTIME == pos)
-    {
-        UICOM_DATA_TEXT_ATTR_RST(item, TEXT_STYLE_LARGE_SOLID);
-        UICOM_CLR_SLECTED((*p_type));
-        switch (childIdx)
-        {
-            case 0:
+            case 4:
+                zone->zone.y   += 24;
                 UICOM_DATA_FILL(item, UICOM_STR_XITONGSHIJIAN);
                 break;
-            case 1:
+            case 5:
                 if (UICOM_TST_SLECTED(type))
                 {
                         drawMode = DRAW_MODE_CLEAR;
                 }
-                zone->zone.x   += 12;
+                zone->zone.x   += 48;
+                zone->zone.y   += 24;
                 sprintf(UICOM_DATA_BUF(item), "%02d时%02d分%02d秒", 
                     systmtime.tm_hour, 
                     systmtime.tm_min,
                     systmtime.tm_sec);
                 break;
-            case 2:
+            case 6:
                 if (UICOM_TST_SLECTED(type))
                 {
                         drawMode = DRAW_MODE_CLEAR;
                 }
-                zone->zone.y   += 11;
+                zone->zone.x   += 36;
+                zone->zone.y   += 36;
                 sprintf(UICOM_DATA_BUF(item), "%04d年%02d月%02d日", 
                     systmtime.tm_year, 
                     systmtime.tm_mon,
                     systmtime.tm_mday);
                 break;
+                
             default:
                 break;
         }
     }
+
     return DRAW_MODE_TEXT_ONLY | drawMode;
 
 }
@@ -274,11 +265,7 @@ static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
     UIMMI_DEBUGSM_ENTER(THIS_MENU_NAME, parent, me);
     ui_mmi_reg_suspend(menu_pub_suspend);
     ui_mmi_reg_resume(menu_pub_resume);
-
-    gMenuSearchInfoCtrl.timeused_m = 12;
-    gMenuSearchInfoCtrl.timeused_s = 44;
-    gMenuSearchInfoCtrl.timesetup = 20;
-
+    
     gMenuSearchInfoCtrl.refreshTmr = ui_mmi_start_timer(MENU_SEARCHINFO_REFRESH_TMR_DELAY,   \
                        menu_searchinfo_refreshTmr,  (p_void)&gMenuSearchInfoCtrl, TRUE);
                        
@@ -343,8 +330,7 @@ static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
              if (MENU_SEARCHINFO_REFRESH_MSG == (myevt))
             {
                 systime_update(RTC_GetCounter());
-                gmenu_content_list_update(&THIS_MENU_UI_CONTAINER,  IDX_SEARCHINFO_SYSTIME,  UICOM_STATUS_SELECTED);
-                gmenu_content_list_update(&THIS_MENU_UI_CONTAINER,  IDX_SEARCHINFO_WORKTIME,  UICOM_STATUS_SELECTED);
+                gmenu_content_list_update(&THIS_MENU_UI_CONTAINER,  IDX_SEARCHINFO_TIME,  UICOM_STATUS_SELECTED);
             }
         }
         return UI_PROC_RET_FINISH;

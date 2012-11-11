@@ -10,7 +10,6 @@
 
 #define MONITORSETUP_LIST_NUM  (6)
 
-
 struct MENU_CHECKMODECFG_CTRL {
     u_int8 bitmapItemStatus;
     u_int16 valMin;
@@ -107,11 +106,25 @@ u_int16 modesetup_val_apply(u_int8 checktype, p_void inputdata, u_int8 len, p_vo
         //MY_DEBUG("SET_VAL:%d, %d, %d\n", inputdata, id , param);
         if (IDX_CKMODE_TIME_VAL == id)
         {
-            gMenuCheckModeCfgCtrl.valMin = (u_int16)inputdata;
+           if((u_int16)inputdata == CFG_MODE_MIN_MIN ||(u_int16)inputdata>CFG_MODE_MIN_MAX)
+           {
+                gMenuCheckModeCfgCtrl.valMin = gAdSampConfig.mode_min;  //设置为原值
+           }
+           else
+           {
+                gMenuCheckModeCfgCtrl.valMin = (u_int16)inputdata;
+           }
         }
         else if (IDX_CKMODE_VOL_VAL == id)
         {
-            gMenuCheckModeCfgCtrl.valmV = (u_int16)inputdata;
+            if((u_int16)inputdata == CFG_MODE_VOL_MIN || (u_int16)inputdata > CFG_MODE_VOL_MAX)
+            {
+                 gMenuCheckModeCfgCtrl.valmV = gAdSampConfig.mode_vol;
+            }
+            else
+            {
+                gMenuCheckModeCfgCtrl.valmV = (u_int16)inputdata;
+            }
         }
 
         if (0 == gMenuCheckModeCfgCtrl.valmV)
@@ -121,7 +134,7 @@ u_int16 modesetup_val_apply(u_int8 checktype, p_void inputdata, u_int8 len, p_vo
         
         if (0 == gMenuCheckModeCfgCtrl.valMin)
         {
-            gMenuCheckModeCfgCtrl.valmV = CFG_DEFAULT_MODE_MIN;
+            gMenuCheckModeCfgCtrl.valMin = CFG_DEFAULT_MODE_MIN;
         }    
         
     }
@@ -370,10 +383,12 @@ static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
     {
             gAdSampConfig.mode_sel = CFG_DEFAULT_MODE_SEL;
     }
-    
+
+    CHECKMODE_ITEM_RST_STATUS(0);
     CHECKMODE_ITEM_SET_STATUS(gAdSampConfig.mode_sel);
 
     gMenuCheckModeCfgCtrl.valMin = gAdSampConfig.mode_min;
+
     gMenuCheckModeCfgCtrl.valmV  = gAdSampConfig.mode_vol;
 
     if (0 == gMenuCheckModeCfgCtrl.valmV)
@@ -384,7 +399,7 @@ static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
     if (0 == gMenuCheckModeCfgCtrl.valMin)
     {
         gMenuCheckModeCfgCtrl.valMin = CFG_DEFAULT_MODE_MIN;
-    }    
+    }   
 }
 
 static void monitorsetup_menu_update_focus(void)
@@ -394,7 +409,7 @@ static void monitorsetup_menu_update_focus(void)
 static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 {
     u_int8 curfocus;
-    
+    u_int32 tmp;
     UIMMI_DEBUGSM_HANDLE(THIS_MENU_NAME, me, e);
 
     if (MSG_IS_ENTRY(e->sig))
@@ -456,9 +471,30 @@ static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
         }
         else if (curfocus == IDX_CKMODE_OK)
         {
+            u_int8 temp,i;
+            temp = CHECKMODE_ITEM_GET_STATUS() & 0x7;
+            for(i=0;i<3;)
+            {
+                if(temp &(0x1<<i))
+                {
+                    break;
+                }
+                 i++;
+            }
+            if(3 == i )
+            {
+                 gAdSampConfig.mode_sel = CFG_DEFAULT_MODE_SEL;
+            }
+            else
+            {
+                  gAdSampConfig.mode_sel = i;   //换为位位置
+            }
+            //xprintf("mode_sel = %d\n", gAdSampConfig.mode_sel );
             gAdSampConfig.mode_min =  gMenuCheckModeCfgCtrl.valMin ;
-            gAdSampConfig.mode_vol  =  gMenuCheckModeCfgCtrl.valmV;
-             gAdSampConfig.mode_sel  =  CHECKMODE_ITEM_GET_STATUS() & 0x7;
+            gAdSampConfig.mode_vol  = gMenuCheckModeCfgCtrl.valmV ;
+
+            //xprintf("\nSaveModeCfg!!\n");
+            SaveSetCfg();
             ui_mmi_return(1);
         }
         return UI_PROC_RET_FINISH;

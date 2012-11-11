@@ -11,10 +11,11 @@
 #define MENU_CURSE_EVT_PRE_ITEM   (0x22)
 
 struct MENU_CURSE_DISP_CFG_CTRL {
-    u_int16 startNo;
-    u_int16 endNo;
-    u_int16 curseTab[MAX_DISP_CURSE_NUM];
+    u_int8 startNo;
+    u_int8 endNo;
+    u_int8 curseTab[MAX_DISP_CURSE_NUM];
 };
+static   u_int8 curve_sel_tab[MAX_DISP_CURSE_NUM];
 
 static struct MENU_CURSE_DISP_CFG_CTRL gMenuCurseDisCfgCtr = {0};
 
@@ -188,7 +189,10 @@ u_int16 searchoptsetup_val_apply(u_int8 checktype, p_void inputdata, u_int8 len,
     u_int16 val = (u_int16)inputdata;
     struct EVENT_NODE_ITEM e;
     
-
+      if (val > SYS_AD_CH_MAX)
+      {
+            val = 0;
+      }
     
     //MY_DEBUG("SET_VAL:%d, %d, %d\n", inputdata, id , param);
     if (id == IDX_EARCHOPT_VAL_START)
@@ -244,7 +248,7 @@ static void searchoptsetup_menu_inputbox_open(u_int8 curfocus, bool_t focusTail)
     inputcfg.param = (p_void)curfocus;
     inputcfg.inputdetector = searchoptsetup_val_apply;
     inputcfg.checktype = INPUT_CHECK_LIMIT;
-    inputcfg.limitlen = 4;
+    inputcfg.limitlen = 3;
     if (curfocus == IDX_EARCHOPT_VAL_START)
     {
         initparam.initdata = (p_void)gMenuCurseDisCfgCtr.startNo;
@@ -265,15 +269,74 @@ static void searchoptsetup_menu_inputbox_open(u_int8 curfocus, bool_t focusTail)
     gmenu_input_open(&inputcfg, &initparam, 0);
 }
 
-static u_int32 adsamp_curve_map(T_UICOM_COUNT group, u_int32 x, u_int32 grpbase, u_int32 x_start)
+void  adsamp_curve_Xname(PUICOM_DATA item)
 {
-        u_int32 val = batteryVolAdArray[group]*5/65535;
-
-
-        xprintf("grp[%d,%d][%d,%d]:%d\n",  grpbase, group, x, x_start,val);
-        
-        return  val;
+       sprintf(UICOM_DATA_BUF(item), "t");
 }
+
+void  adsamp_curve_Yname(PUICOM_DATA item)
+{
+       sprintf(UICOM_DATA_BUF(item), "V");
+}
+void adsamp_ch_name(T_UICOM_COUNT grp, PUICOM_DATA item)
+{
+        sprintf(UICOM_DATA_BUF(item), "%04d", curve_sel_tab[grp]);
+}
+static u_int8 adsamp_curve_map(T_UICOM_COUNT group, u_int32 x, u_int8 maxY, u_int8 unitY)
+{        
+        u_int32 val ;
+        
+        group =  curve_sel_tab[group];
+        if (group)
+        {
+            group -= 1;
+        }
+        
+        val = batteryVolAdArray[group]*5*unitY/65535;
+        //xprintf("val:%d, %d\n",group, val);
+        return  (val)%maxY;
+}
+
+static u_int8 update_curve_ch_sel(u_int8 focus)
+{
+      u_int8 max, min;
+      u_int8 i = 0;
+        
+        if ((IDX_EARCHOPT_VAL_START == focus) || (IDX_EARCHOPT_VAL_END == focus))
+        {
+
+                min = gMenuCurseDisCfgCtr.startNo;
+                max = gMenuCurseDisCfgCtr.endNo;
+                if ((0 == min) || (0 == max) || (min  > max))
+                {
+                        return 0;
+                }
+                i = 0;
+               while (min <=  max)
+               {
+                        curve_sel_tab[i] =  min;
+                        min++;
+                        i++;
+               }
+        }
+        else
+        {
+              min =0;
+              i = 0;
+            while (min < 4)
+            {    
+                    if (gMenuCurseDisCfgCtr.curseTab[min] > 0)
+                    {
+                        curve_sel_tab[i] =  gMenuCurseDisCfgCtr.curseTab[min] ;
+                        i++;
+                    }
+                    min++;
+            }
+        }
+
+        return i;
+}
+
 static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 {
     
@@ -281,35 +344,36 @@ static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
 
     if (MSG_IS_ENTRY(e->sig))
     {
-        //u_int8 focus = gmenu_content_list_getfocus(&THIS_MENU_UI_CONTAINER);
-        
-        Screen_PrintClear(NULL);
-        searchoptsetup_menu_inputbox_open(0, FALSE);
-        searchoptsetup_menu_paint(FALSE, 0);
-        return UI_PROC_RET_FINISH;
+            Screen_PrintClear(NULL);
+            searchoptsetup_menu_inputbox_open(0, FALSE);
+            searchoptsetup_menu_paint(FALSE, 0);
+            return UI_PROC_RET_FINISH;
     }
 
     if (gmenu_input_default_proc(e))
     {
-        gmenu_content_list_movefocus(&THIS_MENU_UI_CONTAINER, 0, 0);
-        return UI_PROC_RET_FINISH;
+            gmenu_content_list_movefocus(&THIS_MENU_UI_CONTAINER, 0, 0);
+            return UI_PROC_RET_FINISH;
     }
 
     switch (e->sig)
     {
         case EVENT_KEY_OK:
         {
-        struct gmenu_curve_config  dispParam= {0};
+            struct gmenu_curve_config  dispParam= {0};
 
-        dispParam.maxKey  = SYS_AD_CH_MAX;
-        dispParam.maxVal   = 4;
-        dispParam.initKeyCount = 88;
-        dispParam.maxGrpbase  = 4;
-        dispParam.fun = adsamp_curve_map;
-        
-        gmenu_show_curve(&dispParam, TRUE);
+            dispParam.maxKey  = 0;
+            dispParam.maxVal   =  0;
+            dispParam.initCount =  update_curve_ch_sel( gmenu_content_list_getfocus(&THIS_MENU_UI_CONTAINER));
+            dispParam.fun = adsamp_curve_map;
+            dispParam.curvetitle = adsamp_ch_name;
+            dispParam.curveXname= adsamp_curve_Xname;
+            dispParam.curveYname= adsamp_curve_Yname;
+
+            if (dispParam.initCount)
+                gmenu_show_curve(&dispParam, TRUE);
         }
-            return UI_PROC_RET_FINISH;
+        return UI_PROC_RET_FINISH;
         case EVENT_KEY_DOWN:
         case EVENT_KEY_UP:
         case EVENT_KEY_RIGHT:

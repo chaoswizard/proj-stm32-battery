@@ -108,10 +108,6 @@ void bkpSysDefBakInit(void)
 
     for(j=0;j<(SYS_AD_CH_MAX+7)>>3;j++)
     {
-        g_bkpData.ch_warn_status[j] = 0;   //全部悬空，显示时，首先判断是否有悬空产生，这里的查询都需工作中才有效
-    }
-    for(j=0;j<(SYS_AD_CH_MAX+7)>>3;j++)
-    {
         g_bkpData.ch_work_status[j] = 0;   //全部放电结束，显示时，这里的查询都需工作中才有效
     }
     g_bkpData.start_group_time = 0;
@@ -120,7 +116,7 @@ void bkpSysDefBakInit(void)
     g_bkpData.last_line_in_group = 0;
     g_bkpData.rtc_need_update = 0;
     g_bkpData.start_group_time = 0;
-    g_bkpData.sysResAndStatus.led_buf= LED_END|LED_NO_U_PAN;
+    g_bkpData.sysResAndStatus.led_buf= LED_START|LED_NO_U_PAN; //置为开始，即等待开始
 
     SaveBkpData(TABLE_BKP);
     SaveBkpData(TABLE_BAK_BKP);

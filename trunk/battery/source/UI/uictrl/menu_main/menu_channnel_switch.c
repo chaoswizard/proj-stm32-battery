@@ -1,6 +1,7 @@
 #include "uimmi_ctrl.h"
 #include "gui_menu_item.h"
-
+#include "syscom_util.h"
+#include "global.h"
 
 #define THIS_MENU_NAME  "通道切换选择"
 //"SwitchChSel"
@@ -10,6 +11,18 @@
 
 #define THIS_MENU_SM_HANDLE      (gMenuChSwitch)
 #define THIS_MENU_UI_CONTAINER   (gMenuChSwUiCon)
+
+u_int8 chsel[(MAX_CH_NUM+7)>>3 ];    //通道选择配置，分为可用、停用两种，故用13个字节就可以表示
+
+//采样通道选择缓冲区操作，按位
+#define  TST_SAMP_SEL_TST(num)  UTIL_LBIT_TST((chsel),  num)
+#define  TST_SAMP_SEL_SET(num)    UTIL_LBIT_VAL((chsel),  num) = UTIL_LBIT_SET((chsel),  num)
+#define  TST_SAMP_SEL_CLR(num)    UTIL_LBIT_VAL((chsel),  num) = UTIL_LBIT_CLR((chsel),  num)
+#define  TST_SAMP_SEL_CPL(num)    UTIL_LBIT_VAL((chsel),  num) = UTIL_LBIT_CPL((chsel),  num)
+#define  TST_SAMP_SEL_ALL_CLR()  memset(chsel, 0, sizeof(chsel))
+#define  TST_SAMP_SEL_ALL_SET()   memset(chsel, 0xFF, sizeof(chsel))
+
+#define  TST_SAMP_SEL_CHK()            util_array_check((chsel),  SYS_AD_CH_MAX)
 
 struct MENU_CHSWITCH_CTRL {
     u_int16 bitmapItemStatus;
@@ -137,7 +150,7 @@ static T_UICOM_DRAW_MODE channelsw_menu_cell_data_int(struct OSD_ZONE *zone, PUI
             case 2:
                 if (cuSelCh) cuSelCh--;
                 //xprintf("focus =%d, %d\n", cuSelCh, TST_AD_SAMP_SEL_TST(cuSelCh));
-                if (TST_AD_SAMP_SEL_TST(cuSelCh))
+                if (TST_SAMP_SEL_TST(cuSelCh))
                 {
                     UICOM_DATA_FILL(item, UICOM_STR_YUANQUAN);
                 }
@@ -247,6 +260,10 @@ static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
     ui_mmi_reg_resume(menu_pub_resume);
     gMenuChSwitchDataCtrl.curBaseCh = MIN_CH_NUM;
     gMenuChSwitchDataCtrl.curSelCh = MIN_CH_NUM;
+
+    GetSetCfg();
+    memcpy(chsel,gAdSampConfig.chsel,sizeof(chsel));
+
 }
 
 static void chnelsw_menu_tips(void)
@@ -364,11 +381,11 @@ static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
             CHSWITCH_ITEM_CPL_STATUS(curfocus);
             if (CHSWITCH_ITEM_TST_STATUS(IDX_CHANNELSW_SEL_ALL))
             {
-                TST_AD_SAMP_SEL_ALL_SET();
+                TST_SAMP_SEL_ALL_SET();
             }
             else
             {
-                TST_AD_SAMP_SEL_ALL_CLR();
+                TST_SAMP_SEL_ALL_CLR();
             }
             channelsw_menu_paint(1, curfocus);
         }
@@ -378,18 +395,16 @@ static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
         }
         else if (curfocus == IDX_CHANNELSW_OK)
         {
+            memcpy(gAdSampConfig.chsel,chsel,sizeof(chsel));
+            SaveSetCfg();
             ui_mmi_return(1);
         }
         else
         {
             tmp =  gMenuChSwitchDataCtrl.curSelCh - 1; 
-           // xprintf("cur focus =%d\n", tmp);
-           //util_hex_dump("AA:", (gAdSampConfig.chsel),  sizeof (gAdSampConfig.chsel));
-           TST_AD_SAMP_SEL_CPL(tmp);//
-          // util_hex_dump("BB:", (gAdSampConfig.chsel),  sizeof (gAdSampConfig.chsel));
+           TST_SAMP_SEL_CPL(tmp);
             channelsw_update_curfocus();
-            curfocus = TST_AD_SAMP_SEL_CHK();
-            //xprintf("Focus NUM:%d\n", curfocus);
+            curfocus = TST_SAMP_SEL_CHK();
             if (0 == curfocus)
             {
                 CHSWITCH_ITEM_CLR_STATUS(IDX_CHANNELSW_SEL_ALL);

@@ -325,7 +325,7 @@ void Rtc_time_init(void)
       xprintf("\r\n\n External Reset occurred....");
     }
 
-    xprintf("\r\n No need to configure RTC....");
+    xprintf("\r\n No need to configure RTC....\n");
     /* Wait for RTC registers synchronization */
     RTC_WaitForSynchro();
 

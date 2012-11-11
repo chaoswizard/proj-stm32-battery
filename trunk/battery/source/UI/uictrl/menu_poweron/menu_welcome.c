@@ -41,6 +41,11 @@ DEFINE_SM_NODE_MAP(gMenuWelcome,
 
 static void  menu_welcome_paint(void);
 
+static SWTMR_NODE_HANDLE  enterDelayTmr;
+#define ENTER_MAIN_DELAY  5000
+#define ENTER_MAIN_MSG    (0x99)
+
+
 void menu_show_help(void)
 {
     struct SCREEN_ZONE rect;
@@ -77,23 +82,36 @@ static void  menu_welcome_paint(void)
 
 
 //==========================================================
-
+static void enter_main_delayTmr(u_int32 * arg )
+{
+        struct EVENT_NODE_ITEM e;
+        
+        e.sig = EVENT_USR_MMI;
+        USR_EVENT_MMI_INIT(e.param, ENTER_MAIN_MSG);
+        ui_mmi_send_msg(&e);
+}
 static void menu_pub_suspend(SM_NODE_HANDLE me, SM_NODE_HANDLE child)
 {
     UIMMI_DEBUGSM_SUSPEND(THIS_MENU_NAME, me, child);
+        ui_mmi_stop_timer(enterDelayTmr);
+    enterDelayTmr = SWTMR_INVALID_NODE;
 }
 
 static void menu_pub_resume(SM_NODE_HANDLE me, SM_NODE_HANDLE child)
 {
     UIMMI_DEBUGSM_RESUME(THIS_MENU_NAME, child, me);
+    enterDelayTmr = ui_mmi_start_timer(ENTER_MAIN_DELAY,   \
+                   enter_main_delayTmr,  NULL, FALSE);
 }
-
 
 static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
 {
     UIMMI_DEBUGSM_ENTER(THIS_MENU_NAME, parent, me);
     ui_mmi_reg_suspend(menu_pub_suspend);
     ui_mmi_reg_resume(menu_pub_resume);
+    
+    enterDelayTmr = ui_mmi_start_timer(ENTER_MAIN_DELAY,   \
+                       enter_main_delayTmr,  NULL, FALSE);
 }
 
 static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
@@ -105,12 +123,31 @@ static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
         Screen_PrintClear(NULL);
         menu_welcome_paint();
     }
+    switch (e->sig)
+    {
+        case EVENT_KEY_OK:
+            ui_mmi_enter(UI_NODE_BENCH, 0);    
+            break;
+        case EVENT_USR_MMI:
+        {
+             u_int32 myevt = USR_EVENT_MMI(e->param);
+            if (ENTER_MAIN_MSG == (myevt))
+            {
+                ui_mmi_enter(UI_NODE_MAINMENU, 1);
+            }
+        }
+        break;
+            
+    }
     return UI_PROC_RET_DFT;
 }
 
 static void menu_pub_exit(SM_NODE_HANDLE me, SM_NODE_HANDLE next)
 {
     UIMMI_DEBUGSM_EXIT(THIS_MENU_NAME, next, me);
+    ui_mmi_stop_timer(enterDelayTmr);
+    enterDelayTmr = SWTMR_INVALID_NODE;
+    
 }
 
 

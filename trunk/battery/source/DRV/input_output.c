@@ -149,6 +149,14 @@ static void flashIO(void)
 	RELAY_CTRL_STROBE_H;//GPIOD->BSRR  |= 0x0800;			//PD11=锁存,,1=输入,0=保持	
 	RELAY_CTRL_ENABLE_L;//GPIOD->BRR|= 0x0200;				//PD9=Enable Output,0=高阻
 }
+void RelayStatusAllClr(void)
+{
+        signed char i;
+        for(i=12 ;i >= 0;i--)	
+	{
+	    RelayStatus[i] = 0;	       
+	}
+}
 void RelayCtrl(unsigned char num,unsigned char newStatus)
 {
         if(newStatus)
@@ -166,11 +174,17 @@ void RelayCtrl(unsigned char num,unsigned char newStatus)
 
 void RelayAllDown(void)
 {
-        int i;
+       #if 0 
+         int i; 
         for(i=1;i<=100;i++)
         {
         RelayCtrl(i, RELAY_OFF);
-        }
+        }   
+        #endif
+        RelayStatusAllClr();
+        flashIO();
+
+    
 }
 
 void RelayTest(void)
