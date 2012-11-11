@@ -44,6 +44,7 @@
 struct tagCurvePosHistory {
     u_int8 yPos[SHOW_GROUP_CURVE_NUM][UNIT_MAX_W];
     u_int8 validLen;
+    u_int8 rstPage;
 };
 
 static struct tagCurvePosHistory gCurvePosData;
@@ -67,7 +68,7 @@ static struct {
 
 static void curvegroup_menu_paint(u_int8 isClear);
 static void curvemap_paint(u_int8 isRst);
-static void curve_load_data(void);
+static bool_t curve_load_data(bool_t pageUp);
 
 void gmenu_show_curve(struct gmenu_curve_config *param, bool_t pop)
 {
@@ -99,41 +100,76 @@ static u_int8  curve_menu_test_map(T_UICOM_COUNT group, u_int32 x, u_int8 maxY, 
     return ((group+ x)*(x))%maxY;
 }
 
+static void curve_auto_load(void)
+{
+    curve_load_data(FALSE);
+}
 
-static void curve_load_data(void)
+static void curve_usr_load(bool_t pageUp)
+{
+    s_int32 i=0;
+
+    while (i<UNIT_MAX_W)
+    {
+        if (!curve_load_data(pageUp)) {
+            break;
+        }
+        i++;
+    }
+}
+
+static bool_t curve_load_data(bool_t pageUp)
 {
     u_int8 grp;
     u_int8 val;
     u_int32 key;
+    u_int8 endAll;
 
+    if (gCurvePosData.rstPage) {
+        gShowCurveCtrl.pageCount = 0;
+        gCurvePosData.validLen = 0;
+        gCurvePosData.rstPage = 0;
+    } 
+    
     if (gCurvePosData.validLen >= UNIT_MAX_W)
     {
         gCurvePosData.validLen = 0;
-        gShowCurveCtrl.pageCount++;
+        if (pageUp) {
+            if (gShowCurveCtrl.pageCount) gShowCurveCtrl.pageCount--;
+        } else {
+            gShowCurveCtrl.pageCount++;
+        }
     }
 
+    endAll = TRUE;
     key = gShowCurveCtrl.pageCount*UNIT_MAX_W + gCurvePosData.validLen;
     for (grp=0;grp<(gShowCurveCtrl.cfg.initCount);grp++)
     {
-        if (gShowCurveCtrl.cfg.fun)
-        {
-            val = gShowCurveCtrl.cfg.fun(grp, key, UNIT_MAX_H, SHOW_CURVE_Y_RULE);
-        }
-        else 
-        {
-            val = curve_menu_test_map(grp, key, UNIT_MAX_H, SHOW_CURVE_Y_RULE);
+        if (gShowCurveCtrl.cfg.getMaxKey && (key > gShowCurveCtrl.cfg.getMaxKey(grp))) {
+            val = UNIT_MAX_H;
+        } else {
+            endAll = FALSE;
+            if (gShowCurveCtrl.cfg.fun)
+            {
+                val = gShowCurveCtrl.cfg.fun(grp, key, UNIT_MAX_H, SHOW_CURVE_Y_RULE);
+            }
+            else 
+            {
+                val = curve_menu_test_map(grp, key, UNIT_MAX_H, SHOW_CURVE_Y_RULE);
+            }
         }
         gCurvePosData.yPos[grp][gCurvePosData.validLen] = val;   //Ìî³äÏÔÊ¾µã
     }
     
     gCurvePosData.validLen++;
 
-    if (gShowCurveCtrl.cfg.maxKey)
-    if (key > gShowCurveCtrl.cfg.maxKey)
+    if (endAll)
     {
-        gCurvePosData.validLen = 0;
-        gShowCurveCtrl.pageCount = 0;
+        gCurvePosData.rstPage = 1;
+        return 0;
     }
+
+    return 1;
 }
 
 static T_UICOM_DRAW_MODE  curve_menu_datainit(T_UICOM_COUNT group, T_UICOM_COUNT *x,T_UICOM_COUNT *y)
@@ -295,6 +331,9 @@ static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
     {
         Screen_PrintClear(NULL);
         CURVEGRP_ITEM_SET_STATUS_RANGE(0,  gShowCurveCtrl.cfg.initCount-1);
+        if (!gShowCurveCtrl.cfg.autoLoad) {
+            curve_usr_load(FALSE);
+        }
         curve_menu_update_all();
         return UI_PROC_RET_FINISH;
     }
@@ -316,16 +355,20 @@ static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
         case EVENT_KEY_OK:
             ui_mmi_return(1);
           return UI_PROC_RET_FINISH;
-          case EVENT_SYS_HW_AD:
-            curve_load_data();
-            curve_menu_update_all();
-            return UI_PROC_RET_FINISH;
+          //case EVENT_SYS_HW_AD:
+          if (gShowCurveCtrl.cfg.autoLoad) {
+              curve_auto_load();
+              curve_menu_update_all();
+              return UI_PROC_RET_FINISH;
+          }
         case EVENT_KEY_DOWN:
         case EVENT_KEY_UP:
         case EVENT_KEY_LEFT:
         case EVENT_KEY_RIGHT:
-            curve_load_data();
-            curve_menu_update_all();
+            if (!gShowCurveCtrl.cfg.autoLoad) {
+                curve_usr_load((EVENT_KEY_UP == e->sig) || (EVENT_KEY_LEFT == e->sig));
+                curve_menu_update_all();
+            }
             break;
         default:
             break;

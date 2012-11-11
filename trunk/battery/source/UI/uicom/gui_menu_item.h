@@ -125,9 +125,10 @@ void gmenu_value_map_draw(struct GMENU_VALUE_MAP *map,
 void gmenu_ruler_draw(struct OSD_ZONE *zone, enum PIXEL_COLOR pixel_mode, T_UICOM_DRAW_MODE (*initname_cbf)(T_UICOM_ORDER, u_int16, struct OSD_ZONE *, PUICOM_DATA));
 //----------------------------------------------------------------------
 struct gmenu_curve_config {
-    u_int32 maxKey;
     u_int32 maxVal;
+    u_int32 (*getMaxKey)(T_UICOM_COUNT group);
     u_int8 initCount;
+    bool_t autoLoad;
     u_int8 (*fun)(T_UICOM_COUNT group, u_int32 x, u_int8 maxY, u_int8 rulerY);
     void (*curvetitle)(T_UICOM_COUNT grp, PUICOM_DATA item);
     void (*curveXname)(PUICOM_DATA item);

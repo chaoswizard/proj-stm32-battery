@@ -5,34 +5,38 @@
 //"SearchOption"
 
 #define MAX_DISP_CURSE_NUM (4)
+#define MAX_CH_COUNT   SYS_AD_CH_MAX
 
 
 #define MENU_CURSE_EVT_NEXT_ITEM  (0x88)
 #define MENU_CURSE_EVT_PRE_ITEM   (0x22)
 
 struct MENU_CURSE_DISP_CFG_CTRL {
-    u_int8 startNo;
-    u_int8 endNo;
-    u_int8 curseTab[MAX_DISP_CURSE_NUM];
+    u_int8 rtTab[MAX_DISP_CURSE_NUM];
+    u_int16 historyTab[MAX_DISP_CURSE_NUM];
+    bool_t  isRtTable;
 };
-static   u_int8 curve_sel_tab[MAX_DISP_CURSE_NUM];
+static   u_int16 curve_sel_tab[MAX_DISP_CURSE_NUM];
 
 static struct MENU_CURSE_DISP_CFG_CTRL gMenuCurseDisCfgCtr = {0};
+
 
 
 #define THIS_MENU_SM_HANDLE      (gMenuSearchOption)
 #define THIS_MENU_UI_CONTAINER   (gSearchoptionsetupList)
 
 
-#define SEARCHOPT_LIST_NUM  (6)
+#define SEARCHOPT_LIST_NUM  (8)
 
 
-#define IDX_EARCHOPT_VAL_START (0)
-#define IDX_EARCHOPT_VAL_END   (1)
-#define IDX_EARCHOPT_VAL_C1    (2)
-#define IDX_EARCHOPT_VAL_C2    (3)
-#define IDX_EARCHOPT_VAL_C3    (4)
-#define IDX_EARCHOPT_VAL_C4    (5)
+#define IDX_EARCHOPT_VAL_S1    (0)
+#define IDX_EARCHOPT_VAL_S2    (1)
+#define IDX_EARCHOPT_VAL_S3    (2)
+#define IDX_EARCHOPT_VAL_S4    (3)
+#define IDX_EARCHOPT_VAL_C1    (4)
+#define IDX_EARCHOPT_VAL_C2    (5)
+#define IDX_EARCHOPT_VAL_C3    (6)
+#define IDX_EARCHOPT_VAL_C4    (7)
 
 
 
@@ -49,8 +53,10 @@ LDEF_MENU_CONTENT_LIST(THIS_MENU_UI_CONTAINER, searchopt_menu_cell_zone_int, sea
 static u_int8 searchopt_menu_cell_zone_int(struct OSD_ZONE *zone, T_UICOM_COUNT pos)
 {
     struct SCREEN_ZONE cellPosTable[SEARCHOPT_LIST_NUM] = {
-        {SEARCHOPT_LIST_X(1)-4,  SEARCHOPT_LIST_Y(1), SEARCHOPT_LIST_CELL_W, SEARCHOPT_LIST_CELL_H},
-        {SEARCHOPT_LIST_X(3)-4, SEARCHOPT_LIST_Y(1),  SEARCHOPT_LIST_CELL_W, SEARCHOPT_LIST_CELL_H},
+        {SEARCHOPT_LIST_X(0),  SEARCHOPT_LIST_Y(1), SEARCHOPT_LIST_CELL_W-1, SEARCHOPT_LIST_CELL_H},
+        {SEARCHOPT_LIST_X(1)-1,  SEARCHOPT_LIST_Y(1), SEARCHOPT_LIST_CELL_W, SEARCHOPT_LIST_CELL_H},
+        {SEARCHOPT_LIST_X(2)-1,  SEARCHOPT_LIST_Y(1), SEARCHOPT_LIST_CELL_W, SEARCHOPT_LIST_CELL_H},
+        {SEARCHOPT_LIST_X(3)-1,  SEARCHOPT_LIST_Y(1), SEARCHOPT_LIST_CELL_W, SEARCHOPT_LIST_CELL_H},
         {SEARCHOPT_LIST_X(0),  SEARCHOPT_LIST_Y(3)+1, SEARCHOPT_LIST_CELL_W-1, SEARCHOPT_LIST_CELL_H},
         {SEARCHOPT_LIST_X(1)-1,  SEARCHOPT_LIST_Y(3)+1, SEARCHOPT_LIST_CELL_W, SEARCHOPT_LIST_CELL_H},
         {SEARCHOPT_LIST_X(2)-1,  SEARCHOPT_LIST_Y(3)+1, SEARCHOPT_LIST_CELL_W, SEARCHOPT_LIST_CELL_H},
@@ -82,25 +88,20 @@ static T_UICOM_DRAW_MODE searchopt_menu_cell_data_int(struct OSD_ZONE *zone, PUI
 
     UICOM_DATA_TEXT_ATTR_RST(item, TEXT_STYLE_DEFAULT);
 
-
-    if (IDX_EARCHOPT_VAL_START == pos)
+    val = 0;
+    if ((pos >= IDX_EARCHOPT_VAL_S1) && pos <= IDX_EARCHOPT_VAL_S4)
     {
-        val = gMenuCurseDisCfgCtr.startNo;
-    }
-    else if (IDX_EARCHOPT_VAL_END== pos)
-    {
-        val = gMenuCurseDisCfgCtr.endNo;
+        val = gMenuCurseDisCfgCtr.rtTab[pos - IDX_EARCHOPT_VAL_S1];
     }
     else if ((pos >= IDX_EARCHOPT_VAL_C1) && pos <= IDX_EARCHOPT_VAL_C4)
     {
-        val = gMenuCurseDisCfgCtr.curseTab[pos - IDX_EARCHOPT_VAL_C1];
+        val = gMenuCurseDisCfgCtr.historyTab[pos - IDX_EARCHOPT_VAL_C1];
     }
 
     if (UICOM_TST_SLECTED(type))
     {
         focus = gmenu_input_getstr(UICOM_DATA_BUF(item));
         UICOM_DATA_TEXT_ATTR_ADD(item, TEXT_ATTR_FOCUS(focus));
-        //MY_DEBUG("LCD<%d>: [%s] %d\n", pos, UICOM_DATA_BUF(item), focus);
     }
     else
     {
@@ -130,17 +131,10 @@ static void searchoptsetup_menu_paint(u_int8 isClear, u_int8 focus)
     struct SCREEN_ZONE zone;
 
     SCREEN_ZONE_INIT(&zone, SEARCHOPT_LIST_X(0),  SEARCHOPT_LIST_Y(0)+2, SEARCHOPT_LIST_CELL_W, SEARCHOPT_LIST_CELL_H);
-    Screen_PrintString(&zone, "连续曲线显示(1-4条)", TEXT_STYLE_DEFAULT);
-
-    SCREEN_ZONE_INIT(&zone, SEARCHOPT_LIST_X(0),  SEARCHOPT_LIST_Y(1), SEARCHOPT_LIST_CELL_W, SEARCHOPT_LIST_CELL_H);
-    Screen_PrintString(&zone, "起始:", TEXT_STYLE_DEFAULT);
-
-    SCREEN_ZONE_INIT(&zone, SEARCHOPT_LIST_X(2),  SEARCHOPT_LIST_Y(1), SEARCHOPT_LIST_CELL_W, SEARCHOPT_LIST_CELL_H);
-    Screen_PrintString(&zone, "结束:", TEXT_STYLE_DEFAULT );
-
+    Screen_PrintString(&zone, "实时曲线显示", TEXT_STYLE_DEFAULT);
 
     SCREEN_ZONE_INIT(&zone, SEARCHOPT_LIST_X(0),  SEARCHOPT_LIST_Y(2)+4, SEARCHOPT_LIST_CELL_W, SEARCHOPT_LIST_CELL_H);
-    Screen_PrintString(&zone, "非连续曲线显示", TEXT_STYLE_DEFAULT);
+    Screen_PrintString(&zone, "历史曲线显示", TEXT_STYLE_DEFAULT);
 
     if (isClear)
     {
@@ -186,31 +180,39 @@ static void menu_pub_enter(SM_NODE_HANDLE parent, SM_NODE_HANDLE me)
 u_int16 searchoptsetup_val_apply(u_int8 checktype, p_void inputdata, u_int8 len, p_void param)
 {
     u_int8 id = (u_int8)param;
+    u_int16 tmp;
     u_int16 val = (u_int16)inputdata;
     struct EVENT_NODE_ITEM e;
     
-      if (val > SYS_AD_CH_MAX)
-      {
-            val = 0;
-      }
     
     //MY_DEBUG("SET_VAL:%d, %d, %d\n", inputdata, id , param);
-    if (id == IDX_EARCHOPT_VAL_START)
+    if ((id >= IDX_EARCHOPT_VAL_S1) && id <= IDX_EARCHOPT_VAL_S4)
     {
-        gMenuCurseDisCfgCtr.startNo = val;
-    }
-    else if (IDX_EARCHOPT_VAL_END == id)
-    {
-        gMenuCurseDisCfgCtr.endNo = val;
+        if (val >  MAX_CH_COUNT)
+        {
+              val = 0;
+        }
+        gMenuCurseDisCfgCtr.rtTab[id - IDX_EARCHOPT_VAL_S1] = val;;
     }
     else if ((id >= IDX_EARCHOPT_VAL_C1) && id <= IDX_EARCHOPT_VAL_C4)
     {
-        gMenuCurseDisCfgCtr.curseTab[id - IDX_EARCHOPT_VAL_C1] = val;;
+        tmp = val/1000;
+        if ((tmp > MAX_DISP_CURSE_NUM) || (tmp == 0))
+        {
+            val = 0;
+        }
+        else
+        {
+            tmp = val - (tmp*1000);
+            if (((tmp >  MAX_CH_COUNT) || tmp == 0)) val = 0;
+        }
+        
+        gMenuCurseDisCfgCtr.historyTab[id - IDX_EARCHOPT_VAL_C1] = val;;
     }
 
     if (INPUT_IF_LIMIT(checktype))
     {
-        if ((id != IDX_EARCHOPT_VAL_END) && (id != IDX_EARCHOPT_VAL_C4))
+        if ((id != IDX_EARCHOPT_VAL_S4) && (id != IDX_EARCHOPT_VAL_C4))
         {
             e.sig = EVENT_USR_MMI;
             USR_EVENT_MMI_INIT(e.param, MENU_CURSE_EVT_NEXT_ITEM);
@@ -219,7 +221,7 @@ u_int16 searchoptsetup_val_apply(u_int8 checktype, p_void inputdata, u_int8 len,
     }
     else if (INPUT_IF_DELALL(checktype))
     {
-        if ((id != IDX_EARCHOPT_VAL_START) && (id != IDX_EARCHOPT_VAL_C1))
+        if ((id != IDX_EARCHOPT_VAL_S1) && (id != IDX_EARCHOPT_VAL_C1))
         {
             e.sig = EVENT_USR_MMI;
             USR_EVENT_MMI_INIT(e.param, MENU_CURSE_EVT_PRE_ITEM);
@@ -227,7 +229,7 @@ u_int16 searchoptsetup_val_apply(u_int8 checktype, p_void inputdata, u_int8 len,
         }
     }
     
-    if ((id == IDX_EARCHOPT_VAL_START) || (id == IDX_EARCHOPT_VAL_C1))
+    if ((id == IDX_EARCHOPT_VAL_S1) || (id == IDX_EARCHOPT_VAL_C1))
     {
         return INPUT_STATUS_DEFAULT_ECHO(checktype);
 
@@ -248,18 +250,15 @@ static void searchoptsetup_menu_inputbox_open(u_int8 curfocus, bool_t focusTail)
     inputcfg.param = (p_void)curfocus;
     inputcfg.inputdetector = searchoptsetup_val_apply;
     inputcfg.checktype = INPUT_CHECK_LIMIT;
-    inputcfg.limitlen = 3;
-    if (curfocus == IDX_EARCHOPT_VAL_START)
+    if ((curfocus >= IDX_EARCHOPT_VAL_S1) && (curfocus <= IDX_EARCHOPT_VAL_S4))
     {
-        initparam.initdata = (p_void)gMenuCurseDisCfgCtr.startNo;
+        inputcfg.limitlen = 3;
+        initparam.initdata = (p_void)gMenuCurseDisCfgCtr.rtTab[curfocus - IDX_EARCHOPT_VAL_S1];
     }
-    else if (curfocus == IDX_EARCHOPT_VAL_END)
+    else if ((curfocus >= IDX_EARCHOPT_VAL_C1) && (curfocus <= IDX_EARCHOPT_VAL_C4))
     {
-        initparam.initdata = (p_void)gMenuCurseDisCfgCtr.endNo;
-    }
-    else if ((curfocus >= IDX_EARCHOPT_VAL_C1) && curfocus <= IDX_EARCHOPT_VAL_C4)
-    {
-        initparam.initdata = (p_void)gMenuCurseDisCfgCtr.curseTab[curfocus - IDX_EARCHOPT_VAL_C1];
+        inputcfg.limitlen = 4;
+        initparam.initdata = (p_void)gMenuCurseDisCfgCtr.historyTab[curfocus - IDX_EARCHOPT_VAL_C1];
     }
     else
     {
@@ -280,58 +279,86 @@ void  adsamp_curve_Yname(PUICOM_DATA item)
 }
 void adsamp_ch_name(T_UICOM_COUNT grp, PUICOM_DATA item)
 {
+    if (gMenuCurseDisCfgCtr.isRtTable)
+    {
+        sprintf(UICOM_DATA_BUF(item), "%03d", curve_sel_tab[grp]);
+    }
+    else
+    {
         sprintf(UICOM_DATA_BUF(item), "%04d", curve_sel_tab[grp]);
+    }
 }
-static u_int8 adsamp_curve_map(T_UICOM_COUNT group, u_int32 x, u_int8 maxY, u_int8 unitY)
+static u_int8 adsamp_curve_map(T_UICOM_COUNT ch, u_int32 x, u_int8 maxY, u_int8 unitY)
 {        
-        u_int32 val ;
+    u_int32 val ;
+    u_int8  grp;
+
+    if (gMenuCurseDisCfgCtr.isRtTable) {
+        ch =  curve_sel_tab[ch];
+    } else {
+        grp = curve_sel_tab[ch]/1000;
+        ch =  curve_sel_tab[ch] - (grp*1000);
+    }
+    if (ch)
+    {
+        ch -= 1;
+    }
+    if (gMenuCurseDisCfgCtr.isRtTable) {
+        val = batteryVolAdArray[ch];
+    } else {
+        val = batteryVolAdArray[ch];
+    }
         
-        group =  curve_sel_tab[group];
-        if (group)
-        {
-            group -= 1;
-        }
-        
-        val = batteryVolAdArray[group]*5*unitY/65535;
-        //xprintf("val:%d, %d\n",group, val);
-        return  (val)%maxY;
+    //xprintf("val:%d, %d\n",ch, val);
+    return  (val*5*unitY/65535)%maxY;
 }
 
+
+static u_int32 adsamp_getmax(T_UICOM_COUNT group)
+{
+    u_int8  grp;
+
+    if (gMenuCurseDisCfgCtr.isRtTable) {
+        return 0;
+    } else {
+        grp = curve_sel_tab[group]/1000;
+        return gAdSampConfig.data_group_valid_line_idx[group] + 1;
+    }
+}
 static u_int8 update_curve_ch_sel(u_int8 focus)
 {
       u_int8 max, min;
       u_int8 i = 0;
         
-        if ((IDX_EARCHOPT_VAL_START == focus) || (IDX_EARCHOPT_VAL_END == focus))
+        if ((focus >= IDX_EARCHOPT_VAL_S1) && focus <= IDX_EARCHOPT_VAL_S4)
         {
-
-                min = gMenuCurseDisCfgCtr.startNo;
-                max = gMenuCurseDisCfgCtr.endNo;
-                if ((0 == min) || (0 == max) || (min  > max))
-                {
-                        return 0;
-                }
-                i = 0;
-               while (min <=  max)
-               {
-                        curve_sel_tab[i] =  min;
-                        min++;
-                        i++;
-               }
+            gMenuCurseDisCfgCtr.isRtTable = TRUE;
+            min =0;
+            i = 0;
+             while (min < MAX_DISP_CURSE_NUM)
+             {    
+                 if (gMenuCurseDisCfgCtr.rtTab[min] > 0)
+                 {
+                     curve_sel_tab[i] =  gMenuCurseDisCfgCtr.rtTab[min] ;
+                     i++;
+                 }
+                 min++;
+             }
         }
-        else
+        else if((focus >= IDX_EARCHOPT_VAL_C1) && focus <= IDX_EARCHOPT_VAL_C4)
         {
-              min =0;
-              i = 0;
-            while (min < 4)
-            {    
-                    if (gMenuCurseDisCfgCtr.curseTab[min] > 0)
-                    {
-                        curve_sel_tab[i] =  gMenuCurseDisCfgCtr.curseTab[min] ;
-                        i++;
-                    }
-                    min++;
-            }
+            gMenuCurseDisCfgCtr.isRtTable = FALSE;
+            min =0;
+            i = 0;
+             while (min < MAX_DISP_CURSE_NUM)
+             {    
+                 if (gMenuCurseDisCfgCtr.historyTab[min] > 0)
+                 {
+                     curve_sel_tab[i] =  gMenuCurseDisCfgCtr.historyTab[min] ;
+                     i++;
+                 }
+                 min++;
+             }
         }
 
         return i;
@@ -362,14 +389,18 @@ static u_int8 menu_pub_handle(SM_NODE_HANDLE me, struct EVENT_NODE_ITEM *e)
         {
             struct gmenu_curve_config  dispParam= {0};
 
-            dispParam.maxKey  = 0;
-            dispParam.maxVal   =  0;
             dispParam.initCount =  update_curve_ch_sel( gmenu_content_list_getfocus(&THIS_MENU_UI_CONTAINER));
             dispParam.fun = adsamp_curve_map;
             dispParam.curvetitle = adsamp_ch_name;
             dispParam.curveXname= adsamp_curve_Xname;
             dispParam.curveYname= adsamp_curve_Yname;
-
+            if (gMenuCurseDisCfgCtr.isRtTable) {
+                dispParam.autoLoad = 1;
+                dispParam.getMaxKey  = NULL;
+            } else {
+                dispParam.autoLoad = 0;
+                dispParam.getMaxKey  = adsamp_getmax;
+            }
             if (dispParam.initCount)
                 gmenu_show_curve(&dispParam, TRUE);
         }
